@@ -38,3 +38,29 @@ Our job is to make a portal so that people can
 -[]
 -[]
 -[]
+
+Site architecture: 
+- /Login
+- /Sign Up
+- /Science
+  - Event directory with the events under science
+- /Technology
+  - Event directory with the events under technology
+- /Engineering
+  - Event directory with the events under engineering
+- /Art
+  - Event directory with the events under art
+- /Mathematics
+  - Event directory with the events under mathematics
+
+- /Hotels
+- /Flights
+- /Car Rentals
+
+
+Mobile App:
+- Itenerary based off of event choices or something. 
+
+
+
+
