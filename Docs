@@ -1,6 +1,40 @@
+Our job is to make portal for a STEAM Convention
+STEAM stands for:
 Science
 Technology
 Engineering
 Art
 Mathmatics
 
+At this convention, there will be events. Events will fall under categories
+Science
+Technology
+Engineering
+Art
+Mathmatics
+
+For Ex: 
+Science: 
+- Lessons in Chemistry book signing
+- Breaking bad cast pannel
+
+Art: 
+- Grpahic Design 101
+- Renessaince art disussion. 
+
+Our job is to make a portal so that people can 
+
+-[] Signing up for the event
+  - Login/ Sign up page
+  - QR Code for sign up that directs them to a page where they fill out information to create their account. 
+-[] Account Creation
+  - First Name
+  - Last Name
+  - Email
+  - Phone Number
+
+-[]
+-[]
+-[]
+-[]
+-[]
