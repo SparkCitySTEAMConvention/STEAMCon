@@ -1,0 +1,6 @@
+package com.sparkcity.steamcon.booking;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.UUID;
+
+public interface CarRentalRepository extends JpaRepository<CarRental, UUID> {}
