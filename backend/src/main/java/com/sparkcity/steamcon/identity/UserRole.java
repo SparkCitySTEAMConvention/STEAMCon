@@ -10,51 +10,51 @@ public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-private UUID id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-private User user;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-private Role role;
+    private Role role;
 
     @Column(nullable = false)
-private Instant assignedAt = Instant.now();
+    private Instant assignedAt = Instant.now();
 
     @Column(nullable = false)
-private boolean active = true;
+    private boolean active = true;
 
-public UserRole() {
+    public UserRole() {
     }
 
-public UserRole(User user, Role role) {
-this.user = user;
-this.role = role;
+    public UserRole(User user, Role role) {
+        this.user = user;
+        this.role = role;
     }
 
-public UUID getId() {
-return id;
+    public UUID getId() {
+        return id;
     }
 
-public User getUser() {
-return user;
+    public User getUser() {
+        return user;
     }
 
-public Role getRole() {
-return role;
+    public Role getRole() {
+        return role;
     }
 
-public Instant getAssignedAt() {
-return assignedAt;
+    public Instant getAssignedAt() {
+        return assignedAt;
     }
 
-public boolean isActive() {
-return active;
+    public boolean isActive() {
+        return active;
     }
 
-public void setActive(boolean active) {
-this.active = active;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
