@@ -41,7 +41,53 @@
 .section-heading h2, .speaker-section h2 { font-size: clamp(2rem, 3.6vw, 3.5rem); }
 .section-heading > p { max-width: 310px; color: var(--color-text-muted); font-size: 0.95rem; }
 .track-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
-.track-card { padding: 1.25rem; border: 2px solid var(--color-ink); border-radius: var(--radius-medium); box-shadow: var(--shadow-small); }
+.track-card {
+  padding: 1.25rem;
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-small);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .track-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 14px 0 var(--color-ink);
+  }
+}
+
+/* Match keyboard focus on the card or a future control inside it. */
+.track-card:where(:focus-visible, :focus-within:has(:focus-visible)) {
+  transform: translateY(-10px);
+  box-shadow: 0 14px 0 var(--color-ink);
+}
+
+.track-card:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px var(--color-focus), 0 14px 0 var(--color-ink);
+}
+
+.track-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--color-ink);
+  transition-duration: 80ms;
+}
+
+.track-card:focus-visible:active {
+  box-shadow: 0 0 0 7px var(--color-focus), 0 2px 0 var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track-card,
+  .track-card:hover,
+  .track-card:focus-visible,
+  .track-card:focus-within:has(:focus-visible),
+  .track-card:active {
+    transform: none;
+    transition: none;
+  }
+}
 .track-science { background: var(--color-science); }
 .track-technology { background: var(--color-technology); }
 .track-engineering { background: var(--color-engineering); }
