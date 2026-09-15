@@ -13,7 +13,7 @@ export default function SpeakerSpotlight() {
       <div className="container">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">03 / Meet the minds</p>
+            <p className="eyebrow">04 / Meet the minds</p>
             <h2 id="speaker-spotlight-heading">Big questions.<br />Generous voices.</h2>
           </div>
           <p>Meet a few of the people helping every discipline collide, connect, and become something new.</p>

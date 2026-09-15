@@ -16,11 +16,11 @@ export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks
   ))
 
   return (
-    <section className="section schedule-section" id="events" aria-labelledby="schedule-preview-heading">
+    <section className="section schedule-section" id="schedule-by-day" aria-labelledby="schedule-preview-heading">
       <div className="container">
         <div className="section-heading schedule-heading">
           <div>
-            <p className="eyebrow">02 / Plan your days</p>
+            <p className="eyebrow">03 / Plan your days</p>
             <h2 id="schedule-preview-heading">See what’s happening,<br />day by day.</h2>
           </div>
           <p>Browse a preview across all five tracks, then register to start building your own schedule.</p>
