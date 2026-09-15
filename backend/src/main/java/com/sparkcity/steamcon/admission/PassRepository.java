@@ -1,6 +1,14 @@
 package com.sparkcity.steamcon.admission;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 import java.util.UUID;
 
-public interface PassRepository extends JpaRepository<Pass, UUID> {}
+public interface PassRepository extends JpaRepository<Pass, UUID> {
+
+    Optional<Pass> findByUserIdAndStatus(
+            UUID userId,
+            AdmissionStatus status
+    );
+}
