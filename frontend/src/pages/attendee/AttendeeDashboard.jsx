@@ -70,10 +70,30 @@ export default function AttendeeDashboard({ data = attendeeData }) {
           confirmedBookings={confirmedBookings}
         />
 
+        <section className="attendee-section attendee-section-priority" id="bookings" aria-labelledby="bookings-heading">
+          <div className="attendee-section-heading">
+            <div><p className="eyebrow">01 / Make the trip</p><h2 id="bookings-heading">Your travel, handled.</h2></div>
+            <p>Book each part separately. We’ll bring the details together on your itinerary.</p>
+          </div>
+          <ul className="attendee-booking-grid">
+            {data.bookings.map(booking => <BookingCard key={booking.id} booking={booking} onOpen={previewBooking} />)}
+          </ul>
+        </section>
+
+        <section className="attendee-section attendee-itinerary" id="itinerary" aria-labelledby="itinerary-heading">
+          <div className="attendee-section-heading">
+            <div><p className="eyebrow">02 / One clear plan</p><h2 id="itinerary-heading">Your itinerary.</h2></div>
+            <p>Sessions and confirmed bookings appear together in chronological order.</p>
+          </div>
+          <ol className="attendee-itinerary-list">
+            {itinerary.map((item, index) => <ItineraryItem key={item.id} item={item} index={index} />)}
+          </ol>
+        </section>
+
         <div className="attendee-primary-grid">
           <section id="schedule" aria-labelledby="schedule-heading">
             <div className="attendee-section-heading">
-              <div><p className="eyebrow">01 / My schedule</p><h2 id="schedule-heading">What you’re showing up for.</h2></div>
+              <div><p className="eyebrow">03 / My schedule</p><h2 id="schedule-heading">What you’re showing up for.</h2></div>
               <span>{selectedSessions.length} sessions</span>
             </div>
             <ul className="attendee-session-list">
@@ -98,7 +118,7 @@ export default function AttendeeDashboard({ data = attendeeData }) {
 
         <section className="attendee-section" id="discover" aria-labelledby="discover-heading">
           <div className="attendee-section-heading">
-            <div><p className="eyebrow">02 / Follow your curiosity</p><h2 id="discover-heading">Find your next session.</h2></div>
+            <div><p className="eyebrow">04 / Follow your curiosity</p><h2 id="discover-heading">Find your next session.</h2></div>
             <p>Choose a track or explore the full preview schedule.</p>
           </div>
           <div className="attendee-filters" aria-label="Filter sessions by track">
@@ -126,25 +146,6 @@ export default function AttendeeDashboard({ data = attendeeData }) {
           </ul>
         </section>
 
-        <section className="attendee-section" id="bookings" aria-labelledby="bookings-heading">
-          <div className="attendee-section-heading">
-            <div><p className="eyebrow">03 / Make the trip</p><h2 id="bookings-heading">Your travel, handled.</h2></div>
-            <p>Book each part separately. We’ll bring the details together on your itinerary.</p>
-          </div>
-          <ul className="attendee-booking-grid">
-            {data.bookings.map(booking => <BookingCard key={booking.id} booking={booking} onOpen={previewBooking} />)}
-          </ul>
-        </section>
-
-        <section className="attendee-section attendee-itinerary" id="itinerary" aria-labelledby="itinerary-heading">
-          <div className="attendee-section-heading">
-            <div><p className="eyebrow">04 / One clear plan</p><h2 id="itinerary-heading">Your itinerary.</h2></div>
-            <p>Sessions and confirmed bookings appear together in chronological order.</p>
-          </div>
-          <ol className="attendee-itinerary-list">
-            {itinerary.map((item, index) => <ItineraryItem key={item.id} item={item} index={index} />)}
-          </ol>
-        </section>
       </main>
 
       <footer className="container attendee-footer">

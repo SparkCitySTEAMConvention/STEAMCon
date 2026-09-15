@@ -12,10 +12,10 @@ export default function AttendeeHeader({ attendee, admission }) {
           <span>Attendee Portal</span>
         </div>
         <nav className="attendee-nav" aria-label="Attendee navigation">
+          <a href="#bookings">Travel</a>
+          <a href="#itinerary">Itinerary</a>
           <a href="#schedule">My schedule</a>
           <a href="#discover">Find sessions</a>
-          <a href="#bookings">Bookings</a>
-          <a href="#itinerary">Itinerary</a>
           <Link to="/">Homepage <span aria-hidden="true">↗</span></Link>
         </nav>
       </div>

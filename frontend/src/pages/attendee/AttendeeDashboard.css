@@ -45,6 +45,7 @@
 .attendee-summary-mathematics { background: color-mix(in srgb, var(--color-mathematics) 45%, white); }
 .attendee-primary-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.7fr); gap: 2rem; align-items: start; }
 .attendee-section { padding-top: clamp(4rem, 8vw, 7rem); }
+.attendee-section-priority { padding-top: 0; }
 .attendee-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem 3rem; margin-bottom: 1.5rem; }
 .attendee-section-heading h2 { margin-top: 0.7rem; font-size: clamp(2rem, 3.8vw, 3.5rem); }
 .attendee-section-heading > span { flex-shrink: 0; padding: 0.35rem 0.7rem; border: 1px solid var(--color-border); border-radius: 99px; color: var(--color-text-muted); font-size: 0.75rem; }
@@ -102,6 +103,7 @@
 .attendee-text-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; min-height: 44px; padding: 0; border: 0; border-top: 1px solid var(--color-border); background: transparent; color: var(--color-ink); font-size: 0.82rem; font-weight: 800; text-align: left; cursor: pointer; }
 .attendee-text-action:hover { color: var(--color-art); }
 .attendee-itinerary { margin-top: clamp(4rem, 8vw, 7rem); padding: clamp(2rem, 5vw, 4rem); border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ice); box-shadow: var(--shadow-large); }
+.attendee-itinerary + .attendee-primary-grid { margin-top: clamp(4rem, 8vw, 7rem); }
 .attendee-itinerary-list { border-top: 2px solid var(--color-ink); }
 .attendee-itinerary-item { display: grid; grid-template-columns: 3rem minmax(0, 1fr) minmax(150px, 0.4fr); align-items: center; gap: 1rem; padding-block: 1.25rem; border-bottom: 1px solid var(--color-ink); }
 .attendee-itinerary-number { font: 700 0.75rem/1.5 'Courier New', monospace; }
