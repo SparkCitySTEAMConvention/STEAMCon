@@ -6,6 +6,7 @@ import RegistrationPage from './pages/RegistrationPage.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
 import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
+import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 
 export default function App() {
@@ -22,7 +23,9 @@ export default function App() {
       '/attendee/car': 'Reserve a Car | STEAM Con',
       '/speaker': 'Speaker Portal | STEAM Con',
     }
-    document.title = pageTitles[pathname] || 'Page not found | STEAM Con'
+    document.title = pathname.startsWith('/speaker/proposals/')
+      ? 'Proposal details | STEAM Con'
+      : pageTitles[pathname] || 'Page not found | STEAM Con'
     if (previousPath.current !== pathname) {
       window.scrollTo(0, 0)
       document.querySelector('main')?.focus({ preventScroll: true })
@@ -38,6 +41,7 @@ export default function App() {
       <Route path="/attendee/travel" element={<TravelBookingPage kind="travel" />} />
       <Route path="/attendee/hotel" element={<HotelBookingPage />} />
       <Route path="/attendee/car" element={<TravelBookingPage kind="car" />} />
+      <Route path="/speaker/proposals/:proposalId" element={<ProposalDetails />} />
       <Route path="/speaker" element={<SpeakerDashboard />} />
       <Route path="*" element={
         <main className="container section" tabIndex={-1}>

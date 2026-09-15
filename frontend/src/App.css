@@ -164,6 +164,7 @@
 
 @media (min-width: 761px) {
   .session-art { container-type: size; }
+  /* Leave room for the electrons throughout a full turn in the desktop panel. */
   .session-art .orbit { max-width: calc(100cqh - 16px); }
 }
 .session-copy { padding: clamp(1.5rem, 4vw, 4rem); }

@@ -1,4 +1,4 @@
-const statuses = ['Draft', 'Pending', 'Approved']
+const statuses = ['Draft', 'Pending', 'Approved', 'Rejected']
 
 export default function ProposalSummary({ proposals }) {
   return (
