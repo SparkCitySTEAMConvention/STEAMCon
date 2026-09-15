@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import HomePage from './pages/HomePage.jsx'
+import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 
 export default function App() {
@@ -9,7 +10,12 @@ export default function App() {
   const previousPath = useRef(pathname)
 
   useEffect(() => {
-    document.title = pathname === '/' ? 'STEAM Con' : pathname === '/speaker' ? 'Speaker Portal | STEAM Con' : 'Page not found | STEAM Con'
+    const pageTitles = {
+      '/': 'STEAM Con',
+      '/attendee': 'Attendee Portal | STEAM Con',
+      '/speaker': 'Speaker Portal | STEAM Con',
+    }
+    document.title = pageTitles[pathname] || 'Page not found | STEAM Con'
     if (previousPath.current !== pathname) {
       window.scrollTo(0, 0)
       document.querySelector('main')?.focus({ preventScroll: true })
@@ -20,6 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/attendee" element={<AttendeeDashboard />} />
       <Route path="/speaker" element={<SpeakerDashboard />} />
       <Route path="*" element={
         <main className="container section" tabIndex={-1}>
