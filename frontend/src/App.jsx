@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
+import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import HomePage from './pages/HomePage.jsx'
 import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
@@ -10,7 +11,7 @@ export default function App() {
   const previousPath = useRef(pathname)
 
   useEffect(() => {
-    document.title = pathname === '/' ? 'STEAM Con' : pathname === '/speaker' ? 'Speaker Portal | STEAM Con' : pathname.startsWith('/speaker/proposals/') ? 'Proposal details | STEAM Con' : 'Page not found | STEAM Con'
+    document.title = pathname === '/' ? 'STEAM Con' : pathname === '/speakers' ? 'Proposed speakers | STEAM Con' : pathname === '/attendee' ? 'Attendee Portal | STEAM Con' : pathname === '/speaker' ? 'Speaker Portal | STEAM Con' : pathname.startsWith('/speaker/proposals/') ? 'Proposal details | STEAM Con' : 'Page not found | STEAM Con'
     if (previousPath.current !== pathname) {
       window.scrollTo(0, 0)
       document.querySelector('main')?.focus({ preventScroll: true })
@@ -21,6 +22,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/speakers" element={<SpeakerDirectory />} />
       <Route path="/speaker/proposals/:proposalId" element={<ProposalDetails />} />
       <Route path="/speaker" element={<SpeakerDashboard />} />
       <Route path="*" element={

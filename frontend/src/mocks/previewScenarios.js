@@ -7,7 +7,7 @@ export const scheduledProposal = {
   primarySpeakerId: 'speaker-test', speakerIds: ['speaker-test'],
   speakers: [{ id: 'speaker-test', name: 'Fictional test speaker', firstName: 'Test', bio: 'Synthetic test identity.', organization: null, role: null }],
   adminFeedback: 'Synthetic approval for schedule-action testing only.',
-  scheduledAt: '2000-01-01T10:00:00Z', date: null, time: null, room: 'Synthetic test room', location: null,
+  scheduledAt: '2000-01-01T10:00:00Z', endsAt: '2000-01-01T10:30:00Z', timezone: 'America/New_York', room: 'Synthetic test room', location: null,
 }
 export function previewRepository(repository, scenario) {
   if (!scenario) return repository
