@@ -9,18 +9,17 @@ public class User {
  @Id @GeneratedValue(strategy=GenerationType.UUID) private UUID id;
  @Column(nullable=false, unique=true) private String email;
  @Column(nullable=false) private String displayName;
- private String organization;
+private String organization;
 
- @OneToMany
-@JoinColumn(name = "user_id", insertable = false, updatable = false)
+ @OneToMany(mappedBy = "user")
 private List<UserRole> roles;
 
- public User() {}
- public User(String email,String displayName){this.email=email;this.displayName=displayName;}
- public UUID getId(){return id;} public String getEmail(){return email;} public void setEmail(String v){email=v;}
- public String getDisplayName(){return displayName;} public void setDisplayName(String v){displayName=v;}
- public List<UserRole> getRoles() {
-    return roles;
+public User() {}
+public User(String email,String displayName){this.email=email;this.displayName=displayName;}
+public UUID getId(){return id;} public String getEmail(){return email;} public void setEmail(String v){email=v;}
+public String getDisplayName(){return displayName;} public void setDisplayName(String v){displayName=v;}
+public List<UserRole> getRoles() {
+return roles;
 }
- public String getOrganization(){return organization;} public void setOrganization(String v){organization=v;}
+public String getOrganization(){return organization;} public void setOrganization(String v){organization=v;}
 }
