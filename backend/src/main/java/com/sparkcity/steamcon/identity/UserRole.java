@@ -12,8 +12,9 @@ public class UserRole {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -28,8 +29,8 @@ public class UserRole {
     public UserRole() {
     }
 
-    public UserRole(UUID userId, Role role) {
-        this.userId = userId;
+    public UserRole(User user, Role role) {
+        this.user = user;
         this.role = role;
     }
 
@@ -37,8 +38,8 @@ public class UserRole {
         return id;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
     public Role getRole() {
