@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Header() {
   return (
     <header className="site-header" id="top">
@@ -6,7 +8,7 @@ export default function Header() {
         <nav aria-label="Main navigation">
           <a href="#events">Events</a>
           <a href="#tracks">Tracks</a>
-          <a href="#speakers">Speakers</a>
+          <Link to="/speaker">Speakers</Link>
           <a href="#travel">Travel</a>
           <a className="nav-register" href="#register">Register <span aria-hidden="true">↗</span></a>
         </nav>
