@@ -101,11 +101,72 @@
 .status-label { flex-shrink: 0; border: 1px solid var(--color-border); padding: 0.35rem 0.75rem; border-radius: 99px; font-size: 0.75rem; color: var(--color-text-muted); }
 .sessions-placeholder { display: grid; grid-template-columns: 1fr 1.15fr; border: 2px solid var(--color-ink); border-radius: var(--radius-large); box-shadow: var(--shadow-large); background: var(--color-surface); overflow: hidden; }
 .session-art { position: relative; display: grid; place-items: center; min-height: 320px; overflow: hidden; background: var(--color-ice); border-right: 2px solid var(--color-ink); }
-.orbit { position: absolute; width: 75%; height: 52%; border: 2px solid var(--color-ink); border-radius: 50%; }
-.orbit-one { transform: rotate(-40deg); }
-.orbit-two { transform: rotate(40deg); }
-.orbit-three { transform: rotate(90deg); }
-.orbit-center { position: relative; font-size: 7rem; line-height: 1; }
+.session-art .orbit {
+  position: absolute;
+  width: 75%;
+  height: 52%;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: rotate(var(--orbit-angle));
+  transform-origin: center;
+  animation: session-orbit-turn 18s linear infinite;
+}
+.session-art .orbit::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--electron-color);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.session-art .orbit-one { --orbit-angle: -40deg; --electron-color: var(--color-technology); }
+.session-art .orbit-two {
+  --orbit-angle: 40deg;
+  --electron-color: var(--color-art);
+  animation-duration: 23s;
+  animation-direction: reverse;
+}
+.session-art .orbit-three {
+  --orbit-angle: 90deg;
+  --electron-color: var(--color-mathematics);
+  animation-duration: 29s;
+}
+.session-art .orbit-center {
+  position: relative;
+  font-size: 7rem;
+  line-height: 1;
+  pointer-events: none;
+  transform-origin: center;
+  animation: session-nucleus-breathe 3.8s ease-in-out infinite;
+}
+
+@keyframes session-orbit-turn {
+  from { transform: rotate(var(--orbit-angle)); }
+  to { transform: rotate(calc(var(--orbit-angle) + 360deg)); }
+}
+
+@keyframes session-nucleus-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-art .orbit,
+  .session-art .orbit-center {
+    animation: none;
+  }
+}
+
+@media (min-width: 761px) {
+  .session-art { container-type: size; }
+  /* Leave room for the electrons throughout a full turn in the desktop panel. */
+  .session-art .orbit { max-width: calc(100cqh - 16px); }
+}
 .session-copy { padding: clamp(1.5rem, 4vw, 4rem); }
 .session-copy h3 { margin-top: 1rem; font-size: clamp(1.8rem, 3vw, 2.75rem); letter-spacing: -0.04em; }
 .session-copy > p:not(.eyebrow) { margin-top: 1.25rem; color: var(--color-text-muted); max-width: 430px; }
