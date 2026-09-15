@@ -38,7 +38,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldAllowValidEnrollment() {
-
         UUID attendeeId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
         UUID trackId = UUID.randomUUID();
@@ -86,7 +85,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldRejectEnrollmentWithoutAdmission() {
-
         UUID attendeeId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
         UUID trackId = UUID.randomUUID();
@@ -115,7 +113,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldRejectDuplicateEnrollment() {
-
         UUID attendeeId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
         UUID trackId = UUID.randomUUID();
@@ -156,7 +153,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldCancelEnrollment() {
-
         UUID attendeeId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
 
@@ -185,7 +181,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldRejectNullAttendee() {
-
         UUID sessionId = UUID.randomUUID();
 
         assertThrows(
@@ -197,7 +192,6 @@ class AttendeeSessionEnrollmentServiceTest {
 
     @Test
     void shouldRejectNullSession() {
-
         UUID attendeeId = UUID.randomUUID();
 
         assertThrows(
@@ -205,5 +199,77 @@ class AttendeeSessionEnrollmentServiceTest {
                 () -> enrollmentService.enroll(
                         attendeeId,
                         null));
+    }
+
+    @Test
+    void shouldAutoEnrollMandatorySession() {
+        UUID attendeeId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+        UUID trackId = UUID.randomUUID();
+
+        Session session = new Session();
+        session.setTitle("Opening Ceremony");
+        session.setTrackId(trackId);
+        session.setMandatory(true);
+
+        when(sessionRepository.findById(sessionId))
+                .thenReturn(Optional.of(session));
+
+        when(admissionService.hasAccessToTrack(
+                attendeeId,
+                trackId))
+                .thenReturn(true);
+
+        when(enrollmentRepository
+                .findByAttendeeIdAndSessionIdAndStatus(
+                        attendeeId,
+                        sessionId,
+                        EnrollmentStatus.ENROLLED))
+                .thenReturn(Optional.empty());
+
+        AttendeeSessionEnrollment enrollment =
+                new AttendeeSessionEnrollment(
+                        attendeeId,
+                        sessionId);
+
+        when(enrollmentRepository.save(any(
+                AttendeeSessionEnrollment.class)))
+                .thenReturn(enrollment);
+
+        AttendeeSessionEnrollment result =
+                enrollmentService.autoEnrollMandatorySession(
+                        attendeeId,
+                        sessionId);
+
+        assertNotNull(result);
+        assertEquals(attendeeId, result.getAttendeeId());
+        assertEquals(sessionId, result.getSessionId());
+
+        verify(enrollmentRepository).save(any(
+                AttendeeSessionEnrollment.class));
+    }
+
+    @Test
+    void shouldRejectAutoEnrollmentForNonMandatorySession() {
+        UUID attendeeId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+        UUID trackId = UUID.randomUUID();
+
+        Session session = new Session();
+        session.setTitle("Optional Workshop");
+        session.setTrackId(trackId);
+        session.setMandatory(false);
+
+        when(sessionRepository.findById(sessionId))
+                .thenReturn(Optional.of(session));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> enrollmentService.autoEnrollMandatorySession(
+                        attendeeId,
+                        sessionId));
+
+        verify(enrollmentRepository, never())
+                .save(any(AttendeeSessionEnrollment.class));
     }
 }
