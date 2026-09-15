@@ -88,3 +88,31 @@
 @media (prefers-reduced-motion: reduce) {
   .speaker-portal .button:hover { transform: none; }
 }
+
+/* Proposal management extends the portal; homepage and shared tokens stay intact. */
+.portal-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.portal-status-rejected { background: var(--color-paper); color: var(--color-ink); border-style: dashed; }
+.portal-badge { display: inline-block; background: var(--portal-track, var(--color-steel)); color: var(--color-ink); padding: 0.25rem 0.6rem; border-radius: var(--radius-small); }
+.portal-filters { display: flex; flex-wrap: wrap; gap: 0.65rem; border: 0; padding: 0; margin: 0 0 1rem; }
+.portal-filters legend { font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; }
+.portal-filters button { min-height: 44px; padding: 0.45rem 0.75rem; background: var(--color-surface); color: var(--color-ink); border: 1px solid var(--color-ink); border-radius: var(--radius-small); cursor: pointer; }
+.portal-filters button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); text-decoration: underline; text-underline-offset: 0.25em; }
+.portal-result-count { font-size: 0.875rem; margin-bottom: 1rem; }
+.portal-preview-picker { display: grid; gap: 0.5rem; max-width: 30rem; margin-bottom: 2rem; }
+.portal-preview-picker select, .portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
+.portal-proposal-main { max-width: 960px; overflow-wrap: anywhere; }
+.portal-proposal-main h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
+.portal-detail-section { margin-block: 2rem; }
+.portal-detail-section h2, .portal-editor h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+.portal-detail-section h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.portal-detail-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; padding: 1.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface); }
+.portal-detail-facts dt { font-weight: 700; }
+.portal-detail-facts dd { margin: 0.5rem 0 0; }
+.portal-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+.portal-actions button { cursor: pointer; }
+.portal-editor { display: grid; gap: 1.25rem; margin-block: 2rem; }
+.portal-editor label { display: grid; gap: 0.5rem; font-weight: 700; }
+.portal-editor textarea { resize: vertical; }
+.portal-action-status { margin-top: 1rem; }
+@media (max-width: 900px) { .portal-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .portal-summary, .portal-detail-facts { grid-template-columns: 1fr; } }

@@ -1,0 +1,6 @@
+import { tracks } from '../../mocks/tracks.js'
+export default function TrackFilters({ value, onChange }) {
+  return <fieldset className="portal-filters"><legend>Filter proposals by track</legend>
+    {[{ id: 'all', name: 'All' }, ...tracks].map(track => <button type="button" key={track.id} aria-pressed={value === track.id} onClick={() => onChange(track.id)}>{track.name}</button>)}
+  </fieldset>
+}
