@@ -1,25 +1,34 @@
+import { useEffect, useRef } from 'react'
+import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
-import AnnouncementBar from './components/AnnouncementBar.jsx'
-import Header from './components/Header.jsx'
-import Hero from './components/Hero.jsx'
-import TrackGrid from './components/TrackGrid.jsx'
-import FeaturedSessions from './components/FeaturedSessions.jsx'
-import SpeakerCallout from './components/SpeakerCallout.jsx'
-import Footer from './components/Footer.jsx'
+import HomePage from './pages/HomePage.jsx'
+import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 
 export default function App() {
+  const { pathname } = useLocation()
+  const previousPath = useRef(pathname)
+
+  useEffect(() => {
+    document.title = pathname === '/' ? 'STEAM Con' : pathname === '/speaker' ? 'Speaker Portal | STEAM Con' : 'Page not found | STEAM Con'
+    if (previousPath.current !== pathname) {
+      window.scrollTo(0, 0)
+      document.querySelector('main')?.focus({ preventScroll: true })
+    }
+    previousPath.current = pathname
+  }, [pathname])
+
   return (
-    <>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <AnnouncementBar />
-      <Header />
-      <main id="main" tabIndex={-1}>
-        <Hero />
-        <TrackGrid />
-        <FeaturedSessions />
-        <SpeakerCallout />
-      </main>
-      <Footer />
-    </>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/speaker" element={<SpeakerDashboard />} />
+      <Route path="*" element={
+        <main className="container section" tabIndex={-1}>
+          <p className="eyebrow">STEAM Con / 404</p>
+          <h1>That page isn’t here.</h1>
+          <p>Head home to explore STEAM Con.</p>
+          <div className="button-group"><Link className="button button-dark" to="/">Back to homepage</Link></div>
+        </main>
+      } />
+    </Routes>
   )
 }
