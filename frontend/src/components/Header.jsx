@@ -9,9 +9,9 @@ export default function Header() {
           <a href="#events">Events</a>
           <a href="#tracks">Tracks</a>
           <Link to="/attendee">Attendees</Link>
-          <Link to="/speaker">Speakers</Link>
+          <a href="#speakers">Speakers</a>
           <a href="#travel">Travel</a>
-          <a className="nav-register" href="#register">Register <span aria-hidden="true">↗</span></a>
+          <Link className="nav-register" to="/register">Register Now <span aria-hidden="true">↗</span></Link>
         </nav>
       </div>
     </header>

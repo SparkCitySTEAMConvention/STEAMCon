@@ -2,7 +2,8 @@ import AnnouncementBar from '../components/AnnouncementBar.jsx'
 import Header from '../components/Header.jsx'
 import Hero from '../components/Hero.jsx'
 import TrackGrid from '../components/TrackGrid.jsx'
-import FeaturedSessions from '../components/FeaturedSessions.jsx'
+import ScheduleByDay from '../components/ScheduleByDay.jsx'
+import SpeakerSpotlight from '../components/SpeakerSpotlight.jsx'
 import SpeakerCallout from '../components/SpeakerCallout.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -15,7 +16,8 @@ export default function HomePage() {
       <main id="main" tabIndex={-1}>
         <Hero />
         <TrackGrid />
-        <FeaturedSessions />
+        <ScheduleByDay />
+        <SpeakerSpotlight />
         <SpeakerCallout />
       </main>
       <Footer />
