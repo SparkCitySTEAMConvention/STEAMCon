@@ -8,7 +8,7 @@ export default function SpeakerCallout() {
         <div className="speaker-copy">
           <p>Have something to share? Help spark the conversations that connect science, technology, engineering, art, and mathematics.</p>
           <Link className="button button-ice" to="/register?role=speaker">Register as a speaker <span aria-hidden="true">↗</span></Link>
-          <p className="speaker-note">Already registered? <Link to="/speaker">Open the Speaker Portal.</Link></p>
+          <p className="speaker-note"><Link to="/speakers">Explore proposed speakers.</Link> Already registered? <Link to="/speaker">Open the Speaker Portal.</Link></p>
         </div>
       </div>
     </section>

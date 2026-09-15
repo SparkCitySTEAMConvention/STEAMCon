@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
+import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import HomePage from './pages/HomePage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
@@ -21,6 +22,7 @@ export default function App() {
       '/attendee/travel': 'Book Travel | STEAM Con',
       '/attendee/hotel': 'Book a Hotel | STEAM Con',
       '/attendee/car': 'Reserve a Car | STEAM Con',
+      '/speakers': 'Proposed speakers | STEAM Con',
       '/speaker': 'Speaker Portal | STEAM Con',
     }
     document.title = pathname.startsWith('/speaker/proposals/')
@@ -41,6 +43,7 @@ export default function App() {
       <Route path="/attendee/travel" element={<TravelBookingPage kind="travel" />} />
       <Route path="/attendee/hotel" element={<HotelBookingPage />} />
       <Route path="/attendee/car" element={<TravelBookingPage kind="car" />} />
+      <Route path="/speakers" element={<SpeakerDirectory />} />
       <Route path="/speaker/proposals/:proposalId" element={<ProposalDetails />} />
       <Route path="/speaker" element={<SpeakerDashboard />} />
       <Route path="*" element={

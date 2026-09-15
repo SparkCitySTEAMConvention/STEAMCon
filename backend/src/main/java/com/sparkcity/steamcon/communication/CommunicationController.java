@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.sparkcity.steamcon.identity.Role;
+
 @RestController
 @RequestMapping("/api")
 public class CommunicationController {
@@ -25,7 +27,8 @@ public class CommunicationController {
 
         if (scope != null) {
             return ResponseEntity.ok(
-                    communicationService.getForumsByScope(scope));
+                    communicationService
+                            .getForumsByScope(scope));
         }
 
         return ResponseEntity.ok(
@@ -34,10 +37,16 @@ public class CommunicationController {
 
     @GetMapping("/forums/{id}/messages")
     public ResponseEntity<List<Message>> getMessages(
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @RequestParam Role role,
+            @RequestParam ForumPermission permission) {
 
         return ResponseEntity.ok(
-                communicationService.getMessagesForForum(id));
+                communicationService
+                        .getMessagesForForum(
+                                id,
+                                role,
+                                permission));
     }
 
     @PostMapping("/forums/{id}/messages")
@@ -50,7 +59,8 @@ public class CommunicationController {
                         id,
                         request.authorId(),
                         request.body(),
-                        request.speakerFlairId());
+                        request.role(),
+                        request.permission());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

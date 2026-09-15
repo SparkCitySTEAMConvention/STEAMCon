@@ -1,19 +1,22 @@
 package com.sparkcity.steamcon.communication;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
+
+import com.sparkcity.steamcon.identity.Role;
 
 class CommunicationServiceTest {
 
@@ -22,6 +25,12 @@ class CommunicationServiceTest {
 
     @Mock
     private MessageRepository messageRepository;
+
+    @Mock
+    private ForumAccessPolicyRepository forumAccessPolicyRepository;
+
+    @Mock
+    private SpeakerFlairRepository speakerFlairRepository;
 
     private CommunicationService communicationService;
 
@@ -32,7 +41,9 @@ class CommunicationServiceTest {
 
         communicationService = new CommunicationService(
                 forumRepository,
-                messageRepository);
+                messageRepository,
+                forumAccessPolicyRepository,
+                speakerFlairRepository);
     }
 
     @Test
@@ -74,6 +85,7 @@ class CommunicationServiceTest {
                         ForumScope.TRACK);
 
         assertEquals(1, result.size());
+
         assertEquals(
                 ForumScope.TRACK,
                 result.get(0).getScope());
@@ -86,9 +98,13 @@ class CommunicationServiceTest {
         UUID authorId = UUID.randomUUID();
 
         Forum forum = new Forum();
+        forum.setScope(ForumScope.GENERAL);
 
         when(forumRepository.findById(forumId))
                 .thenReturn(Optional.of(forum));
+
+        when(speakerFlairRepository.findAll())
+                .thenReturn(List.of());
 
         when(messageRepository.save(any(Message.class)))
                 .thenAnswer(invocation ->
@@ -99,7 +115,8 @@ class CommunicationServiceTest {
                         forumId,
                         authorId,
                         "Hello everyone!",
-                        null);
+                        Role.ATTENDEE,
+                        ForumPermission.WRITE);
 
         assertNotNull(result);
         assertEquals(forumId, result.getForumId());
@@ -117,8 +134,11 @@ class CommunicationServiceTest {
 
         UUID forumId = UUID.randomUUID();
 
+        Forum forum = new Forum();
+        forum.setScope(ForumScope.GENERAL);
+
         when(forumRepository.findById(forumId))
-                .thenReturn(Optional.of(new Forum()));
+                .thenReturn(Optional.of(forum));
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -126,7 +146,8 @@ class CommunicationServiceTest {
                         forumId,
                         UUID.randomUUID(),
                         "   ",
-                        null));
+                        Role.ATTENDEE,
+                        ForumPermission.WRITE));
     }
 
     @Test
@@ -136,6 +157,7 @@ class CommunicationServiceTest {
         UUID otherForumId = UUID.randomUUID();
 
         Forum forum = new Forum();
+        forum.setScope(ForumScope.GENERAL);
 
         Message activeMessage = new Message();
         activeMessage.setForumId(forumId);
@@ -163,9 +185,12 @@ class CommunicationServiceTest {
 
         List<Message> result =
                 communicationService.getMessagesForForum(
-                        forumId);
+                        forumId,
+                        Role.ATTENDEE,
+                        ForumPermission.READ);
 
         assertEquals(1, result.size());
+
         assertEquals(
                 "Visible",
                 result.get(0).getBody());
@@ -182,6 +207,169 @@ class CommunicationServiceTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> communicationService
-                        .getMessagesForForum(forumId));
+                        .getMessagesForForum(
+                                forumId,
+                                Role.ATTENDEE,
+                                ForumPermission.READ));
+    }
+
+    @Test
+    void generalForumShouldAllowAccess() {
+
+        Forum forum = new Forum();
+        forum.setScope(ForumScope.GENERAL);
+
+        communicationService.validateForumAccess(
+                forum,
+                Role.ATTENDEE,
+                ForumPermission.READ);
+    }
+
+    @Test
+    void restrictedForumShouldAllowMatchingRoleAndPermission() {
+
+        UUID forumId = UUID.randomUUID();
+
+        ForumAccessPolicy policy =
+                new ForumAccessPolicy();
+
+        policy.setForumId(forumId);
+        policy.setRole(Role.ATTENDEE);
+        policy.setPermission(ForumPermission.READ);
+
+        when(forumAccessPolicyRepository.findAll())
+                .thenReturn(List.of(policy));
+
+        /*
+         * IMPORTANT:
+         * This test assumes your Forum has its actual ID populated.
+         *
+         * If Forum.java does NOT have setId(), this test may need
+         * to be adjusted using Mockito instead.
+         */
+        Forum forum = new Forum();
+
+        /*
+         * Uncomment this only if Forum.java has setId(UUID):
+         *
+         * forum.setId(forumId);
+         */
+
+        forum.setScope(ForumScope.TRACK);
+
+        communicationService.validateForumAccess(
+                forum,
+                Role.ATTENDEE,
+                ForumPermission.READ);
+    }
+
+    @Test
+    void restrictedForumShouldRejectWrongRole() {
+
+        UUID forumId = UUID.randomUUID();
+
+        ForumAccessPolicy policy =
+                new ForumAccessPolicy();
+
+        policy.setForumId(forumId);
+        policy.setRole(Role.SPEAKER);
+        policy.setPermission(ForumPermission.READ);
+
+        when(forumAccessPolicyRepository.findAll())
+                .thenReturn(List.of(policy));
+
+        Forum forum = new Forum();
+
+        /*
+         * Uncomment this only if Forum.java has setId(UUID):
+         *
+         * forum.setId(forumId);
+         */
+
+        forum.setScope(ForumScope.TRACK);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> communicationService
+                        .validateForumAccess(
+                                forum,
+                                Role.ATTENDEE,
+                                ForumPermission.READ));
+    }
+
+    @Test
+    void adminForumShouldRejectNonAdminUser() {
+
+        UUID forumId = UUID.randomUUID();
+
+        ForumAccessPolicy policy =
+                new ForumAccessPolicy();
+
+        policy.setForumId(forumId);
+        policy.setRole(Role.ADMIN);
+        policy.setPermission(ForumPermission.READ);
+
+        when(forumAccessPolicyRepository.findAll())
+                .thenReturn(List.of(policy));
+
+        Forum forum = new Forum();
+
+        /*
+         * Uncomment this only if Forum.java has setId(UUID):
+         *
+         * forum.setId(forumId);
+         */
+
+        forum.setScope(ForumScope.ADMIN);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> communicationService
+                        .validateForumAccess(
+                                forum,
+                                Role.ATTENDEE,
+                                ForumPermission.READ));
+    }
+
+    @Test
+    void createMessageShouldAttachSpeakerFlair() {
+
+        UUID forumId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        Forum forum = new Forum();
+        forum.setScope(ForumScope.GENERAL);
+
+        SpeakerFlair flair = new SpeakerFlair();
+        flair.setUserId(userId);
+        flair.setLabel("Speaker");
+        flair.setDisplayStyle("badge");
+
+        when(forumRepository.findById(forumId))
+                .thenReturn(Optional.of(forum));
+
+        when(speakerFlairRepository.findAll())
+                .thenReturn(List.of(flair));
+
+        when(messageRepository.save(any(Message.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
+
+        Message result =
+                communicationService.createMessage(
+                        forumId,
+                        userId,
+                        "Hello from the speaker",
+                        Role.SPEAKER,
+                        ForumPermission.WRITE);
+
+        assertNotNull(result);
+        assertEquals(userId, result.getAuthorId());
+        assertEquals(
+                "Hello from the speaker",
+                result.getBody());
+
+        verify(messageRepository)
+                .save(any(Message.class));
     }
 }
