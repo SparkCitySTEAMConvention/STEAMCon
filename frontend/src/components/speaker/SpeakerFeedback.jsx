@@ -1,3 +1,5 @@
+import { timestampLabel } from '../../utils/proposalPresentation.js'
+import { conventionConfig } from '../../mocks/conventionConfig.js'
 import EmptyState from './EmptyState.jsx'
 
 export default function SpeakerFeedback({ feedback }) {
@@ -7,7 +9,7 @@ export default function SpeakerFeedback({ feedback }) {
       {feedback.length ? <ul className="portal-list">
         {feedback.map(item => (
           <li key={item.id} className={`portal-feedback-item ${item.read ? 'is-read' : 'is-unread'}`}>
-            <div className="portal-feedback-meta"><span>{item.read ? 'Read' : '● Unread'}</span><span>{item.date || 'Date to be announced'}</span></div>
+            <div className="portal-feedback-meta"><span>{item.read ? 'Read' : '● Unread'}</span><span>{timestampLabel(item.date, conventionConfig.timezone)}</span></div>
             <h3>{item.title}</h3>
             <p>{item.message}</p>
           </li>

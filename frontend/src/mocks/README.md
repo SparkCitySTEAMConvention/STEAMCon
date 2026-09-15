@@ -17,12 +17,29 @@ descriptions, without quotations or session commitments.
 separate records joined by stable IDs. Speaker track membership is an array;
 proposal/session/panel speaker membership is also an array. The primary speaker
 is explicitly identified. `speakerData.js` assembles a selected speaker workspace.
-The dashboard picker previews all 15 identities and their own proposals.
+The development-only dashboard picker previews all 15 identities and their own proposals.
+The default workspace is Bill Nye, with two approved proposed sessions.
 
 All convention scheduling and location fields remain nullable. Display fallbacks
 are shared in `utils/proposalPresentation.js`. A schedule-change action requires
-approval plus a timestamp or both date and time; partial scheduling alone does
-not permit a change request.
+approval plus a valid ISO start timestamp. Calendar downloads require valid start
+and end timestamps (end after start) and an event timezone. Unavailable actions
+have explanatory text. All formatting uses the shared helper, never the viewer's
+implicit local timezone.
+
+### Where Data should insert confirmed details
+
+- `conventionConfig.js`: edit the single `conventionConfig` record for event
+  `startsAt`, `endsAt`, `timezone`, `venueName`, `city`, and `state`.
+- `proposals.js`: edit the matching entry in `proposalSchedules`:
+  `proposal-bill-nye` or `proposal-panel-space-imagination`. Set `scheduledAt`,
+  `endsAt`, `timezone`, and `room`. Each entry feeds both the proposal details
+  and upcoming session card; do not edit generated `sessions.js` records.
+- Use ISO 8601 strings with `Z` or an explicit offset for timestamps and IANA
+  timezone names. A null session timezone inherits the convention timezone.
+  Keep every unknown field null. Dates without a timezone show an explanatory
+  message; calendar downloads stay unavailable until the timezone is known.
+- `speakers.js` contains the profile and professional biography.
 
 `services/speakerRepository.js` is a replaceable asynchronous frontend adapter,
 not Backend C's final API contract. No endpoint, DTO, authentication or server
@@ -35,7 +52,7 @@ explain that integration is pending and never claim a request was sent.
 Run `npm run dev` in `frontend`. These query overrides work only in development:
 
 - `/speaker?preview=loading`, `?preview=error`, `?preview=empty`
-- `/speaker/proposals/proposal-bill-nye` — draft and preview editing
+- `/speaker/proposals/proposal-timnit-gebru` — draft and preview editing
 - `/speaker/proposals/proposal-neil-degrasse-tyson` — pending
 - `/speaker/proposals/proposal-panel-space-imagination` — approved, unscheduled
 - `/speaker/proposals/proposal-fei-fei-li` — rejected with feedback
@@ -67,3 +84,26 @@ preview error override intentionally keeps failing until removed from the URL.
 Remaining: Backend C contract/integration, persistent draft saving and real
 schedule-change submission; team review before public-figure fixtures are used
 beyond development. No GitHub checklist was edited and no PR was opened.
+
+## Bill Nye dashboard verification
+
+From `frontend/`:
+
+- `npm test` runs the existing repository tests plus nullable schedule,
+  timezone formatting, Bill Nye programming, and calendar eligibility checks.
+- `CHROME_PATH=/path/to/chromium npm run test:browser` runs actual browser
+  navigation and rendering tests at 320, 768, and 1440 pixels. Requires Node 22+
+  and a local Chromium executable; no additional package is required.
+  Set `SCREENSHOT_DIR` to an existing directory to save dashboard screenshots.
+- `npm run lint`, `npm run build`; run `git diff --check` from the repository.
+
+The browser suite checks both homepage speaker links, proposal detail navigation,
+multiple panelists, null and confirmed scheduling, keyboard focus, reduced motion,
+empty/error/loading states, and horizontal overflow. Homepage atom animation and
+track-card implementations are unchanged.
+
+Backend integration still needs speaker identity/authentication, profile updates,
+proposal submission and persistence, organizer feedback/notification data, confirmed
+scheduling, and schedule-change requests. Edit Profile and Propose a Session remain
+explained unavailable placeholders. Calendar downloads are generated locally when
+the required schedule data exists.

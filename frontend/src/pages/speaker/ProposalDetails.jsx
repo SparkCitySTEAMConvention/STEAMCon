@@ -8,7 +8,8 @@ import { developmentDisclaimer, speakerData } from '../../mocks/speakerData.js'
 import { tracks } from '../../mocks/tracks.js'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
-import { canRequestScheduleChange, scheduleLabel } from '../../utils/proposalPresentation.js'
+import ScheduleActions from '../../components/speaker/ScheduleActions.jsx'
+import { roomLabel, locationLabel, scheduleLabel } from '../../utils/proposalPresentation.js'
 import './SpeakerDashboard.css'
 
 export default function ProposalDetails({ repository = speakerRepository }) {
@@ -48,19 +49,19 @@ function ProposalContent({ initialProposal, repository }) {
     {editing ? <DraftEditor proposal={proposal} repository={repository} onCancel={closeEditor} onSave={saved => { setProposal(saved); closeEditor(); setMessage('Draft saved for this preview session. Changes are lost on refresh; nothing was submitted.') }} /> : <>
       <section className="portal-detail-section" aria-labelledby="abstract-heading"><h2 id="abstract-heading">Abstract</h2><p>{proposal.abstract}</p></section>
       <dl className="portal-detail-facts">
-        <div><dt>STEAM track</dt><dd><TrackBadge trackId={proposal.trackId} /></dd></div>
+        <div><dt>STEAM track</dt><dd><TrackBadge trackId={proposal.trackId} />{proposal.additionalTrackIds?.map(trackId => <TrackBadge key={trackId} trackId={trackId} />)}</dd></div>
         <div><dt>Session format</dt><dd>{proposal.format}</dd></div>
         <div><dt>Duration</dt><dd>{proposal.durationMinutes ? `${proposal.durationMinutes} minutes` : 'Duration to be announced'}</dd></div>
         <div><dt>Schedule</dt><dd>{scheduleLabel(proposal)}</dd></div>
-        <div><dt>Room</dt><dd>{proposal.room || 'Room to be announced'}</dd></div>
-        <div><dt>Convention location</dt><dd>{proposal.location || 'Location to be announced'}</dd></div>
+        <div><dt>Room</dt><dd>{roomLabel(proposal)}</dd></div>
+        <div><dt>Convention location</dt><dd>{locationLabel()}</dd></div>
       </dl>
       <section className="portal-detail-section" aria-labelledby="primary-heading"><h2 id="primary-heading">Primary speaker</h2><h3>{primary?.name || 'Speaker to be announced'}</h3><p>{primary?.bio}</p></section>
-      <section className="portal-detail-section" aria-labelledby="others-heading"><h2 id="others-heading">{proposal.format === 'Panel' ? 'Co-panelists' : 'Co-speakers'}</h2>{others.length ? <ul className="portal-list">{others.map(person => <li key={person.id}><h3>{person.name}</h3><p>{person.bio}</p></li>)}</ul> : <p>No co-speakers listed.</p>}</section>
+      <section className="portal-detail-section" aria-labelledby="others-heading"><h2 id="others-heading">{proposal.format === 'Panel' ? 'Co-panelists' : 'Co-speakers'}</h2>{others.length ? <ul className="portal-list" aria-label="Co-speakers" role="list">{others.map(person => <li key={person.id}><h3>{person.name}</h3><p>{person.bio}</p></li>)}</ul> : <p>No co-speakers listed.</p>}</section>
       <section className="portal-detail-section" aria-labelledby="feedback-heading"><h2 id="feedback-heading">Admin feedback</h2><p>{proposal.adminFeedback || 'No admin feedback yet.'}</p></section>
       <div className="portal-actions">
         {proposal.status === 'Draft' && <button ref={node => { if (node && restoreEditFocus.current) { node.focus(); restoreEditFocus.current = false } }} id="edit-draft" className="button button-dark" type="button" onClick={() => { setMessage(''); setEditing(true) }}>Edit draft</button>}
-        {canRequestScheduleChange(proposal) && <button className="button button-paper" type="button" onClick={() => setMessage('Schedule-change requests are not connected yet. No request was sent.')}>Request schedule change</button>}
+        <ScheduleActions session={proposal} />
       </div>
     </>}
     <p role="status" className="portal-action-status">{message}</p>
