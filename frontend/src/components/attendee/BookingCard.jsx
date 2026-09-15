@@ -1,4 +1,6 @@
-export default function BookingCard({ booking, onOpen }) {
+import { Link } from 'react-router-dom'
+
+export default function BookingCard({ booking }) {
   return (
     <li className="attendee-booking-card">
       <article aria-labelledby={`${booking.id}-booking-title`}>
@@ -8,9 +10,9 @@ export default function BookingCard({ booking, onOpen }) {
         </div>
         <h3 id={`${booking.id}-booking-title`}>{booking.title}</h3>
         <p>{booking.detail}</p>
-        <button className="attendee-text-action" type="button" onClick={() => onOpen(booking)}>
+        <Link className="attendee-text-action" to={booking.href}>
           {booking.action} <span aria-hidden="true">→</span>
-        </button>
+        </Link>
       </article>
     </li>
   )

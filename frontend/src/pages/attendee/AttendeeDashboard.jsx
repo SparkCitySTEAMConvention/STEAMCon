@@ -5,6 +5,7 @@ import BookingCard from '../../components/attendee/BookingCard.jsx'
 import ItineraryItem from '../../components/attendee/ItineraryItem.jsx'
 import SessionCard from '../../components/attendee/SessionCard.jsx'
 import { attendeeData } from '../../mocks/attendeeData.js'
+import { buildTravelItinerary, getBookingCards, loadTravelBookings } from '../../utils/travelBookings.js'
 import './AttendeeDashboard.css'
 
 export default function AttendeeDashboard({ data = attendeeData }) {
@@ -13,6 +14,7 @@ export default function AttendeeDashboard({ data = attendeeData }) {
   )
   const [activeTrack, setActiveTrack] = useState('All')
   const [notice, setNotice] = useState('')
+  const [savedTravelBookings] = useState(() => loadTravelBookings())
 
   const selectedSessions = useMemo(
     () => data.sessions.filter(session => selectedSessionIds.includes(session.id)),
@@ -24,11 +26,17 @@ export default function AttendeeDashboard({ data = attendeeData }) {
     : data.sessions.filter(session => session.track === activeTrack)
 
   const itinerary = useMemo(
-    () => [...data.itinerary, ...selectedSessions].sort((first, second) => first.order - second.order),
-    [data.itinerary, selectedSessions],
+    () => [...data.itinerary, ...buildTravelItinerary(savedTravelBookings), ...selectedSessions]
+      .sort((first, second) => first.order - second.order),
+    [data.itinerary, savedTravelBookings, selectedSessions],
   )
 
-  const confirmedBookings = data.bookings.filter(booking => booking.status === 'Confirmed').length
+  const bookingCards = useMemo(
+    () => getBookingCards(data.bookings, savedTravelBookings),
+    [data.bookings, savedTravelBookings],
+  )
+
+  const confirmedBookings = bookingCards.filter(booking => booking.status === 'Booked').length
 
   function toggleSession(session) {
     if (session.mandatory) return
@@ -40,10 +48,6 @@ export default function AttendeeDashboard({ data = attendeeData }) {
     setNotice(isSelected
       ? `${session.title} was removed from your schedule.`
       : `${session.title} was added to your schedule.`)
-  }
-
-  function previewBooking(booking) {
-    setNotice(`${booking.label} is selected. Its full booking form is the next screen in this attendee flow.`)
   }
 
   return (
@@ -76,7 +80,7 @@ export default function AttendeeDashboard({ data = attendeeData }) {
             <p>Book each part separately. We’ll bring the details together on your itinerary.</p>
           </div>
           <ul className="attendee-booking-grid">
-            {data.bookings.map(booking => <BookingCard key={booking.id} booking={booking} onOpen={previewBooking} />)}
+            {bookingCards.map(booking => <BookingCard key={booking.id} booking={booking} />)}
           </ul>
         </section>
 

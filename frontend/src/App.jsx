@@ -4,6 +4,8 @@ import './App.css'
 import HomePage from './pages/HomePage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
+import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
+import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 
 export default function App() {
@@ -15,6 +17,9 @@ export default function App() {
       '/': 'STEAM Con',
       '/register': 'Register | STEAM Con',
       '/attendee': 'Attendee Portal | STEAM Con',
+      '/attendee/travel': 'Book Travel | STEAM Con',
+      '/attendee/hotel': 'Book a Hotel | STEAM Con',
+      '/attendee/car': 'Reserve a Car | STEAM Con',
       '/speaker': 'Speaker Portal | STEAM Con',
     }
     document.title = pageTitles[pathname] || 'Page not found | STEAM Con'
@@ -30,6 +35,9 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<RegistrationPage />} />
       <Route path="/attendee" element={<AttendeeDashboard />} />
+      <Route path="/attendee/travel" element={<TravelBookingPage kind="travel" />} />
+      <Route path="/attendee/hotel" element={<HotelBookingPage />} />
+      <Route path="/attendee/car" element={<TravelBookingPage kind="car" />} />
       <Route path="/speaker" element={<SpeakerDashboard />} />
       <Route path="*" element={
         <main className="container section" tabIndex={-1}>
