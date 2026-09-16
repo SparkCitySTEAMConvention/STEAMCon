@@ -43,7 +43,7 @@
 .map-road-three { top: 72%; left: -4%; width: 88%; height: 7%; transform: rotate(7deg); }
 .map-road-four { top: -8%; left: 34%; width: 7%; height: 82%; border-width: 0 1px; transform: rotate(-15deg); }
 .map-pin { position: absolute; z-index: 5; display: grid; justify-items: center; gap: 0.25rem; transform: translate(-50%, -50%); }
-.map-pin b, .map-key { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; border: 2px solid var(--color-ink); border-radius: 50% 50% 50% 0; background: var(--color-technology); box-shadow: 3px 3px 0 var(--color-ink); font-weight: 950; transform: rotate(-45deg); }
+.map-pin b, .map-key { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; border: 2px solid var(--color-ink); border-radius: 50% 50% 50% 0; background: var(--color-technology); box-shadow: 3px 3px 0 var(--color-ink); font-weight: 950; transform: none; }
 .map-pin b { font-size: 1rem; }
 .map-pin b::first-letter, .map-key { line-height: 1; }
 .map-pin b { color: transparent; }
