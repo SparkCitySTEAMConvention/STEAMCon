@@ -20,5 +20,5 @@ export default function AuthProvider({children}) {
   try { await authService.logout() }
   finally { setSession(null); navigate('/') }
  }
- return <AuthContext.Provider value={{user:session?.user ?? null,authSource:session?.source ?? null,isAuthenticated:!!session,isLoading,login:credentials => authenticate(() => authService.login(credentials)),loginAsDemo:role => authenticate(() => authService.loginAsDemo(role)),logout}}>{children}</AuthContext.Provider>
+ return <AuthContext.Provider value={{user:session?.user ?? null,authSource:session?.source ?? null,hasBackendSession:session?.source === 'backend' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session?.sessionId || ''),isAuthenticated:!!session,isLoading,login:credentials => authenticate(() => authService.login(credentials)),loginAsDemo:role => authenticate(() => authService.loginAsDemo(role)),logout}}>{children}</AuthContext.Provider>
 }
