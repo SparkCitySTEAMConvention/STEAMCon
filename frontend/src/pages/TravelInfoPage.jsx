@@ -101,47 +101,49 @@ export default function TravelInfoPage() {
           </div>
         </section>
 
-        <section className="container travel-guide-section departures-section" id="departures" aria-labelledby="departures-heading">
-          <div className="travel-guide-heading">
-            <div><p className="eyebrow">03 / Sample departures</p><h2 id="departures-heading">Know where to catch your ride.</h2></div>
-            <p>Preview common New York transit hubs before you travel. These demonstration times show how a future live departures board could work.</p>
-          </div>
-          <div className="departures-board">
-            <div className="departures-board-header">
-              <div><span className="status-light" aria-hidden="true" /><strong>NYC departures preview</strong></div>
-              <span>Demo data · Not live</span>
+        <section className="travel-guide-transit" id="departures" aria-labelledby="transit-heading">
+          <div className="container">
+            <div className="travel-guide-transit-grid">
+              <div><p className="eyebrow">03 / Moving around</p><h2 id="transit-heading">The subway keeps the city close.</h2></div>
+              <ul>
+                <li><strong>Subway and bus</strong><span>Best for flexible, lower-cost trips throughout the city.</span></li>
+                <li><strong>Rail connections</strong><span>Useful for airport transfers and travel from the wider region.</span></li>
+                <li><strong>Walking and rideshare</strong><span>Good for shorter trips; allow extra time during peak traffic.</span></li>
+              </ul>
             </div>
-            <div className="departures-columns" aria-hidden="true">
-              <span>Time</span><span>Service and destination</span><span>Terminal</span><span>Status</span>
-            </div>
-            <ol className="departures-list">
-              {sampleDepartures.map((departure, index) => (
-                <li key={`${departure.time}-${departure.service}`}>
-                  <time>{departure.time}</time>
-                  <div><strong>{departure.service}</strong><span>{departure.destination}</span></div>
-                  <span className="terminal-label">{departure.terminal}</span>
-                  <span className={`departure-status ${index === 1 ? 'is-boarding' : ''}`}>{departure.status}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <p className="departures-note"><strong>Travel note:</strong> Port Authority is primarily a bus terminal. Penn Station and Grand Central are the major Manhattan rail hubs shown here.</p>
-        </section>
 
-        <section className="travel-guide-transit" aria-labelledby="transit-heading">
-          <div className="container travel-guide-transit-grid">
-            <div><p className="eyebrow">04 / Moving around</p><h2 id="transit-heading">The subway keeps the city close.</h2></div>
-            <ul>
-              <li><strong>Subway and bus</strong><span>Best for flexible, lower-cost trips throughout the city.</span></li>
-              <li><strong>Rail connections</strong><span>Useful for airport transfers and travel from the wider region.</span></li>
-              <li><strong>Walking and rideshare</strong><span>Good for shorter trips; allow extra time during peak traffic.</span></li>
-            </ul>
+            <div className="transit-departures" aria-labelledby="departures-heading">
+              <div className="transit-departures-heading">
+                <div><p className="eyebrow">Departures preview</p><h3 id="departures-heading">Know where to catch your ride.</h3></div>
+                <p>Preview common New York transit hubs before you travel. These demonstration times show how a future live departures board could work.</p>
+              </div>
+              <div className="departures-board">
+                <div className="departures-board-header">
+                  <div><span className="status-light" aria-hidden="true" /><strong>NYC departures preview</strong></div>
+                  <span>Demo data · Not live</span>
+                </div>
+                <div className="departures-columns" aria-hidden="true">
+                  <span>Time</span><span>Service and destination</span><span>Terminal</span><span>Status</span>
+                </div>
+                <ol className="departures-list">
+                  {sampleDepartures.map((departure, index) => (
+                    <li key={`${departure.time}-${departure.service}`}>
+                      <time>{departure.time}</time>
+                      <div><strong>{departure.service}</strong><span>{departure.destination}</span></div>
+                      <span className="terminal-label">{departure.terminal}</span>
+                      <span className={`departure-status ${index === 1 ? 'is-boarding' : ''}`}>{departure.status}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <p className="departures-note"><strong>Travel note:</strong> Port Authority is primarily a bus terminal. Penn Station and Grand Central are the major Manhattan rail hubs shown here.</p>
+            </div>
           </div>
         </section>
 
         <section className="container travel-guide-section" aria-labelledby="before-heading">
           <div className="travel-guide-heading">
-            <div><p className="eyebrow">05 / Before you book</p><h2 id="before-heading">Start with your event pass.</h2></div>
+            <div><p className="eyebrow">04 / Before you book</p><h2 id="before-heading">Start with your event pass.</h2></div>
             <p>Register first. Your attendee portal keeps travel, hotel, car-rental, sessions, and the combined itinerary in one place.</p>
           </div>
           <div className="travel-guide-callout">
