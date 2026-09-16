@@ -81,6 +81,7 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
           <div className="portal-sidebar">
             <section aria-labelledby="sessions-heading">
               <h2 id="sessions-heading">Upcoming speaking engagements</h2>
+              <p className="portal-muted">Preview schedule · The backend does not expose a speaker proposal-to-session relationship.</p>
               {sessions.length ? <ul className="portal-list">{sessions.map(session => <UpcomingSessionCard key={session.id} session={session} />)}</ul> : <EmptyState title="Your stage is still taking shape.">Upcoming sessions will appear here when they are assigned.</EmptyState>}
             </section>
             <SpeakerFeedback feedback={feedback} />
