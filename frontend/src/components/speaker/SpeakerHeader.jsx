@@ -17,14 +17,12 @@ export default function SpeakerHeader({ speaker }) {
         <div><p className="eyebrow">Speaker workspace</p><p className="portal-profile-name">{speaker.name}</p><p className="portal-muted">{speaker.organization}{speaker.role && ` · ${speaker.role}`}</p><div className="portal-profile-tracks">{speaker.trackIds?.map(trackId => <TrackBadge key={trackId} trackId={trackId} />)}</div></div>
         <div className="portal-propose">
           <div className="portal-actions">
-          <button className="button button-dark" type="button" aria-disabled="true" aria-describedby="proposal-availability">Propose a Session <span aria-hidden="true">＋</span></button>
-          <button className="button button-paper" type="button" aria-disabled="true" aria-describedby="profile-availability">Edit Profile</button>
+          <Link className="button button-dark" to="/speaker/proposals/new">Propose a Session <span aria-hidden="true">＋</span></Link>
+          <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>
           </div>
-          <p id="profile-availability">Profile editing coming soon.</p>
-          <p id="proposal-availability">Proposal submissions coming soon.</p>
         </div>
       </div>
-      <div className="container"><AccountNavigation /></div>
+      <div className="container"><nav aria-label="Speaker navigation"><Link className="portal-home" to="/speaker/forums">Forum &amp; Messaging</Link></nav><AccountNavigation /></div>
     </header>
   )
 }

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
-
 import './App.css'
 
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
@@ -14,8 +13,11 @@ import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
 import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
+import EditSpeakerProfile from './pages/speaker/EditSpeakerProfile.jsx'
+import ProposeSession from './pages/speaker/ProposeSession.jsx'
 import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
+import SpeakerForums from './pages/speaker/SpeakerForums.jsx'
 
 export default function App() {
   const { pathname } = useLocation()
@@ -34,11 +36,16 @@ export default function App() {
       '/attendee/car': 'Reserve a Car | STEAM Con',
       '/speakers': 'Proposed speakers | STEAM Con',
       '/speaker': 'Speaker Portal | STEAM Con',
+      '/speaker/profile/edit': 'Edit Profile | STEAM Con',
+      '/speaker/forums': 'Speaker Forum & Messaging | STEAM Con',
     }
 
-    document.title = pathname.startsWith('/speaker/proposals/')
-      ? 'Proposal details | STEAM Con'
-      : pageTitles[pathname] || 'Page not found | STEAM Con'
+    document.title =
+      pathname === '/speaker/proposals/new'
+        ? 'Propose a Session | STEAM Con'
+        : pathname.startsWith('/speaker/proposals/')
+          ? 'Proposal details | STEAM Con'
+          : pageTitles[pathname] || 'Page not found | STEAM Con'
 
     if (previousPath.current !== pathname) {
       window.scrollTo(0, 0)
@@ -78,6 +85,18 @@ export default function App() {
         </Route>
 
         <Route element={<RoleRoute role="SPEAKER" />}>
+          <Route
+            path="/speaker/profile/edit"
+            element={<EditSpeakerProfile />}
+          />
+          <Route
+            path="/speaker/forums"
+            element={<SpeakerForums />}
+          />
+          <Route
+            path="/speaker/proposals/new"
+            element={<ProposeSession />}
+          />
           <Route
             path="/speaker/proposals/:proposalId"
             element={<ProposalDetails />}
