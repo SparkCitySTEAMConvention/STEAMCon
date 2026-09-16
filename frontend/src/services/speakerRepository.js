@@ -5,8 +5,8 @@ import { speakers } from '../mocks/speakers.js'
 // frontend operations, not proposed URLs, payloads, authentication or API schemas.
 const edits = new Map()
 export const speakerRepository = {
-  async getDashboard(speakerId) {
-    const data = getSpeakerData(speakerId)
+  async getDashboard() {
+    const data = getSpeakerData('speaker-bill-nye')
     return { ...data, proposals: data.proposals.map(proposal => edits.get(proposal.id) || proposal) }
   },
   async getProposal(id) {

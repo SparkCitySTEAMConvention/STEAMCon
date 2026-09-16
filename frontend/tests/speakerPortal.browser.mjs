@@ -87,18 +87,69 @@ try {
       const screenshot = await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});
       await writeFile(`${process.env.SCREENSHOT_DIR}/directory-${width}.png`, Uint8Array.from(atob(screenshot.data), c => c.charCodeAt(0)));
     }
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('.site-header nav > a')].map(a => [a.textContent, a.getAttribute('href')])`), [
+      ['Events', '/#events'], ['Tracks', '/#tracks'], ['Speakers', '/speakers'], ['Travel', '/#travel'],
+    ]);
+    assert.equal(await evaluate('document.querySelectorAll(".nav-login summary").length'), 1);
+    await evaluate('document.querySelector(".nav-login summary").focus()');
+    for (const [name, code, number] of [['Enter','Enter',13], [' ','Space',32]]) {
+      await key(name,code,number);
+      assert.equal(await evaluate('document.querySelector(".nav-login").open'),true);
+      await noOverflow();
+      assert.equal(await evaluate(`(()=>{const r=document.querySelector('.nav-login ul').getBoundingClientRect();return r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight})()`),true);
+      await key('Tab','Tab',9);
+      assert.equal(await evaluate('document.activeElement.textContent'),'Attendee Portal');
+      assert.equal(await evaluate('getComputedStyle(document.activeElement).outlineStyle'),'solid');
+      await key('Escape','Escape',27);
+      assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
+      assert.equal(await evaluate('document.activeElement.tagName'),'SUMMARY');
+      assert.equal(await evaluate('getComputedStyle(document.activeElement).outlineStyle'),'solid');
+    }
+    await click('.directory-grid > li:nth-child(2) .directory-card');
+    assert.equal(await evaluate('location.pathname'),'/speakers');
     await click('.nav-login summary');
-    assert.equal(await evaluate('document.querySelectorAll(".nav-login a")[1].getAttribute("href")'), '/attendee');
+    await click('h1');
+    assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
+    // Retain the element to verify selection closes it before route unmount.
+    await evaluate('void (window.previousLogin = document.querySelector(".nav-login"))');
+    await click('.nav-login summary');
     await click('.nav-login a[href="/attendee"]');
     assert.equal(await evaluate('location.pathname'), '/attendee');
-    // Frontend A owns the attendee page; verify the link target only here.
+    assert.equal(await evaluate('window.previousLogin.open'),false);
+    assert.equal(await evaluate('document.querySelector("#attendee-main") !== null'),true);
+    assert.match(await text(), /Your itinerary/);
+    await noOverflow();
+    for (const [path, heading] of [
+      ['/attendee/travel', 'Book your way there and back.'],
+      ['/attendee/hotel', 'Find your STEAM Con stay.'],
+      ['/attendee/car', 'Reserve your ride.'],
+    ]) {
+      await click(`a[href="${path}"]`);
+      assert.equal(await evaluate('location.pathname'),path);
+      assert.equal(await evaluate('document.querySelector("h1").textContent'),heading);
+      assert.equal(await evaluate('document.querySelector("main form") !== null'),true);
+      await noOverflow();
+      await click('a[href="/attendee"]');
+      assert.equal(await evaluate('document.querySelector("#attendee-main") !== null'),true);
+    }
+    await navigate('/');
+    assert.equal(await evaluate(`document.querySelector('header a[href="/register"]') !== null`),false);
+    await click('main a[href="/register"]');
+    assert.equal(await evaluate('location.pathname'),'/register');
+    assert.match(await text(), /Choose how you’ll show up/);
+    await noOverflow();
     await navigate('/speakers');
     // Open the menu if the shared header was remounted by routing.
     if (!await evaluate('document.querySelector(".nav-login").open')) await click('.nav-login summary');
-    await click('.nav-login a[href="/speaker"]');
+    await evaluate('void (window.previousLogin = document.querySelector(".nav-login"))');
+    await evaluate(`document.querySelector('.nav-login a[href="/speaker"]').focus()`);
+    await key('Enter','Enter',13);
+    assert.equal(await evaluate('window.previousLogin.open'),false);
     await waitFor('document.querySelectorAll(".portal-proposal").length === 2');
     assert.equal(await evaluate('location.pathname'), '/speaker');
     assert.match(await text(), /Welcome back, Bill/);
+    assert.doesNotMatch(await text(), /Preview speaker workspace/);
+    assert.equal(await evaluate('document.querySelectorAll("select").length'),0);
     assert.match(await text(), /Bill Nye/);
     assert.match(await text(), /Chief Ambassador and Vice Chairman/);
     assert.match(await text(), /Science Changes Everything/);

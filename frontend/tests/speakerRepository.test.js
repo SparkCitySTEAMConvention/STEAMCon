@@ -43,9 +43,7 @@ test('draft saves persist in the preview and cannot change status or membership'
   assert.equal(saved.title, 'Updated title')
   assert.equal(saved.status, 'Draft')
   assert.deepEqual(saved.speakerIds, before.speakerIds)
-  const dashboard = await speakerRepository.getDashboard('speaker-timnit-gebru')
-  assert.ok(dashboard.proposals.length > 1)
-  assert.equal(dashboard.proposals.find(proposal => proposal.id === before.id).title, 'Updated title')
+  assert.equal((await speakerRepository.getProposal(before.id)).title, 'Updated title')
   await assert.rejects(speakerRepository.saveDraft('proposal-neil-degrasse-tyson', before))
   await assert.rejects(speakerRepository.saveDraft(before.id, { ...before, title: '  ' }))
   assert.equal(await speakerRepository.getProposal('missing'), null)
@@ -64,6 +62,14 @@ test('Bill Nye has the complete proposed program and panel membership', async ()
   }
   assert.deepEqual(dashboard.sessions[1].speakers.map(person => person.name), ['Bill Nye', 'Neil deGrasse Tyson', 'Mae Jemison'])
   assert.deepEqual(dashboard.proposals[1].additionalTrackIds, ['engineering'])
+})
+
+test('dashboard identity stays Bill Nye for every public speaker ID', async () => {
+  for (const speaker of speakers) {
+    const dashboard = await speakerRepository.getDashboard(speaker.id)
+    assert.equal(dashboard.speaker.id, 'speaker-bill-nye')
+    assert.ok(dashboard.proposals.every(proposal => proposal.speakerIds.includes('speaker-bill-nye')))
+  }
 })
 
 test('shared schedule formatting respects the event timezone and nullable fields', () => {
