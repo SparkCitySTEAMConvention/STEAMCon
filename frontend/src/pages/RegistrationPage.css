@@ -51,11 +51,15 @@
 .registration-form input:not([type='checkbox']), .registration-form select, .registration-form textarea { width: 100%; min-height: 50px; padding: 0.7rem 0.8rem; border: 1.5px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-paper); color: var(--color-ink); }
 .registration-form textarea { min-height: 118px; resize: vertical; }
 .registration-form input:not([type='checkbox']):focus, .registration-form select:focus, .registration-form textarea:focus { background: var(--color-white); }
+.registration-form [aria-invalid='true'] { border-color: #a32222 !important; box-shadow: 0 0 0 3px color-mix(in srgb, #a32222 16%, transparent); }
+.registration-field-error { display: block !important; justify-content: initial !important; color: #8a1717; font-size: 0.72rem; font-weight: 800; }
 .registration-field-wide { grid-column: 1 / -1; }
 .registration-consent { grid-template-columns: auto 1fr; align-items: start; margin-top: -0.5rem; color: var(--color-text-muted); font-weight: 400 !important; }
 .registration-consent input { width: 19px; height: 19px; margin: 0.1rem 0 0; accent-color: var(--color-ink); }
 .registration-consent span { display: block !important; }
 .registration-submit { width: 100%; margin-top: 1.5rem; cursor: pointer; }
+.registration-submit:disabled { cursor: wait; opacity: 0.72; }
+.registration-request-error { display: grid; gap: 0.25rem; margin-top: 1.5rem; padding: 1rem; border: 2px solid #a32222; border-radius: var(--radius-small); background: color-mix(in srgb, #a32222 8%, var(--color-paper)); color: #701313; font-size: 0.8rem; }
 .registration-portal-link { margin-top: 1.25rem; color: var(--color-text-muted); font-size: 0.78rem; text-align: center; }
 .registration-portal-link a { color: var(--color-ink); font-weight: 800; }
 .registration-success { min-height: 620px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
