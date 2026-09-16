@@ -1,7 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import { previewRepository } from '../../mocks/previewScenarios.js'
 import { useCallback, useMemo, useState } from 'react'
-import { speakers } from '../../mocks/speakers.js'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import TrackFilters from '../../components/speaker/TrackFilters.jsx'
@@ -16,16 +15,15 @@ import { conventionScheduleLabel, locationLabel, hasSchedule } from '../../utils
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
-  const [speakerId, setSpeakerId] = useState('speaker-bill-nye')
   const [params] = useSearchParams()
   const scenario = import.meta.env.DEV ? params.get('preview') : null
   const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
-  const loader = useCallback(() => source.getDashboard(speakerId), [source, speakerId])
-  const resource = useSpeakerResource(loader, `${speakerId}:${scenario}`)
-  return <SpeakerDashboardView key={speakerId} data={resource.data || { ...speakerData, speaker: speakers.find(person => person.id === speakerId), proposals: [], sessions: [], feedback: [] }} resource={resource} speakerId={speakerId} onSpeakerChange={setSpeakerId} />
+  const loader = useCallback(() => source.getDashboard(), [source])
+  const resource = useSpeakerResource(loader, scenario)
+  return <SpeakerDashboardView data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} />
 }
 
-function SpeakerDashboardView({ data, resource, speakerId, onSpeakerChange }) {
+function SpeakerDashboardView({ data, resource }) {
   const [trackId, setTrackId] = useState('all')
   const { speaker, convention, proposals, sessions, feedback } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
@@ -41,9 +39,6 @@ function SpeakerDashboardView({ data, resource, speakerId, onSpeakerChange }) {
           <p>Keep an eye on your proposals, upcoming sessions, and organizer feedback. Your next great conversation starts here.</p>
         </div>
         <p className="portal-demo">{developmentDisclaimer}</p>
-        {import.meta.env.DEV && <label className="portal-preview-picker">Preview speaker workspace
-          <select value={speakerId} onChange={event => onSpeakerChange(event.target.value)}>{speakers.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}</select>
-        </label>}
         {resource.status === 'loading' && <p role="status">Loading proposals…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load proposals.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
         {resource.status === 'ready' && <>

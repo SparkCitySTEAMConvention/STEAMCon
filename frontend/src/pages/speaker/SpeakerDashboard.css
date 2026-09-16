@@ -98,8 +98,7 @@
 .portal-filters button { min-height: 44px; padding: 0.45rem 0.75rem; background: var(--color-surface); color: var(--color-ink); border: 1px solid var(--color-ink); border-radius: var(--radius-small); cursor: pointer; }
 .portal-filters button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); text-decoration: underline; text-underline-offset: 0.25em; }
 .portal-result-count { font-size: 0.875rem; margin-bottom: 1rem; }
-.portal-preview-picker { display: grid; gap: 0.5rem; max-width: 30rem; margin-bottom: 2rem; }
-.portal-preview-picker select, .portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
+.portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
 .portal-proposal-main { max-width: 960px; overflow-wrap: anywhere; }
 .portal-proposal-main h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
 .portal-detail-section { margin-block: 2rem; }
