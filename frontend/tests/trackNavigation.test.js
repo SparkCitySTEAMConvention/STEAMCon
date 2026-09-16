@@ -25,6 +25,7 @@ test('whole cards are semantic Router links without nested controls and query se
   assert.match(page, /useSearchParams\(\)/)
   assert.match(page, /selectedTrack\(tracks, searchParams.get\('track'\)\)/)
   assert.match(page, /next.set\('track', trackQuery\(item\)\)/)
+  assert.match(page, /<Link to=\{passRegistrationDestination\(track, pass\)\}/)
   assert.equal((page.match(/<h1>/g) || []).length, 1)
 })
 test('summary derives counts from varying data and never claims unconfirmed schedules', () => {
