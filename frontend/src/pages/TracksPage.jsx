@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import TrackFeature from '../components/TrackFeature.jsx'
+import TrackProgram from '../components/TrackProgram.jsx'
 import usePublicProgram from '../hooks/usePublicProgram.js'
 import { trackTreatment } from '../utils/trackFeature.js'
 import { trackQuery, selectedTrack, programSummary } from '../utils/trackNavigation.js'
@@ -26,7 +27,7 @@ export default function TracksPage() {
           </div>}
         </div>
       </div>
-      <p>{source.mode === 'preview' ? 'Program preview · Development demonstration data' : 'Live program'}</p>
+      <p>{source.mode === 'preview' ? 'Program preview · Development demonstration data' : source.mode === 'live' ? 'Live program' : 'Live program unavailable · Sign in with a valid backend session'}</p>
       {resource.status === 'loading' && <p role="status">Loading tracks…</p>}
       {resource.status === 'error' && <div role="alert"><p>Unable to load tracks. Please retry.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry tracks</button></div>}
       {resource.status === 'ready' && <>
@@ -38,6 +39,7 @@ export default function TracksPage() {
           }}>{item.name}</button>)}
         </div>
         <TrackFeature track={track} sessions={resource.data.sessions} />
+        <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />
       </>}
     </main>
     <Footer />

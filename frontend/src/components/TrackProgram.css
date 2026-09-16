@@ -1,0 +1,12 @@
+.track-program { margin-top: 4rem; }
+.track-program h2 { font-size: clamp(1.8rem, 3vw, 3rem); margin-block: 1rem; }
+.track-program-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 1.5rem; margin-block: 1.5rem; }
+.track-program-controls > div { flex: 1 1 260px; }
+.track-program-controls label { display: block; font-weight: 700; }
+.track-program-controls input[type='search'] { width: 100%; box-sizing: border-box; margin-top: 0.5rem; padding: 0.8rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); font: inherit; background: var(--color-surface); color: var(--color-ink); }
+.track-program-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1.5rem; margin-block: 1.5rem; }
+.track-program-session { min-width: 0; padding: 1.5rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); overflow-wrap: anywhere; }
+.track-program-session h3 { font-size: 1.5rem; margin-block: 0.75rem; }
+.track-program-session details { margin-top: 1.5rem; border-top: 1px solid var(--color-ink); padding-top: 1rem; }
+.track-program-session summary { cursor: pointer; font-weight: 700; }
+.track-program-session li { margin-block: 0.75rem; }
