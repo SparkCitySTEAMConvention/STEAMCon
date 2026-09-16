@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { attendeeData } from '../mocks/attendeeData.js'
+import { attendeeRepository } from '../services/attendeeRepository.js'
 
+const attendeePreview = attendeeRepository.getPreview()
 function trackSlug(track) {
   return track.toLowerCase().replaceAll(' ', '-')
 }
 
-export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks = attendeeData.tracks }) {
+export default function ScheduleByDay({
+  sessions = attendeePreview.sessions,
+  tracks = attendeePreview.tracks,
+  }) {
   const days = useMemo(() => [...new Set(sessions.map(session => session.day))], [sessions])
   const [activeDay, setActiveDay] = useState(days[0] ?? '')
   const [activeTrack, setActiveTrack] = useState('All tracks')
