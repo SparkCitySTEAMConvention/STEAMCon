@@ -39,6 +39,8 @@ These adapters are not complete end-to-end features. Bill Nye's dashboard remain
 
 Permanent tests in `tests/apiRepositories.test.js` verify adapter contracts, validation, responses and failures. Existing speaker tests preserve mock lookup/dashboard/editing coverage. `tests/viteProxy.test.js` checks the proxy and confirms production browser output excludes the default and overridden Spring Boot targets. These tests do not prove live backend integration.
 
+The shared `eventRepository` now reads `/api/tracks`, `/api/sessions` and `/api/session-occurrences`, including `/{id}` details, through `authenticatedFetch`. These return TrackResponse, SessionResponse and SessionOccurrenceResponse records unchanged. Track reads support future proposal track selection with real backend UUIDs; no UI is wired here. Although intended for shared browsing, these routes require authentication under current SecurityConfig. Enrollment POST/DELETE belongs to Frontend A; event writes and speaker application status belong to admin/unassigned. See BACKEND_STRUCTURE.md for exact contracts. CommunicationService now uses CONCIERGE; the prior enum blocker is resolved in source. Maven compilation was not tested. Global and speaker/communication exception handlers map IllegalArgumentException to HTTP 400 with timestamp/status/error/message; login RuntimeException failures are not covered by that mapping.
+
 ## TODOs and blockers
 
 1. Backend A current-user/session validation endpoint: replace deliberate backend restoration refusal with its verified contract.
@@ -48,7 +50,6 @@ Permanent tests in `tests/apiRepositories.test.js` verify adapter contracts, val
 5. Seed backend demo accounts and roles; replace adapter dispatch with real endpoint login, then disable/remove frontend demo identities.
 6. Backend owner must supply supported proposal GET/update/dashboard endpoints before replacing mock reads and in-memory edits.
 7. UI integration remains future work for the existing notification, forum and proposal-creation adapters; use verified backend identity and real UUIDs.
-8. Backend owner must correct `CommunicationService` referencing `ForumScope.GENERAL`, absent from the current enum. This prevents successful backend compilation; no backend fix is included here.
 
 ## Login navigation
 

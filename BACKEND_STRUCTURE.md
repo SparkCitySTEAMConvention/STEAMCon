@@ -2,7 +2,7 @@
 
 Source inspection on branch `frontend-speaker-screen`, 2026-09-16. Updated to include the current frontend API adapters, development proxy and permanent frontend tests. Backend code is unchanged.
 
-This reference describes current source code, not a verified running API. `CommunicationService` references `ForumScope.GENERAL`, which is absent from the enum; this is a compile-time inconsistency. See the limitations below before using the route definitions as an operational contract.
+This reference describes the current post-merge source, not a verified running API. CommunicationService now uses ForumScope.CONCIERGE. Maven compilation has not been tested in this audit; no compilation-success claim is made.
 
 ## 1. Current backend overview
 
@@ -58,31 +58,33 @@ flowchart TD
     Booking[HotelController / HotelReservationController / TravelLegController / CarRentalController] --> BS[BookingService]
     BS --> BR[HotelRepository / HotelReservationRepository / TravelLegRepository / CarRentalRepository]
     Speaker[SpeakerController] --> SS[SpeakerService]
-    SS --> SR[SessionProposalRepository / SpeakerApplicationRepository / ApprovalDecisionRepository]
+    SS --> SR[SessionProposalRepository / SpeakerApplicationRepository / ApprovalDecisionRepository / NotificationService]
     Communication[CommunicationController] --> CS[CommunicationService]
     CS --> CR[ForumRepository / MessageRepository / ForumAccessPolicyRepository / SpeakerFlairRepository]
     Notification[NotificationController] --> NS[NotificationService]
     NS --> NR[NotificationRepository]
+    EventControllers[Track / Session / SessionOccurrence controllers] --> EventRepos[Track / Session / SessionOccurrence repositories]
+    EnrollmentController[EnrollmentController] --> Enrollment
     Enrollment[AttendeeSessionEnrollmentService in events] --> ER[events.AttendeeSessionEnrollmentRepository / SessionRepository]
     Enrollment --> Admission[AdmissionService]
     Admission --> APR[TicketRepository / PassRepository]
 ```
 
-Enrollment and admission services have no controller in the current source. Calendar, itinerary, tracks, session occurrences, user roles, and the separate `enrollment` package have repositories/entities without corresponding HTTP controllers. Diagram edges are constructor dependencies, not additional endpoints.
+EnrollmentController now delegates to the events enrollment service. TrackController, SessionController and SessionOccurrenceController map response records directly from repositories. Admission, calendar, itinerary, user roles and the separate `enrollment` package still have no corresponding HTTP controllers. Diagram edges are constructor dependencies, not additional endpoints.
 
 | Service | Existing behavior | Source |
 | --- | --- | --- |
 | `admission.AdmissionService` | Allow access for an ACTIVE track ticket or the single ACTIVE pass returned by the repository if it contains the track. | [AdmissionService](backend/src/main/java/com/sparkcity/steamcon/admission/AdmissionService.java) |
 | `auth.AuthService` | Register a user with BCrypt password hashing; reject duplicate email; login verifies password and saves an eight-hour ACTIVE session. Registration does not assign roles. | [AuthService](backend/src/main/java/com/sparkcity/steamcon/auth/AuthService.java) |
 | `booking.BookingService` | Save travel legs and car rentals after requiring userId; list hotels; save hotel reservations after requiring userId and finding hotelId. No provider calls or confirmation generation. | [BookingService](backend/src/main/java/com/sparkcity/steamcon/booking/BookingService.java) |
-| `communication.CommunicationService` | List/filter forums; find forum; check supplied role/permission against policies; filter ACTIVE messages; require nonblank body and attach first matching speaker flair. Contains missing GENERAL enum reference. | [CommunicationService](backend/src/main/java/com/sparkcity/steamcon/communication/CommunicationService.java) |
-| `communication.NotificationService` | Create a notification with user/message checks; list by user newest first; mark a notification read. Creation has no controller route and no other service calls it. | [NotificationService](backend/src/main/java/com/sparkcity/steamcon/communication/NotificationService.java) |
+| `communication.CommunicationService` | List/filter forums; find forum; check supplied role/permission against policies; filter ACTIVE messages; require nonblank body and attach first matching speaker flair. CONCIERGE permits authenticated callers with supplied non-null role/permission; other scopes require a matching policy. ID comparisons use Objects.equals. | [CommunicationService](backend/src/main/java/com/sparkcity/steamcon/communication/CommunicationService.java) |
+| `communication.NotificationService` | Create a notification with user/message checks; list by user newest first; mark a notification read. Creation has no controller route; SpeakerService creates notifications after proposal decisions and application-status changes. | [NotificationService](backend/src/main/java/com/sparkcity/steamcon/communication/NotificationService.java) |
 | `events.AttendeeSessionEnrollmentService` | Require attendee/session, find session, check admission, reject existing ENROLLED entry, save enrollment; cancel active entry; mandatory auto-enrollment also saves ENROLLED. | [AttendeeSessionEnrollmentService](backend/src/main/java/com/sparkcity/steamcon/events/AttendeeSessionEnrollmentService.java) |
-| `speaker.SpeakerService` | Save SUBMITTED proposals and applications; approve/reject a proposal and save an ApprovalDecision whose applicationId stores the proposal ID. No Session creation or notification call. | [SpeakerService](backend/src/main/java/com/sparkcity/steamcon/speaker/SpeakerService.java) |
+| `speaker.SpeakerService` | Save SUBMITTED proposals and applications; approve/reject a proposal and save an ApprovalDecision whose applicationId stores the proposal ID. Validates submission fields, rejects duplicate speaker/session applications, and sends notifications for decisions and application-status changes. No Session creation. | [SpeakerService](backend/src/main/java/com/sparkcity/steamcon/speaker/SpeakerService.java) |
 
 ## 3. HTTP routes defined in controllers
 
-All routes except health, login, and register require authentication in `SecurityConfig`. Statuses below are explicit/default successful controller responses, not promises about error handling or runtime availability. There is no custom exception advice in the current backend; service exceptions do not define a stable frontend error schema.
+All routes except health, login, and register require authentication in `SecurityConfig`. Statuses below are explicit/default successful controller responses, not promises about error handling or runtime availability. GlobalExceptionHandler maps IllegalArgumentException to HTTP 400 with { timestamp, status, error, message }. BackendCExceptionHandler provides the same shape for speaker/communication packages. These handlers do not cover every failure: @Valid failures use Spring handling, and event detail/update/delete routes explicitly return empty 404 responses for missing IDs.
 
 | Method | Path | Input | Success body / status | Controller |
 | --- | --- | --- | --- | --- |
@@ -102,9 +104,55 @@ All routes except health, login, and register require authentication in `Securit
 | GET | `/api/notifications/me` | Required query `userId: UUID` | Notification[] / 200 | [NotificationController](backend/src/main/java/com/sparkcity/steamcon/communication/NotificationController.java) |
 | POST | `/api/notifications/{id}/read` | UUID path id; no body | Notification / 200 | NotificationController |
 
+### Post-merge event and speaker contracts
+
+Sources: [TrackController](backend/src/main/java/com/sparkcity/steamcon/events/TrackController.java), [SessionController](backend/src/main/java/com/sparkcity/steamcon/events/SessionController.java), [SessionOccurrenceController](backend/src/main/java/com/sparkcity/steamcon/events/SessionOccurrenceController.java), [EnrollmentController](backend/src/main/java/com/sparkcity/steamcon/events/EnrollmentController.java), and [SpeakerController](backend/src/main/java/com/sparkcity/steamcon/speaker/SpeakerController.java).
+
+Every route below requires authentication under current SecurityConfig. “Shared browsing” describes frontend ownership, not anonymous access. Admin ownership does not imply server role enforcement: SecurityConfig requires authentication without admin authorities. No optional query filters exist on event list routes. Event detail/update/delete return empty 404 for missing records.
+
+| Method | Exact path | Input | Success response / status | Authentication | Intended frontend owner |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/api/tracks` | None | TrackResponse[] / 200 | Required | Shared frontend browsing; Frontend B/shared proposal track selection |
+| GET | `/api/tracks/{id}` | UUID path id | TrackResponse / 200 | Required | Shared frontend browsing; Frontend B/shared proposal track selection |
+| POST | `/api/tracks` | CreateTrackRequest JSON body | TrackResponse / 201 | Required | Admin/unassigned |
+| PUT | `/api/tracks/{id}` | UUID path id; CreateTrackRequest JSON body | TrackResponse / 200 | Required | Admin/unassigned |
+| DELETE | `/api/tracks/{id}` | UUID path id | No body (Void) / 204 | Required | Admin/unassigned |
+| GET | `/api/sessions` | None | SessionResponse[] / 200 | Required | Shared frontend browsing |
+| GET | `/api/sessions/{id}` | UUID path id | SessionResponse / 200 | Required | Shared frontend browsing |
+| POST | `/api/sessions` | CreateSessionRequest JSON body | SessionResponse / 201 | Required | Admin/unassigned |
+| PUT | `/api/sessions/{id}` | UUID path id; CreateSessionRequest JSON body | SessionResponse / 200 | Required | Admin/unassigned |
+| DELETE | `/api/sessions/{id}` | UUID path id | No body (Void) / 204 | Required | Admin/unassigned |
+| GET | `/api/session-occurrences` | None | SessionOccurrenceResponse[] / 200 | Required | Shared frontend browsing |
+| GET | `/api/session-occurrences/{id}` | UUID path id | SessionOccurrenceResponse / 200 | Required | Shared frontend browsing |
+| POST | `/api/session-occurrences` | CreateSessionOccurrenceRequest JSON body | SessionOccurrenceResponse / 201 | Required | Admin/unassigned |
+| PUT | `/api/session-occurrences/{id}` | UUID path id; CreateSessionOccurrenceRequest JSON body | SessionOccurrenceResponse / 200 | Required | Admin/unassigned |
+| DELETE | `/api/session-occurrences/{id}` | UUID path id | No body (Void) / 204 | Required | Admin/unassigned |
+| POST | `/api/enrollments` | CreateEnrollmentRequest JSON body | EnrollmentResponse / 201 | Required | Frontend A |
+| DELETE | `/api/enrollments` | Required UUID query attendeeId, sessionId; no body | No body (Void) / 204 | Required | Frontend A |
+| POST | `/api/proposals` | CreateProposalRequest JSON body | SessionProposal / 201 | Required | Frontend B |
+| POST | `/api/speaker-applications` | CreateSpeakerApplicationRequest JSON body | SpeakerApplication / 201 | Required | Frontend B |
+| POST | `/api/proposals/{id}/decision` | UUID path id; ProposalDecisionRequest JSON body | ApprovalDecision / 200 | Required | Admin/unassigned |
+| POST | `/api/speaker-applications/{id}/status` | UUID path id; SpeakerApplicationStatusRequest JSON body | SpeakerApplication / 200 | Required | Admin/unassigned |
+
+Event records (UUIDs serialize as strings, Instants as timestamps):
+
+| Record | Exact components | Validation on request |
+| --- | --- | --- |
+| CreateTrackRequest | name, description | Nonblank name, max 100; description max 500 |
+| TrackResponse | id, name, description | Response |
+| CreateSessionRequest | title, description, trackId, mandatory | Nonblank title max 100; description max 500; non-null trackId; mandatory is boolean |
+| SessionResponse | id, title, description, trackId, mandatory | Response |
+| CreateSessionOccurrenceRequest | sessionId, startsAt, endsAt | All non-null; endsAt must be after startsAt |
+| SessionOccurrenceResponse | id, sessionId, startsAt, endsAt | Response |
+| CreateEnrollmentRequest | attendeeId, sessionId | Both non-null |
+| EnrollmentResponse | id, attendeeId, sessionId, status, enrolledAt | Response; status uses events.EnrollmentStatus |
+| SpeakerApplicationStatusRequest | status | ApplicationStatus: SUBMITTED, APPROVED, REJECTED; service rejects null |
+
+Existing speaker request records are unchanged: CreateProposalRequest { speakerId, title, description, trackId }; CreateSpeakerApplicationRequest { speakerId, sessionId }; ProposalDecisionRequest { adminReviewerId, decision, comment }. Application-status updates and proposal decisions now trigger notifications. Proposal GET/update/dashboard routes remain absent.
+
 ### Request and response records
 
-Body records use their exact component names. UUIDs are JSON strings; Instant values should be ISO-8601 timestamps with an offset, such as `2026-10-10T10:00:00Z`. Enums use the identifiers listed below. Controllers do not apply `@Valid` to these request bodies; validation annotations on event entities are a separate concern.
+Body records use their exact component names. UUIDs are JSON strings; Instant values should be ISO-8601 timestamps with an offset, such as `2026-10-10T10:00:00Z`. Enums use the identifiers listed below. Event create/update and enrollment POST bodies use @Valid. Existing auth, speaker, booking and communication bodies do not use @Valid. Event request constraints are documented below.
 
 | Record | Components in source | Source |
 | --- | --- | --- |
@@ -267,11 +315,12 @@ Controllers accept user/speaker/author/reviewer IDs and forum role/permission va
 | [speakerRepository](frontend/src/services/speakerRepository.js) | Mock getDashboard/getProposal; in-memory saveDraft; createProposal sends POST `/api/proposals` through authenticatedFetch | Submission sends only speakerId, trimmed title/description and trackId. Backend starts SUBMITTED; no format/duration fields or dashboard, proposal retrieval, or draft-edit route |
 | [notificationRepository](frontend/src/services/notificationRepository.js) | GET `/api/notifications/me?userId=…`; POST `/api/notifications/{id}/read` | Uses authenticatedFetch; requires caller-supplied IDs and returns backend JSON |
 | [forumRepository](frontend/src/services/forumRepository.js) | GET forums with optional scope; GET messages with role/permission; POST messages | Uses authenticatedFetch; sends authorId, trimmed body, role and permission |
+| [eventRepository](frontend/src/services/eventRepository.js) | GET tracks, sessions and session occurrences, both list and detail | Uses authenticatedFetch; returns response records unchanged; no write operations or UI wiring |
 | [Vite proxy](frontend/vite.config.js) | Development-only `/api` proxy | Default target http://localhost:8080; VITE_API_PROXY_TARGET override; disabled for build/preview |
 
-The four frontend service/repository files above exist. No registration operation exists in authService itself, though the backend defines registration; no booking adapter is included. Production deployment must provide a same-origin API because the Vite proxy applies only to development.
+The five frontend service/repository files above exist, including eventRepository for authenticated event reads. No registration operation exists in authService itself, though the backend defines registration; no booking adapter is included. Production deployment must provide a same-origin API because the Vite proxy applies only to development.
 
-An endpoint declared in backend source, an available frontend adapter, a connected UI, and a working live feature are separate states. Adapter existence does not prove end-to-end functionality, particularly while the backend cannot compile.
+An endpoint declared in backend source, an available frontend adapter, a connected UI, and a working live feature are separate states. Adapter existence does not prove end-to-end functionality; live backend integration and Maven compilation have not been tested in this audit.
 
 | Feature | Backend endpoint | Frontend adapter | UI/live state |
 | --- | --- | --- | --- |
@@ -281,13 +330,14 @@ An endpoint declared in backend source, an available frontend adapter, a connect
 | Forum listing | Exists | Exists | No forum UI connection yet |
 | Forum messages | Exists | Exists | No forum UI connection yet |
 | Send forum message | Exists | Exists | No forum UI connection yet |
+| Track/session/occurrence reads | Exists, authentication required | eventRepository exists | No new UI connection |
 | Proposal creation | Exists | Exists | Propose button not connected |
 | Proposal dashboard loading | Missing | Mock repository only | Mock-backed |
 | Proposal editing | Backend missing | In-memory frontend only | Mock-backed |
 
 Protected adapters require a backend-authenticated account and real UUIDs. No fake UUIDs are generated or mock IDs converted. Bill Nye's mock dashboard and draft editing remain intentionally separate from submission.
 
-Do not map mock speaker IDs to backend UUIDs or send demo IDs. Existing API bodies require real UUIDs where declared. Existing speaker read/edit frontend operations cannot be implemented with the current backend route set alone. There are also no controller routes for session/track listings, enrollment, admission purchase, calendar/itinerary retrieval, booking lists, or booking cancellation.
+Do not map mock speaker IDs to backend UUIDs or send demo IDs. Existing API bodies require real UUIDs where declared. Existing speaker read/edit frontend operations cannot be implemented with the current backend route set alone. Track/session/occurrence listing and detail routes and enrollment POST/DELETE now exist. There are still no controller routes for admission purchase, calendar/itinerary retrieval, booking lists, or booking cancellation. eventRepository supplies real track IDs for future speaker proposal selection; the proposal UI remains unconnected.
 
 ## 6. Tests and known source limitations
 
@@ -298,7 +348,7 @@ Backend tests below were inspected, not executed; Maven was not run. Frontend pe
 | [AdmissionServiceTest](backend/src/test/java/com/sparkcity/steamcon/admission/AdmissionServiceTest.java) | Active ticket, pass containing track, denied access without either |
 | [BookingServiceTest](backend/src/test/java/com/sparkcity/steamcon/booking/BookingServiceTest.java) | Travel/car saves, missing travel userId, hotel listing, reservation save, missing hotel |
 | [SpeakerServiceTest](backend/src/test/java/com/sparkcity/steamcon/speaker/SpeakerServiceTest.java) | Proposal/application saves, approval/rejection status change, missing proposal |
-| [CommunicationServiceTest](backend/src/test/java/com/sparkcity/steamcon/communication/CommunicationServiceTest.java) | Forum listing/filtering, message body/visibility, missing forum, policy checks, flair attachment; enum and fixture inconsistencies below |
+| [CommunicationServiceTest](backend/src/test/java/com/sparkcity/steamcon/communication/CommunicationServiceTest.java) | Forum listing/filtering, message body/visibility, missing forum, policy checks, flair attachment |
 | [NotificationServiceTest](backend/src/test/java/com/sparkcity/steamcon/communication/NotificationServiceTest.java) | Creation, blank message rejection, user listing, mark-read, missing notification |
 | [AttendeeSessionEnrollmentServiceTest](backend/src/test/java/com/sparkcity/steamcon/events/AttendeeSessionEnrollmentServiceTest.java) | Enrollment with admission, no admission, duplicates, cancellation, null IDs, mandatory auto-enrollment and nonmandatory rejection |
 | [AttendeeSessionEnrollmentTest](backend/src/test/java/com/sparkcity/steamcon/events/AttendeeSessionEnrollmentTest.java) | Required attendee/session, default ENROLLED, cancellation |
@@ -307,17 +357,14 @@ Backend tests below were inspected, not executed; Maven was not run. Frontend pe
 | [SessionOccurrenceTest](backend/src/test/java/com/sparkcity/steamcon/events/SessionOccurrenceTest.java) | Required session/times, end after start, simultaneous occurrences allowed |
 | [ZipConApplicationTests](backend/src/test/java/com/sparkcity/steamcon/ZipConApplicationTests.java) | Constructs application class and asserts nonnull; does not load Spring context |
 
-No current backend tests exercise controllers through HTTP, the authentication service/filter/security chain, live PostgreSQL persistence, or frontend integration.
+TrackControllerTest, SessionControllerTest, SessionOccurrenceControllerTest and EnrollmentControllerTest now exercise HTTP contracts through MockMvc with security filters disabled and mocked dependencies. They do not establish authenticated live HTTP access, PostgreSQL persistence or frontend integration; these backend tests were inspected, not run in this audit.
 
 | Source issue or limit | Implication |
 | --- | --- |
-| CommunicationService uses `ForumScope.GENERAL`; defined values are TRACK, ADMIN, CONCIERGE | Current main source cannot compile as written. GENERAL is not a valid API enum value |
-| CommunicationServiceTest also uses `ForumScope.GENERAL` and `ForumPermission.WRITE`; defined permission is POST, not WRITE | Test source also contains compile-time enum inconsistencies |
-| Restricted-forum test fixtures leave Forum.id null, while policy matching calls `forum.getId().equals(...)` | After enum fixes, those fixtures still cannot establish successful policy behavior and can throw NullPointerException |
 | `events.AttendeeSessionEnrollment` and `enrollment.AttendeeSessionEnrollment` share the default JPA entity name and table `attendee_session_enrollments`, with different fields | Potential entity scanning/mapping startup conflict; not a unified model. Current enrollment service uses the events version only |
 | Separate enrollment model has userId/occurrenceId uniqueness and AUTO_ENROLLED; events model has attendeeId/sessionId and ENROLLED/CANCELLED | Do not combine their fields or claim occurrence-based enrollment is implemented by the service |
 | No transactional annotation on proposal decision workflow | Proposal save and decision save are separate repository calls; service provides no explicit transaction spanning both |
 | Proposal/application timestamp fields and decision timestamp lack getters | Persisted timestamps are not a documented default JSON response field |
 | Booking service saves PLANNED entities with no external booking calls or confirmationCode assignment | A created record is not evidence of a confirmed provider reservation |
 
-All backend limitations are observations from current code. The backend owner must correct the missing `ForumScope.GENERAL` enum reference before successful backend compilation; this frontend task does not fix backend code.
+Backend code is unchanged. The former communication enum issue is resolved in current source. Maven was not run, so compilation and startup remain unverified.
