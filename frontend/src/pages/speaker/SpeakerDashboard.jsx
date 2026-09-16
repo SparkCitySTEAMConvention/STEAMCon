@@ -16,20 +16,24 @@ import { useAuth } from '../../auth/useAuth.js'
 import { notificationRepository } from '../../services/notificationRepository.js'
 import { getSpeakerNotificationSource } from '../../services/speakerNotificationSource.js'
 import SpeakerNotifications from '../../components/speaker/SpeakerNotifications.jsx'
+import { eventRepository } from '../../services/eventRepository.js'
+import { getSpeakerProposalSource } from '../../services/speakerProposalSource.js'
+import TrackBadge from '../../components/speaker/TrackBadge.jsx'
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
   const { user, authSource, hasBackendSession } = useAuth()
   const notifications = useMemo(() => getSpeakerNotificationSource(notificationRepository, user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
+  const proposalSource = useMemo(() => getSpeakerProposalSource(repository, eventRepository, user, authSource, hasBackendSession), [repository, user, authSource, hasBackendSession])
   const [params] = useSearchParams()
   const scenario = import.meta.env.DEV ? params.get('preview') : null
   const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
   const loader = useCallback(() => source.getDashboard(), [source])
   const resource = useSpeakerResource(loader, scenario)
-  return <SpeakerDashboardView data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView previewProposals={proposalSource.demo ? proposalSource.getPreviewProposals() : []} data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
-function SpeakerDashboardView({ data, resource, notifications, notificationKey }) {
+function SpeakerDashboardView({ previewProposals, data, resource, notifications, notificationKey }) {
   const [trackId, setTrackId] = useState('all')
   const { speaker, convention, proposals, sessions, feedback } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
@@ -58,13 +62,20 @@ function SpeakerDashboardView({ data, resource, notifications, notificationKey }
           <p>{conventionScheduleLabel(convention)}</p>
           <p>{locationLabel(convention)}</p>
         </section>
+        {previewProposals.length > 0 && <section className="portal-detail-section" aria-labelledby="local-proposals-heading">
+          <h2 id="local-proposals-heading">Your locally submitted preview proposals</h2>
+          <p>Saved for this preview login session. Nothing was sent to the backend.</p>
+          <ul className="portal-list">{previewProposals.map(proposal => <li key={proposal.id} className="portal-proposal">
+            <TrackBadge trackId={proposal.trackId} /><p className="portal-status">{proposal.status}</p><h3>{proposal.title}</h3><p>{proposal.description}</p>
+          </li>)}</ul>
+        </section>}
         <ProposalSummary proposals={proposals} />
         <div className="portal-columns">
           <section aria-labelledby="proposals-heading">
             <div className="portal-section-heading"><h2 id="proposals-heading">Your Proposals</h2><span>{proposals.length} total</span></div>
             <TrackFilters value={trackId} onChange={setTrackId} />
             <p className="portal-result-count" role="status">{filtered.length} proposals shown</p>
-            {filtered.length ? <ul className="portal-list portal-proposals">{filtered.map(proposal => <ProposalCard key={proposal.id} proposal={proposal} />)}</ul> : <EmptyState title={proposals.length ? "No proposals in this track." : "Make room for your first idea."}>{proposals.length ? 'Choose another track or return to All to explore your proposals.' : 'Your proposals will appear here. Proposal submissions are coming soon.'}</EmptyState>}
+            {filtered.length ? <ul className="portal-list portal-proposals">{filtered.map(proposal => <ProposalCard key={proposal.id} proposal={proposal} />)}</ul> : <EmptyState title={proposals.length ? "No proposals in this track." : "Make room for your first idea."}>{proposals.length ? 'Choose another track or return to All to explore your proposals.' : 'Use Propose a Session to submit your idea.'}</EmptyState>}
           </section>
           <div className="portal-sidebar">
             <section aria-labelledby="sessions-heading">

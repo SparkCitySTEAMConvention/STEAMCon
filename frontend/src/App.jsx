@@ -7,6 +7,7 @@ import RegistrationPage from './pages/RegistrationPage.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
 import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
+import ProposeSession from './pages/speaker/ProposeSession.jsx'
 import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import SpeakerForums from './pages/speaker/SpeakerForums.jsx'
@@ -34,7 +35,7 @@ export default function App() {
       '/speaker': 'Speaker Portal | STEAM Con',
       '/speaker/forums': 'Speaker Forum & Messaging | STEAM Con',
     }
-    document.title = pathname.startsWith('/speaker/proposals/')
+    document.title = pathname === '/speaker/proposals/new' ? 'Propose a Session | STEAM Con' : pathname.startsWith('/speaker/proposals/')
       ? 'Proposal details | STEAM Con'
       : pageTitles[pathname] || 'Page not found | STEAM Con'
     if (previousPath.current !== pathname) {
@@ -60,6 +61,7 @@ export default function App() {
         </Route>
         <Route element={<RoleRoute role="SPEAKER" />}>
           <Route path="/speaker/forums" element={<SpeakerForums />} />
+          <Route path="/speaker/proposals/new" element={<ProposeSession />} />
           <Route path="/speaker/proposals/:proposalId" element={<ProposalDetails />} />
           <Route path="/speaker" element={<SpeakerDashboard />} />
         </Route>
