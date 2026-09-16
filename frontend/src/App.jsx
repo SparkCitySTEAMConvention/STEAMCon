@@ -6,6 +6,7 @@ import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import RoleRoute from './auth/RoleRoute.jsx'
 import AccessDenied from './pages/AccessDenied.jsx'
 import HomePage from './pages/HomePage.jsx'
+import TracksPage from './pages/TracksPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import RegistrationQrSamples from './pages/RegistrationQrSamples.jsx'
@@ -27,6 +28,7 @@ export default function App() {
   useEffect(() => {
     const pageTitles = {
       '/': 'STEAM Con',
+      '/tracks': 'Tracks | STEAM Con',
       '/login': 'Log in | STEAM Con',
       '/access-denied': 'Access denied | STEAM Con',
       '/register': 'Register | STEAM Con',
@@ -60,6 +62,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/tracks" element={<TracksPage />} />
       <Route path="/register" element={<RegistrationPage />} />
       <Route path="/travel" element={<TravelInfoPage />} />
       <Route
