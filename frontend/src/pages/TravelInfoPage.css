@@ -118,3 +118,13 @@
 .travel-guide-transit .departures-board { border-color: color-mix(in srgb, var(--color-paper) 35%, transparent); background: color-mix(in srgb, var(--color-paper) 4%, var(--color-ink)); }
 .travel-guide-transit .departures-note { color: var(--color-border); }
 @media (max-width: 850px) { .transit-departures-heading { grid-template-columns: 1fr; } }
+
+.flight-booking-callout { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(1.5rem, 5vw, 4rem); align-items: center; padding: clamp(1.5rem, 4vw, 2.5rem); margin-top: 2rem; border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-technology); box-shadow: var(--shadow-large); }
+.flight-booking-callout > div:first-child { display: grid; gap: 0.55rem; max-width: 680px; }
+.flight-booking-callout h3 { font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.flight-booking-callout p:not(.eyebrow) { color: color-mix(in srgb, var(--color-ink) 72%, transparent); }
+.flight-booking-actions { display: grid; gap: 0.9rem; justify-items: stretch; min-width: min(100%, 290px); text-align: center; }
+.flight-booking-link { color: var(--color-ink); font-weight: 850; text-decoration-thickness: 2px; text-underline-offset: 0.25rem; }
+.flight-booking-link:hover { text-decoration-thickness: 4px; }
+@media (max-width: 800px) { .flight-booking-callout { grid-template-columns: 1fr; } .flight-booking-actions { min-width: 0; } }
+@media (max-width: 560px) { .flight-booking-actions .button { width: 100%; } }
