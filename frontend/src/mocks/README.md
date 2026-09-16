@@ -92,10 +92,14 @@ Homepage atom animation and track-card implementations are unchanged.
 
 Backend integration still needs speaker identity/authentication, profile updates,
 proposal submission and persistence, organizer feedback/notification data, confirmed
-scheduling, and schedule-change requests. Edit Profile and Propose a Session remain
-explained unavailable placeholders. Calendar downloads are generated locally when
+scheduling, and schedule-change requests. Edit Profile remains an explained unavailable placeholder. Propose a Session now supports local preview submission and guarded backend dispatch. Calendar downloads are generated locally when
 the required schedule data exists.
 
 ## Notification preview
 
 `notificationData.js` centralizes sample Bill Nye notifications with stable IDs, valid creation timestamps, backend types, and mixed read/unread states. Organizer feedback, proposal information and pending scheduling are sample UI copy. Scheduling dates remain null in shared proposal/session fixtures, and no attendance is confirmed. Preview read state stays in memory for the application session and never calls the API. Separate source instances are isolated for tests.
+
+
+## Proposal submission preview
+
+The five shared tracks supply preview choices. speakerProposalSource creates local SUBMITTED records without modifying the shared proposal fixtures or calling the backend. Records stay in memory per AuthContext user for the current login/application session, survive portal navigation, and reset on new login or refresh. Separate source instances are isolated. Locally submitted proposals appear separately on the dashboard; they do not imply confirmed participation or scheduling.
