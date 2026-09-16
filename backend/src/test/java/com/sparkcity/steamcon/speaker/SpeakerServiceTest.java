@@ -83,6 +83,58 @@ class SpeakerServiceTest {
     }
 
     @Test
+    void createProposalShouldUseAuthenticatedUserIdAsSpeakerId() {
+
+        UUID authenticatedUserId = UUID.randomUUID();
+        UUID trackId = UUID.randomUUID();
+
+        when(sessionProposalRepository
+                .save(any(SessionProposal.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
+
+        SessionProposal result =
+                speakerService.createProposal(
+                        authenticatedUserId,
+                        "My Secure Proposal",
+                        "This proposal belongs to the authenticated user.",
+                        trackId);
+
+        assertEquals(
+                authenticatedUserId,
+                result.getSpeakerId());
+    }
+
+    @Test
+    void createSpeakerApplicationShouldUseAuthenticatedUserId() {
+
+        UUID authenticatedUserId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+
+        when(speakerApplicationRepository
+                .findAll())
+                .thenReturn(List.of());
+
+        when(speakerApplicationRepository
+                .save(any(SpeakerApplication.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
+
+        SpeakerApplication result =
+                speakerService.createSpeakerApplication(
+                        authenticatedUserId,
+                        sessionId);
+
+        assertEquals(
+                authenticatedUserId,
+                result.getSpeakerId());
+
+        assertEquals(
+                sessionId,
+                result.getSessionId());
+    }
+
+    @Test
     void createProposalShouldRejectBlankTitle() {
 
         assertThrows(
