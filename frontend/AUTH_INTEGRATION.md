@@ -1,102 +1,85 @@
-# Shared frontend authentication
+# Shared frontend authentication and Speaker Portal integration
 
-Hybrid: normal editable credentials use real backend login; isolated frontend demo identities use a demonstration adapter. Demo access is not production authentication or server authorization.
+Normal editable credentials use backend authentication. Configured demo identities use an isolated frontend adapter; demo access does not grant server authorization. Backend files are unchanged.
 
-## Existing Backend A contract
+## Completed authentication contracts
 
-Inspected AuthController, AuthService, AuthSession, SessionAuthenticationFilter and SecurityConfig; no backend files changed.
+POST `/api/auth/login` accepts `{ email, password }`. Login and GET `/api/auth/me` return the nested `AuthResponse`:
 
-- POST `/api/auth/login`, JSON `{ email, password }`, returns `id`, `userId`, `createdAt`, `expiresAt`, `status`. Active sessions expire after eight hours.
-- Authenticated requests use exactly `X-Session-Id`, the session ID UUID. The filter authenticates user ID with an empty authorities list.
-- POST `/api/auth/register` returns `id`, `email`, `displayName`; that is not the login response.
-- Invalid credentials throw a runtime exception with no explicit HTTP error mapping. Explicit 401/403 or the implemented invalid-credentials message are recognized; opaque 500 responses show a general error.
-- No roles in login, current-user/session restoration, logout endpoint or seeded demo accounts were found.
+```js
+{
+  sessionId,
+  createdAt,
+  expiresAt,
+  status,
+  user: {
+    id,
+    email,
+    displayName,
+    organization,
+    roles
+  }
+}
+```
 
-Real login establishes a session but cannot open role-protected portals until Backend A supplies roles. Cached backend identity is deliberately discarded on refresh because it cannot be validated/restored. Logout clears local state only; backend sessions remain active until expiry. Frontend route guards do not enforce backend security.
+The frontend accepts active, unexpired sessions with real session/user UUIDs and a `user.roles` array. It retains the backend identity fields and roles. A compatibility `user.role` is derived from that array for existing portal consumers: SPEAKER takes precedence over ATTENDEE; neither role yields null. Email addresses and portal selection never assign backend roles. RoleRoute checks the roles array, while the existing speaker sources use the derived SPEAKER role. Accounts without a supported portal role reach Access Denied.
 
-## Public demo configuration
+Backend sessions last eight hours. On application startup, AuthContext waits for restoration before resolving protected routes. A cached backend identity is revalidated through GET `/api/auth/me` using `X-Session-Id`; the returned identity and roles replace cached values. Invalid, expired, revoked, unreadable or unverifiable sessions are discarded. Backend restoration is implemented and is no longer blocked by a missing endpoint.
 
-`src/auth/demoConfig.js` contains all demo credentials and identities:
+Backend logout calls POST `/api/auth/logout` with `X-Session-Id`. The backend revokes the session and returns 204. Local storage is cleared even if the request fails; AuthContext clears reactive state and returns to the homepage. A failed network request cannot guarantee server revocation. Demo logout clears local state without contacting the backend.
+
+`authenticatedFetch` preserves caller headers, attaches the backend session UUID as `X-Session-Id`, and rejects requests to another origin. SessionAuthenticationFilter verifies active, unexpired sessions and loads active roles as `ROLE_*` authorities. SecurityConfig protects current-session/logout endpoints and restricts proposal creation and speaker application creation to SPEAKER. Frontend guards supplement server authorization.
+
+## Proposal creation contract
+
+Live POST `/api/proposals` sends exactly:
+
+```js
+{ title, description, trackId }
+```
+
+Title and description are trimmed. No `speakerId`, `status`, abstract, format, duration or other frontend field reaches the live request. Speaker identity belongs to the authenticated backend session, rather than a caller-supplied ownership field. `speakerId` is added only to preview/mock proposal ownership records; preview records also use local SUBMITTED status.
+
+Validation follows the text limits in `CreateProposalRequest`: title permits 200 characters and description permits 2,000 characters. The form requires nonblank title/description and a selected track, rejects overlong trimmed values without truncating, and requires a loaded backend track UUID for live submission. Live creation also requires a verified backend speaker UUID, SPEAKER role and active session flag. Tracks load through the existing eventRepository GET `/api/tracks`; backend responses are returned unchanged. Submission failures preserve entries for retry.
+
+The local backend still needs synchronization before end-to-end proposal validation: SpeakerController references an undefined `authenticatedUserId` in proposal creation and uses `Authentication` without an import. The request record also retains a status field, and SessionProposal retains default JPA string columns despite the request's 2,000-character description limit. The frontend follows the exact three-field body and request validation limits documented here; backend compilation and persistence have not been verified.
+
+## Demo identities and preserved preview behavior
+
+`src/auth/demoConfig.js` defines these public frontend identities, rather than seeded database accounts:
 
 | Role | Email | Password | Display name |
 | --- | --- | --- | --- |
 | ATTENDEE | attendee@steamcon.demo | SteamConDemo! | Demo Attendee |
 | SPEAKER | speaker@steamcon.demo | SteamConDemo! | Bill Nye |
 
-These are frontend identities, not PostgreSQL accounts. The adapter is enabled for this demonstration build including previews. Set `VITE_ENABLE_DEMO_AUTH=false` to disable it in deployments. Only configured credentials receive demo roles; arbitrary email addresses never gain roles. Forms remain editable after populating demos. Passwords are never stored. Demo sessions survive same-tab refresh for eight hours in sessionStorage and never send fake session headers.
+Set `VITE_ENABLE_DEMO_AUTH=false` to disable the adapter. Configured credentials alone receive demo roles. Login fields remain editable after the portal selector populates them. Passwords are never stored. Demo sessions survive same-tab refresh for eight hours in sessionStorage and never send fake backend session headers.
 
-The service owns requests, storage, restoration, demo dispatch and local logout. AuthContext owns reactive state; ProtectedRoute and RoleRoute centralize route decisions. authenticatedFetch preserves caller headers and attaches backend session headers only to same-origin requests.
+Bill Nye's dashboard, proposal lookup and draft edits remain preview operations. Preview-created proposals are isolated in memory for the current user object and persist across portal navigation, then reset on login or refresh. Only locally created, owned, SUBMITTED and unscheduled proposals can be deleted, with explicit confirmation; original fixtures and panel memberships remain intact. Preview submissions and deletion never contact live adapters.
 
-## Current API adapters and development proxy
+Profile editing remains an isolated Bill Nye preview. Saved fields and dashboard updates persist across portal navigation, then reset on login or refresh. Name, professional title and organization allow 255 characters; biography allows 2,000. The professional title is distinct from an authentication role. Public fixtures remain unchanged.
 
-The Vite development server proxies `/api` to `http://localhost:8080` by default. `VITE_API_PROXY_TARGET` overrides the target through Vite's `loadEnv` API. Proxying is disabled for production build and preview; deployed browser requests still require an API at the application origin.
+## Existing live sources and adapters
 
-Non-demo credentials use the real POST `/api/auth/login` endpoint. The notification repository implements GET `/api/notifications/me?userId=…` and POST `/api/notifications/{id}/read`. The forum repository implements GET `/api/forums` with optional scope, GET `/api/forums/{id}/messages` with role/permission, and POST to that messages path with `{ authorId, body, role, permission }`. `speakerRepository.createProposal` posts `{ speakerId, title, description, trackId }` to `/api/proposals`.
+Verified backend roles unlock the existing speaker forum, notification and proposal creation sources. Demos continue to use isolated local data, without backend requests.
 
-All protected adapters reuse `authenticatedFetch`, reject missing required values before fetching, and return backend JSON. Message bodies and proposal title/description are trimmed. Extra frontend fields are excluded from POST bodies. Live use requires a backend-authenticated account and real UUIDs; adapters do not generate fake UUIDs or translate mock/demo IDs into backend IDs.
+- notificationRepository uses GET `/api/notifications/me?userId=…` and POST `/api/notifications/{id}/read`. Live reads require a backend user UUID and active session; failed updates preserve unread state.
+- forumRepository uses GET `/api/forums` with optional scope, GET `/api/forums/{id}/messages` with role/permission, and POST to that messages path with `{ authorId, body, role, permission }`. Speaker sources use READ for reads and POST for submissions, preserve failed drafts and provide retry states. Forum policies remain backend-enforced.
+- eventRepository reads `/api/tracks`, `/api/sessions`, `/api/session-occurrences` and their `/{id}` details through authenticatedFetch, returning backend records unchanged. These routes require authentication under current SecurityConfig.
 
-These adapters are not complete end-to-end features. Bill Nye's dashboard remains intentionally mock-backed, draft edits remain in memory, notifications use isolated frontend preview data, the speaker forum UI uses isolated local data during demo authentication, and proposal creation uses the guarded source described below. Backend proposal GET/update/dashboard endpoints remain unavailable.
+## Still unavailable in the live frontend
 
-Permanent tests in `tests/apiRepositories.test.js` verify adapter contracts, validation, responses and failures. Existing speaker tests preserve mock lookup/dashboard/editing coverage. `tests/viteProxy.test.js` checks the proxy and confirms production browser output excludes the default and overridden Spring Boot targets. These tests do not prove live backend integration.
+The following integrations remain unavailable and are not unlocked by authentication:
 
-The shared `eventRepository` now reads `/api/tracks`, `/api/sessions` and `/api/session-occurrences`, including `/{id}` details, through `authenticatedFetch`. These return TrackResponse, SessionResponse and SessionOccurrenceResponse records unchanged. Track reads supply real backend UUIDs for the guarded proposal form. Although intended for shared browsing, these routes require authentication under current SecurityConfig. Enrollment POST/DELETE belongs to Frontend A; event writes and speaker application status belong to admin/unassigned. See BACKEND_STRUCTURE.md for exact contracts. CommunicationService now uses CONCIERGE; the prior enum blocker is resolved in source. Maven compilation was not tested. Global and speaker/communication exception handlers map IllegalArgumentException to HTTP 400 with timestamp/status/error/message; login RuntimeException failures are not covered by that mapping.
+- Proposal list/read/update/delete. The existing dashboard, detail and draft-edit flows remain mock-backed; live deletion is disabled. Local SpeakerController contains read/update/withdrawal routes with caller-supplied speakerId, but they have not been integrated or established as working secured ownership contracts. Live creation does not manufacture dashboard persistence.
+- Profile update. No verified editable profile read/update contract supports the preview's complete fields; backend profile editing remains disabled. Authentication identity fields are not a profile update API.
+- Speaker application list/status reads. No live application listing or status-reading adapter/UI is integrated. Creation and admin status-write endpoints do not provide these reads.
+- Speaker-to-session scheduling reads. Shared sessions and occurrences do not establish a verified speaker/proposal scheduling relationship. The frontend does not invent assignments, dates or calendar eligibility.
 
-## TODOs and blockers
+Supported backend ownership, authorization, response and validation contracts must be confirmed before connecting these operations. No new Tracks-page speaker buttons are added.
 
-1. Backend A current-user/session validation endpoint: replace deliberate backend restoration refusal with its verified contract.
-2. Backend A authenticated-user roles/display name and server role enforcement: replace the null real role without email inference.
-3. Backend A logout/revocation endpoint: call it in the service while keeping cleanup on every failure path.
-4. Configure the production same-origin API deployment; the existing proxy is development-only.
-5. Seed backend demo accounts and roles; replace adapter dispatch with real endpoint login, then disable/remove frontend demo identities.
-6. Backend owner must supply supported proposal GET/update/dashboard endpoints before replacing mock reads and in-memory edits.
-7. Live forum access remains blocked by missing backend roles; live notifications remain blocked by missing backend roles; live proposal creation remains guarded by missing backend roles. Use verified backend identity and real UUIDs.
+## Development proxy and verification
 
-## Login navigation
+The Vite development server proxies `/api` to `http://localhost:8080`; `VITE_API_PROXY_TARGET` overrides the target through loadEnv. Production build and preview do not provide this proxy, so deployment requires an API at the application origin.
 
-The logged-out public header links directly to `/login`. Its labeled native portal selector populates credentials from demoConfig.js without signing in. Both fields remain editable and submission uses their current values; selection never grants a role. Successful configured logins open `/attendee` or `/speaker` (Bill Nye), while roleless backend sessions open Access Denied with a distinct account-role explanation. The authenticated account menu retains portal navigation, Escape/outside-click dismissal, and logout.
-
-## Speaker Forum interface
-
-`/speaker/forums` remains behind ProtectedRoute and the SPEAKER RoleRoute. AuthContext exposes the existing session source without changing login, restoration or logout. `speakerForumSource` isolates demo forum examples and in-memory messages from all backend requests. Examples live in `mocks/forumData.js`, not JSX, and are labeled on the page. Leaving the page discards demo messages.
-
-Backend dispatch requires a backend session source, SPEAKER role and valid user UUID, then uses the existing forumRepository with exact scope values, READ for message reads, and POST plus the authenticated author ID and trimmed body for submissions. Backend login currently supplies no role, so real users still reach Access Denied; no role is inferred. Forum policies remain enforced by the backend. The UI preserves failed drafts, guards duplicate submissions, and handles loading, empty data and retry states. It displays returned author/flair IDs because no name/flair lookup contract is available.
-
-Permanent `speakerForumSource.test.js` tests cover demo isolation, incomplete identities, exact dispatch and errors. Adapter tests continue to cover HTTP contracts and failures. Run these tests with `npm test` from `frontend/`. These checks do not establish live backend integration.
-
-## Speaker notifications
-
-The existing `/speaker` section uses `speakerNotificationSource`. Bill Nye preview notifications live in `mocks/notificationData.js`. Preview reads and mark-as-read never call the API. Read state stays in memory for the application session, including dashboard navigation, and resets on login or refresh. Scheduling dates remain nullable in shared proposal/session fixtures; the proposed-participant disclaimer remains intact.
-
-Live reads require a real backend user UUID, backend session source, and active session. AuthContext exposes only a read-only `hasBackendSession` flag. GET `/api/notifications/me?userId={userId}` and POST `/api/notifications/{notificationId}/read` use the unchanged notificationRepository and authenticatedFetch with `X-Session-Id`. Returned fields are `id`, `userId`, `message`, `type`, `read`, `createdAt`; mark-as-read returns the updated notification. There is no title or scheduled-date field. Missing identity/session prevents requests. Errors offer retry, and failed updates preserve unread state.
-
-Backend login still supplies no roles, preventing real accounts from entering the SPEAKER route. Backend current-user/session validation and role contracts remain blockers for live portal access and restoration. Permanent source tests verify isolation, exact dispatch, responses, guards, and retry. Existing adapter tests verify HTTP/session handling. No component test framework exists; UI states, semantic markup and 320/768/1440px responsive behavior are reviewed in component/CSS code. Tests do not establish a deployed backend connection.
-
-
-## Propose a Session
-
-`/speaker/proposals/new` uses the existing protected SPEAKER route. `speakerProposalSource` isolates preview track loading and submission: neither calls fetch or a live adapter. Trimmed preview records use SUBMITTED and stay in memory for the current AuthContext user, including navigation back to the dashboard. A new login or application refresh resets them; existing Bill Nye fixtures remain unchanged. Dashboard preview submissions are shown separately with no scheduling data or unsupported detail links.
-
-Live tracks use eventRepository GET `/api/tracks`. Live submission requires a backend speaker UUID, SPEAKER role, backend authentication source, active backend session flag, and a loaded backend track UUID. It uses speakerRepository POST `/api/proposals` with exactly speakerId, title, description and trackId. Backend JSON is returned unchanged: id, speakerId, title, description, trackId, status. SessionProposal has no submittedAt getter. Status values are SUBMITTED, APPROVED, REJECTED. Title and description use default JPA string columns (255 characters); the form rejects longer trimmed values without truncation.
-
-There are no live proposal GET/dashboard endpoints. Successful live submission does not manufacture dashboard persistence. Backend login still supplies no roles, so live speaker access remains blocked until that contract is provided. Current-user/session validation and restoration remain backend blockers. Permanent proposal source tests cover preview isolation, session reset, validation, exact live dispatch, identity/session/role/track guards, and failures with retry. UI accessibility and responsive states are reviewed in component/CSS code; these checks do not establish live backend integration.
-
-## Proposal removal
-
-Preview-created proposals are session-local and deletable only by the source instance that created them, while SUBMITTED and unscheduled. Original fixtures, approved proposals, scheduled proposals and existing panel memberships are protected; deletion never mutates shared fixtures or calls fetch/the live repository. The dashboard requires explicit confirmation naming the proposal, supports cancellation, prevents duplicate pending deletion, preserves proposals on failure, announces success, and restores focus to the Delete button after cancellation or the local-proposals heading after deletion. The existing source remains the sole owner of local records; the dashboard rereads it after successful deletion without a reload.
-
-The current SpeakerController/SpeakerService have no proposal DELETE, cancellation or withdrawal contract. POST `/api/proposals/{id}/decision` supports only APPROVE/REJECT; speaker-application status updates are not proposal withdrawal. SecurityConfig requires authentication but supplies no proposal-removal ownership/status rules because no such operation exists. No live deletion repository operation or enabled live Delete button is added. A backend deletion/withdrawal endpoint with server-enforced ownership, authorization and allowed statuses remains required for live removal.
-
-
-## Speaker profile editing
-
-`/speaker/profile/edit` is inside the existing ProtectedRoute and SPEAKER RoleRoute. Logged-out navigation follows the login return-path flow; other roles receive Access Denied. Edit Profile links here from the existing SpeakerHeader. Cancel returns to `/speaker` without invoking an update.
-
-`speakerProfileSource` owns a cloned Bill Nye preview profile. The form and dashboard use the same WeakMap-cached source for the current AuthContext user. Reads, track choices and saves never call fetch or any live repository. Edits survive portal navigation, stay in memory only, and reset on new login or application refresh. No component reads sessionStorage. Public speaker-directory fixtures, proposals, forums and notifications remain unchanged. The proposed-participant disclaimer is unchanged.
-
-Editable presentation fields are `name` (display name), `role` (professional current title, not authentication role), `organization`, `bio`, and primary track (`trackIds[0]`, selected using fixture track IDs). `firstName` is derived from the trimmed name; the dashboard greeting displays the full saved `name`. Successful updates increment a source revision and notify subscribers. The dashboard subscribes with useSyncExternalStore and reloads its profile when the revision changes. Text is trimmed on save. Display name, title and organization allow 255 characters; biography allows 2000. All are required, as is a known primary track. These are frontend validation limits; display name and organization also match the default JPA User string column limit. No silent truncation occurs.
-
-Inspected SpeakerController/SpeakerService, speaker request records/entities, User, AuthController/AuthService/UserResponse, SessionAuthenticationFilter and SecurityConfig. There is no UserController/UserService or verified profile GET/PUT/PATCH endpoint, request record, or response contract. User has `displayName` and `organization`, but title, biography and primary profile track are preview-only fields with no matching backend profile property. UserRole is an authentication role; proposal `trackId` belongs to a proposal. Neither is a profile-editing field. Registration POST `/api/auth/register` accepts email/displayName/password and returns id/email/displayName; it is not a profile update.
-
-Live editing is disabled with explanatory text and no enabled Save action. The source rejects missing backend user UUID, backend source, SPEAKER role or active session before checking the unavailable contract. Valid backend identities still cannot read/update a profile and make no network request. There are no profile ownership or role rules to preserve yet. Existing SecurityConfig requires authenticated protected requests; SessionAuthenticationFilter accepts active, unexpired X-Session-Id sessions with empty authorities. Login still supplies no roles. Backend owners must provide a profile read/update contract with exact supported fields, response shape, validation limits and server-enforced ownership/role authorization before live editing can be connected through authenticatedFetch.
-
-Permanent speakerProfileSource tests cover no-network preview operations, cancellation, validation/limits, returned-copy and session isolation, dashboard-facing updates, fixture and other portal state preservation, and live identity/session/role guards. UI states and responsive behavior are reviewed in JSX/CSS; the repository has no component/browser testing framework, and no browser harness is added.
+Run `npm test`, `npm run lint` and `npm run build` from `frontend/`, and `git diff --check` from the repository. Tests cover nested authentication, demo restoration/isolation, backend roles, current-session restoration, logout cleanup, exact adapter bodies and headers, proposal limit boundaries, and preservation of existing preview behavior. These checks verify frontend contracts; they do not establish a running backend connection or successful backend persistence.

@@ -20,14 +20,14 @@ export const speakerRepository = {
     edits.set(id, { ...proposal, title: changes.title.trim(), abstract: changes.abstract.trim(), trackId: changes.trackId, format: changes.format, durationMinutes: changes.durationMinutes })
     return this.getProposal(id)
   },
-  async createProposal({ speakerId, title, description, trackId } = {}) {
-    for (const [name, value] of Object.entries({ speakerId, title, description, trackId })) {
+  async createProposal({ title, description, trackId } = {}) {
+    for (const [name, value] of Object.entries({ title, description, trackId })) {
       if (typeof value !== 'string' || !value.trim()) throw new Error(`${name} is required.`)
     }
     const response = await authenticatedFetch('/api/proposals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ speakerId, title: title.trim(), description: description.trim(), trackId }),
+      body: JSON.stringify({ title: title.trim(), description: description.trim(), trackId }),
     })
     if (!response.ok) {
       throw new Error(`Proposal submission failed (${response.status}).`)

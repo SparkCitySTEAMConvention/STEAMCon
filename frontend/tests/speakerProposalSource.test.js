@@ -56,11 +56,11 @@ test('live tracks use existing event repository unchanged', async t => {
   const source = createSpeakerProposalSource(forbidden, eventRepository, user, 'backend', true)
   assert.deepEqual(await source.getTracks(), [track]); assert.equal(get.mock.callCount(), 1)
 })
-test('live submission sends exact authenticated ID and fields, returns unchanged JSON', async () => {
+test('live submission excludes caller ownership and status, returns unchanged JSON', async () => {
   let payload; const response = { id: 'backend-response', status: 'SUBMITTED' }
   const source = live({ createProposal: async input => { payload = input; return response } }); await source.getTracks()
   assert.equal(await source.createProposal({ ...values, trackId: track.id, speakerId: 'fake', status: 'APPROVED' }), response)
-  assert.deepEqual(payload, { speakerId: user.id, title: 'Title', description: 'Description', trackId: track.id })
+  assert.deepEqual(payload, { title: 'Title', description: 'Description', trackId: track.id })
 })
 test('missing backend speaker UUID prevents all requests', async () => {
   for (const identity of [null, {}, { ...user, id: 'demo-SPEAKER' }]) {
@@ -94,10 +94,21 @@ test('live track failure propagates and can retry', async () => {
   await assert.rejects(() => source.getTracks(), /Unavailable/)
   failing = false; assert.deepEqual(await source.getTracks(), [])
 })
-test('storage length limit rejects rather than truncates', async () => {
-  const source = preview(); await source.getTracks()
-  for (const field of ['title', 'description']) await assert.rejects(() => source.createProposal({ ...values, [field]: 'a'.repeat(256) }), /255/)
-  assert.deepEqual(source.getPreviewProposals(), [])
+test('proposal limits accept 200/2000 and reject 201/2001 without truncation', async () => {
+  for (const source of [preview(), live({createProposal: async payload => payload})]) {
+    await source.getTracks()
+    const input = {title: 'a'.repeat(200), description: 'b'.repeat(2000), trackId: source.demo ? 'science' : track.id}
+    const saved = await source.createProposal(input)
+    assert.equal(saved.title.length, 200)
+    assert.equal(saved.description.length, 2000)
+    for (const [field, limit] of [['title', 200], ['description', 2000]]) {
+      await assert.rejects(() => source.createProposal({...input, [field]: 'a'.repeat(limit + 1)}), new RegExp(`${limit}`))
+    }
+    if (source.demo) {
+      assert.equal(source.getPreviewProposals().length, 1)
+      assert.equal(saved.speakerId, demo.id)
+    }
+  }
 })
 
 async function savedPreview() {

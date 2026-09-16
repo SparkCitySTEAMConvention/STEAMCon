@@ -1,0 +1,12 @@
+.track-program-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; margin-top: 4rem; }
+.track-program-layout > .track-program { min-width: 0; margin-top: 0; }
+.track-pass-section { min-width: 0; align-self: start; padding: 1.5rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); box-shadow: 4px 5px 0 var(--color-ink); }
+.track-pass-section h2 { font-size: 1.8rem; margin-block: 0.75rem; }
+.track-pass-list { display: grid; gap: 1.25rem; margin-top: 1.5rem; }
+.track-pass-card { padding-top: 1.25rem; border-top: 1px solid var(--color-ink); }
+.track-pass-card h3 { font-size: 1.2rem; }
+.track-pass-price { font-size: 1.5rem; font-weight: 700; margin-block: 0.5rem; }
+.track-pass-card a { display: inline-block; margin-top: 0.75rem; font-weight: 700; }
+@media (min-width: 1200px) {
+  .track-program-layout { grid-template-columns: minmax(0, 1fr) 300px; }
+}

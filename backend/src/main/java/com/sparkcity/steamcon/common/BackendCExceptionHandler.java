@@ -16,32 +16,33 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
         })
 public class BackendCExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(
+            IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>>
             handleIllegalArgument(
                     IllegalArgumentException exception) {
 
-        Map<String, Object> body =
+        Map<String, Object> response =
                 new LinkedHashMap<>();
 
-        body.put(
+        response.put(
                 "timestamp",
                 Instant.now());
 
-        body.put(
+        response.put(
                 "status",
                 HttpStatus.BAD_REQUEST.value());
 
-        body.put(
+        response.put(
                 "error",
                 "Bad Request");
 
-        body.put(
+        response.put(
                 "message",
                 exception.getMessage());
 
         return ResponseEntity
                 .badRequest()
-                .body(body);
+                .body(response);
     }
 }

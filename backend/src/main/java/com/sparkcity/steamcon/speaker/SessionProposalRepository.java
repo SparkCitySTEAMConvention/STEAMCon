@@ -1,6 +1,14 @@
 package com.sparkcity.steamcon.speaker;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 import java.util.UUID;
 
-public interface SessionProposalRepository extends JpaRepository<SessionProposal, UUID> {}
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SessionProposalRepository
+        extends JpaRepository<SessionProposal, UUID> {
+
+    List<SessionProposal> findBySpeakerId(UUID speakerId);
+
+    List<SessionProposal> findByStatus(ProposalStatus status);
+}

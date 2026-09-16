@@ -1,3 +1,3 @@
 package com.sparkcity.steamcon.speaker;
 
-public enum ProposalStatus { SUBMITTED, APPROVED, REJECTED }
+public enum ProposalStatus { DRAFT, SUBMITTED, APPROVED, REJECTED, WITHDRAWN }
