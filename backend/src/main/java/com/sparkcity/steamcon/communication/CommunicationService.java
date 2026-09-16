@@ -1,6 +1,7 @@
 package com.sparkcity.steamcon.communication;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -12,36 +13,48 @@ public class CommunicationService {
 
     private final ForumRepository forumRepository;
     private final MessageRepository messageRepository;
-    private final ForumAccessPolicyRepository forumAccessPolicyRepository;
-    private final SpeakerFlairRepository speakerFlairRepository;
+    private final ForumAccessPolicyRepository
+            forumAccessPolicyRepository;
+    private final SpeakerFlairRepository
+            speakerFlairRepository;
 
     public CommunicationService(
             ForumRepository forumRepository,
             MessageRepository messageRepository,
-            ForumAccessPolicyRepository forumAccessPolicyRepository,
-            SpeakerFlairRepository speakerFlairRepository) {
+            ForumAccessPolicyRepository
+                    forumAccessPolicyRepository,
+            SpeakerFlairRepository
+                    speakerFlairRepository) {
 
         this.forumRepository = forumRepository;
         this.messageRepository = messageRepository;
-        this.forumAccessPolicyRepository = forumAccessPolicyRepository;
-        this.speakerFlairRepository = speakerFlairRepository;
+        this.forumAccessPolicyRepository =
+                forumAccessPolicyRepository;
+        this.speakerFlairRepository =
+                speakerFlairRepository;
     }
 
     public List<Forum> getForums() {
         return forumRepository.findAll();
     }
 
-    public List<Forum> getForumsByScope(ForumScope scope) {
+    public List<Forum> getForumsByScope(
+            ForumScope scope) {
+
         return forumRepository.findAll()
                 .stream()
-                .filter(forum -> forum.getScope() == scope)
+                .filter(forum ->
+                        forum.getScope() == scope)
                 .toList();
     }
 
     public Forum getForum(UUID forumId) {
-        return forumRepository.findById(forumId)
+
+        return forumRepository
+                .findById(forumId)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Forum not found"));
+                        new IllegalArgumentException(
+                                "Forum not found"));
     }
 
     public List<Message> getMessagesForForum(
@@ -59,9 +72,12 @@ public class CommunicationService {
         return messageRepository.findAll()
                 .stream()
                 .filter(message ->
-                        forumId.equals(message.getForumId()))
+                        Objects.equals(
+                                forumId,
+                                message.getForumId()))
                 .filter(message ->
-                        message.getStatus() == MessageStatus.ACTIVE)
+                        message.getStatus()
+                                == MessageStatus.ACTIVE)
                 .toList();
     }
 
@@ -72,6 +88,16 @@ public class CommunicationService {
             Role userRole,
             ForumPermission permission) {
 
+        if (authorId == null) {
+            throw new IllegalArgumentException(
+                    "Author ID is required");
+        }
+
+        if (body == null || body.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Message body cannot be empty");
+        }
+
         Forum forum = getForum(forumId);
 
         validateForumAccess(
@@ -79,21 +105,18 @@ public class CommunicationService {
                 userRole,
                 permission);
 
-        if (body == null || body.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Message body cannot be empty");
-        }
-
         Message message = new Message();
 
         message.setForumId(forumId);
         message.setAuthorId(authorId);
         message.setBody(body);
 
-        SpeakerFlair flair = findSpeakerFlair(authorId);
+        SpeakerFlair flair =
+                findSpeakerFlair(authorId);
 
         if (flair != null) {
-            message.setSpeakerFlairId(flair.getId());
+            message.setSpeakerFlairId(
+                    flair.getId());
         }
 
         return messageRepository.save(message);
@@ -104,23 +127,44 @@ public class CommunicationService {
             Role userRole,
             ForumPermission permission) {
 
-        if (forum.getScope() == ForumScope.GENERAL) {
+        if (forum == null) {
+            throw new IllegalArgumentException(
+                    "Forum is required");
+        }
+
+        if (userRole == null) {
+            throw new IllegalArgumentException(
+                    "User role is required");
+        }
+
+        if (permission == null) {
+            throw new IllegalArgumentException(
+                    "Forum permission is required");
+        }
+
+        // Concierge is available to authenticated users.
+        if (forum.getScope()
+                == ForumScope.CONCIERGE) {
             return;
         }
 
         List<ForumAccessPolicy> policies =
-                forumAccessPolicyRepository.findAll()
+                forumAccessPolicyRepository
+                        .findAll()
                         .stream()
                         .filter(policy ->
-                                forum.getId()
-                                        .equals(policy.getForumId()))
+                                Objects.equals(
+                                        forum.getId(),
+                                        policy.getForumId()))
                         .toList();
 
-        boolean allowed = policies.stream()
-                .anyMatch(policy ->
-                        policy.getRole() == userRole
+        boolean allowed =
+                policies.stream()
+                        .anyMatch(policy ->
+                                policy.getRole()
+                                        == userRole
                                 && policy.getPermission()
-                                == permission);
+                                        == permission);
 
         if (!allowed) {
             throw new IllegalArgumentException(
@@ -128,12 +172,15 @@ public class CommunicationService {
         }
     }
 
-    private SpeakerFlair findSpeakerFlair(UUID userId) {
+    private SpeakerFlair findSpeakerFlair(
+            UUID userId) {
 
         return speakerFlairRepository.findAll()
                 .stream()
                 .filter(flair ->
-                        userId.equals(flair.getUserId()))
+                        Objects.equals(
+                                userId,
+                                flair.getUserId()))
                 .findFirst()
                 .orElse(null);
     }
