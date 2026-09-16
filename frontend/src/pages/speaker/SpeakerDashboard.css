@@ -140,3 +140,13 @@
 .portal-create-form input:focus-visible, .portal-create-form textarea:focus-visible, .portal-create-form select:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 3px; }
 .portal-create-form [aria-invalid="true"] { border-width: 2px; }
 .portal-create-form button:disabled { cursor: wait; }
+
+.portal-profile-form { max-width: 44rem; }
+.portal-profile-form > div { min-width: 0; margin-bottom: 1.25rem; }
+.portal-profile-form label { display: block; }
+.portal-profile-form p { overflow-wrap: anywhere; }
+.portal-profile-form input, .portal-profile-form textarea, .portal-profile-form select { box-sizing: border-box; min-width: 0; max-width: 100%; font: inherit; }
+.portal-profile-form .button-group { flex-wrap: wrap; }
+.portal-profile-form .button { white-space: normal; max-width: 100%; }
+.portal-profile-name, .portal-profile .portal-muted { overflow-wrap: anywhere; }
+.portal-welcome h1, .portal-detail-section p { overflow-wrap: anywhere; }

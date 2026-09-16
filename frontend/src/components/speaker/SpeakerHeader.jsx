@@ -18,9 +18,8 @@ export default function SpeakerHeader({ speaker }) {
         <div className="portal-propose">
           <div className="portal-actions">
           <Link className="button button-dark" to="/speaker/proposals/new">Propose a Session <span aria-hidden="true">＋</span></Link>
-          <button className="button button-paper" type="button" aria-disabled="true" aria-describedby="profile-availability">Edit Profile</button>
+          <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>
           </div>
-          <p id="profile-availability">Profile editing coming soon.</p>
         </div>
       </div>
       <div className="container"><nav aria-label="Speaker navigation"><Link className="portal-home" to="/speaker/forums">Forum &amp; Messaging</Link></nav><AccountNavigation /></div>
