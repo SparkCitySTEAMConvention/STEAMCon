@@ -8,9 +8,10 @@ export default function Header() {
         <nav aria-label="Main navigation">
           <a href="/#events">Events</a>
           <a href="/#tracks">Tracks</a>
+          <Link to="/attendee">Attendees</Link>
           <Link to="/speakers">Speakers</Link>
           <a href="/#travel">Travel</a>
-          <a className="nav-register" href="/#register">Register <span aria-hidden="true">↗</span></a>
+          <Link className="nav-register" to="/register">Register Now <span aria-hidden="true">↗</span></Link>
           <details className="nav-login">
             <summary>Log in</summary>
             <ul>
