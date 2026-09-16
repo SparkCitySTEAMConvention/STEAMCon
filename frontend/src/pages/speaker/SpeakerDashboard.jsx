@@ -18,7 +18,7 @@ import { getSpeakerNotificationSource } from '../../services/speakerNotification
 import SpeakerNotifications from '../../components/speaker/SpeakerNotifications.jsx'
 import { eventRepository } from '../../services/eventRepository.js'
 import { getSpeakerProposalSource } from '../../services/speakerProposalSource.js'
-import TrackBadge from '../../components/speaker/TrackBadge.jsx'
+import PreviewProposalList from '../../components/speaker/PreviewProposalList.jsx'
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
@@ -30,10 +30,10 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
   const loader = useCallback(() => source.getDashboard(), [source])
   const resource = useSpeakerResource(loader, scenario)
-  return <SpeakerDashboardView previewProposals={proposalSource.demo ? proposalSource.getPreviewProposals() : []} data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
-function SpeakerDashboardView({ previewProposals, data, resource, notifications, notificationKey }) {
+function SpeakerDashboardView({ proposalSource, data, resource, notifications, notificationKey }) {
   const [trackId, setTrackId] = useState('all')
   const { speaker, convention, proposals, sessions, feedback } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
@@ -62,13 +62,7 @@ function SpeakerDashboardView({ previewProposals, data, resource, notifications,
           <p>{conventionScheduleLabel(convention)}</p>
           <p>{locationLabel(convention)}</p>
         </section>
-        {previewProposals.length > 0 && <section className="portal-detail-section" aria-labelledby="local-proposals-heading">
-          <h2 id="local-proposals-heading">Your locally submitted preview proposals</h2>
-          <p>Saved for this preview login session. Nothing was sent to the backend.</p>
-          <ul className="portal-list">{previewProposals.map(proposal => <li key={proposal.id} className="portal-proposal">
-            <TrackBadge trackId={proposal.trackId} /><p className="portal-status">{proposal.status}</p><h3>{proposal.title}</h3><p>{proposal.description}</p>
-          </li>)}</ul>
-        </section>}
+        {proposalSource.demo ? <PreviewProposalList key={notificationKey} source={proposalSource} /> : <p className="portal-demo">Proposal removal is unavailable until the backend provides a supported deletion or withdrawal contract.</p>}
         <ProposalSummary proposals={proposals} />
         <div className="portal-columns">
           <section aria-labelledby="proposals-heading">

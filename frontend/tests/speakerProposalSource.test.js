@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createSpeakerProposalSource, getSpeakerProposalSource } from '../src/services/speakerProposalSource.js'
+import { createSpeakerProposalSource, getSpeakerProposalSource, isPreviewProposalDeletable, deleteConfirmedProposal } from '../src/services/speakerProposalSource.js'
 import { proposals } from '../src/mocks/proposals.js'
 import { eventRepository } from '../src/services/eventRepository.js'
 const user = { id: '11111111-1111-4111-8111-111111111111', role: 'SPEAKER' }
@@ -98,4 +98,95 @@ test('storage length limit rejects rather than truncates', async () => {
   const source = preview(); await source.getTracks()
   for (const field of ['title', 'description']) await assert.rejects(() => source.createProposal({ ...values, [field]: 'a'.repeat(256) }), /255/)
   assert.deepEqual(source.getPreviewProposals(), [])
+})
+
+async function savedPreview() {
+  const source = preview()
+  await source.getTracks()
+  const proposal = await source.createProposal(values)
+  return { source, proposal }
+}
+test('local preview proposal can be deleted and returns selected ID', async () => {
+  const { source, proposal } = await savedPreview()
+  assert.equal(source.canDeleteProposal(proposal.id), true)
+  assert.deepEqual(await source.deleteProposal(proposal.id), { deletedId: proposal.id })
+  assert.deepEqual(source.getPreviewProposals(), [])
+  assert.equal(source.canDeleteProposal(proposal.id), false)
+})
+test('preview deletion never fetches or accesses live repository', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('Fetch called') })
+  const { source, proposal } = await savedPreview()
+  await source.deleteProposal(proposal.id)
+  assert.equal(fetch.mock.callCount(), 0)
+})
+test('deletion removes only selected proposal and preserves fixtures', async () => {
+  const before = structuredClone(proposals), { source, proposal } = await savedPreview()
+  const other = await source.createProposal({ ...values, title: 'Other' })
+  await source.deleteProposal(proposal.id)
+  assert.deepEqual(source.getPreviewProposals(), [other])
+  assert.deepEqual(proposals, before)
+})
+test('Bill Nye fixture proposals including approved proposals cannot be deleted', async () => {
+  const { source, proposal } = await savedPreview()
+  const before = structuredClone(proposals)
+  assert.ok(proposals.some(item => item.status === 'Approved'))
+  for (const fixture of proposals) {
+    assert.equal(source.canDeleteProposal(fixture.id), false)
+    await assert.rejects(() => source.deleteProposal(fixture.id), /locally created/)
+  }
+  assert.deepEqual(source.getPreviewProposals(), [proposal])
+  assert.deepEqual(proposals, before)
+})
+test('deletability rejects approved and other nonsubmitted statuses', () => {
+  const proposal = { speakerId: demo.id, status: 'SUBMITTED' }
+  assert.equal(isPreviewProposalDeletable(proposal, demo.id), true)
+  for (const status of ['APPROVED', 'Approved', 'REJECTED', 'Draft']) assert.equal(isPreviewProposalDeletable({ ...proposal, status }, demo.id), false)
+})
+test('deletability rejects scheduling and ownership changes', () => {
+  const proposal = { speakerId: demo.id, status: 'SUBMITTED' }
+  for (const field of ['scheduledAt', 'startsAt', 'endsAt', 'scheduled', 'date', 'startTime', 'room', 'roomId', 'sessionId', 'occurrenceId']) assert.equal(isPreviewProposalDeletable({ ...proposal, [field]: 'assigned' }, demo.id), false)
+  assert.equal(isPreviewProposalDeletable(proposal, 'another-speaker'), false)
+})
+for (const id of [undefined, null, '', '   ']) test(`deletion rejects missing or blank ID ${String(id)} and preserves state`, async () => {
+  const { source, proposal } = await savedPreview()
+  await assert.rejects(() => source.deleteProposal(id), /proposal ID/)
+  assert.deepEqual(source.getPreviewProposals(), [proposal])
+})
+test('unknown ID and repeated deletion are rejected without further mutation', async () => {
+  const { source, proposal } = await savedPreview()
+  await assert.rejects(() => source.deleteProposal('unknown'), /locally created/)
+  assert.deepEqual(source.getPreviewProposals(), [proposal])
+  await source.deleteProposal(proposal.id)
+  await assert.rejects(() => source.deleteProposal(proposal.id), /locally created/)
+  assert.deepEqual(source.getPreviewProposals(), [])
+})
+test('canceling confirmation never invokes deletion and preserves source state', async t => {
+  const { source, proposal } = await savedPreview()
+  const operation = t.mock.method(source, 'deleteProposal')
+  assert.equal(await deleteConfirmedProposal(source, proposal.id, false), null)
+  assert.equal(operation.mock.callCount(), 0)
+  assert.deepEqual(source.getPreviewProposals(), [proposal])
+})
+test('confirmed deletion dispatches once and failure preserves proposal for retry', async t => {
+  const { source, proposal } = await savedPreview()
+  const failure = t.mock.method(source, 'deleteProposal', async () => { throw new Error('Unavailable') })
+  await assert.rejects(() => deleteConfirmedProposal(source, proposal.id, true), /Unavailable/)
+  assert.equal(failure.mock.callCount(), 1)
+  assert.deepEqual(source.getPreviewProposals(), [proposal])
+  failure.mock.restore()
+  await deleteConfirmedProposal(source, proposal.id, true)
+  assert.deepEqual(source.getPreviewProposals(), [])
+})
+test('separate preview sessions do not leak deletions', async () => {
+  const first = await savedPreview(), second = await savedPreview()
+  await first.source.deleteProposal(first.proposal.id)
+  assert.deepEqual(second.source.getPreviewProposals(), [second.proposal])
+  assert.deepEqual(first.source.getPreviewProposals(), [])
+})
+test('live deletion is unavailable without a backend contract and never fetches', async t => {
+  const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('Fetch called') })
+  const source = live()
+  assert.equal(source.canDeleteProposal('any-id'), false)
+  await assert.rejects(() => source.deleteProposal('any-id'), /backend provides/)
+  assert.equal(fetch.mock.callCount(), 0)
 })

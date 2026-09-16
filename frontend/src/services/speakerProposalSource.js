@@ -13,6 +13,19 @@ export function validateProposal({ title, description, trackId } = {}) {
   return errors
 }
 
+export function isPreviewProposalDeletable(proposal, speakerId) {
+  return !!proposal && proposal.speakerId === speakerId && proposal.status === 'SUBMITTED'
+    && !proposal.scheduledAt && !proposal.startsAt && !proposal.endsAt
+    && !proposal.scheduled && !proposal.date && !proposal.startTime && !proposal.room
+    && !proposal.roomId && !proposal.sessionId && !proposal.occurrenceId
+}
+
+// Confirmation is explicit; cancellation never invokes the source operation.
+export async function deleteConfirmedProposal(source, proposalId, confirmed) {
+  if (confirmed !== true) return null
+  return source.deleteProposal(proposalId)
+}
+
 export function createSpeakerProposalSource(repository, trackRepository, user, authSource, hasBackendSession = false) {
   const demo = authSource === 'demo' && user?.role === 'SPEAKER'
   const available = demo || (authSource === 'backend' && user?.role === 'SPEAKER' && hasBackendSession === true && uuid.test(user?.id || ''))
@@ -25,6 +38,18 @@ export function createSpeakerProposalSource(repository, trackRepository, user, a
   return {
     demo, available,
     getPreviewProposals: () => local.map(item => ({ ...item })),
+    canDeleteProposal(proposalId) {
+      return demo && isPreviewProposalDeletable(local.find(item => item.id === proposalId), user.id)
+    },
+    async deleteProposal(proposalId) {
+      requireIdentity()
+      if (!demo) throw new Error('Proposal removal is unavailable until the backend provides a supported deletion or withdrawal contract.')
+      if (typeof proposalId !== 'string' || !proposalId.trim()) throw new Error('A proposal ID is required.')
+      const index = local.findIndex(item => item.id === proposalId)
+      if (index < 0 || !isPreviewProposalDeletable(local[index], user.id)) throw new Error('Only your locally created, submitted and unscheduled preview proposals can be deleted.')
+      local.splice(index, 1)
+      return { deletedId: proposalId }
+    },
     async getTracks() {
       requireIdentity()
       const result = demo ? tracks.map(item => ({ ...item })) : await trackRepository.getTracks()
