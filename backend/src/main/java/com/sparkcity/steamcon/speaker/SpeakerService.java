@@ -28,17 +28,19 @@ public class SpeakerService {
     }
 
     public SessionProposal createProposal(
-            UUID speakerId,
+            UUID authenticatedUserId,
             String title,
             String description,
             UUID trackId) {
 
-        if (speakerId == null) {
-            throw new IllegalArgumentException("Speaker ID is required");
+        if (authenticatedUserId == null) {
+            throw new IllegalArgumentException(
+                    "Authenticated user ID is required");
         }
 
         if (title == null || title.isBlank()) {
-            throw new IllegalArgumentException("Proposal title is required");
+            throw new IllegalArgumentException(
+                    "Proposal title is required");
         }
 
         if (description == null || description.isBlank()) {
@@ -47,12 +49,13 @@ public class SpeakerService {
         }
 
         if (trackId == null) {
-            throw new IllegalArgumentException("Track ID is required");
+            throw new IllegalArgumentException(
+                    "Track ID is required");
         }
 
         SessionProposal proposal = new SessionProposal();
 
-        proposal.setSpeakerId(speakerId);
+        proposal.setSpeakerId(authenticatedUserId);
         proposal.setTitle(title);
         proposal.setDescription(description);
         proposal.setTrackId(trackId);
@@ -61,22 +64,24 @@ public class SpeakerService {
     }
 
     public SpeakerApplication createSpeakerApplication(
-            UUID speakerId,
+            UUID authenticatedUserId,
             UUID sessionId) {
 
-        if (speakerId == null) {
-            throw new IllegalArgumentException("Speaker ID is required");
+        if (authenticatedUserId == null) {
+            throw new IllegalArgumentException(
+                    "Authenticated user ID is required");
         }
 
         if (sessionId == null) {
-            throw new IllegalArgumentException("Session ID is required");
+            throw new IllegalArgumentException(
+                    "Session ID is required");
         }
 
         boolean duplicate =
                 speakerApplicationRepository.findAll()
                         .stream()
                         .anyMatch(application ->
-                                speakerId.equals(
+                                authenticatedUserId.equals(
                                         application.getSpeakerId())
                                 && sessionId.equals(
                                         application.getSessionId()));
@@ -89,7 +94,7 @@ public class SpeakerService {
         SpeakerApplication application =
                 new SpeakerApplication();
 
-        application.setSpeakerId(speakerId);
+        application.setSpeakerId(authenticatedUserId);
         application.setSessionId(sessionId);
 
         return speakerApplicationRepository.save(application);
@@ -97,17 +102,18 @@ public class SpeakerService {
 
     public ApprovalDecision makeProposalDecision(
             UUID proposalId,
-            UUID adminReviewerId,
+            UUID authenticatedAdminId,
             ApprovalDecisionType decisionType,
             String comment) {
 
         if (proposalId == null) {
-            throw new IllegalArgumentException("Proposal ID is required");
+            throw new IllegalArgumentException(
+                    "Proposal ID is required");
         }
 
-        if (adminReviewerId == null) {
+        if (authenticatedAdminId == null) {
             throw new IllegalArgumentException(
-                    "Admin reviewer ID is required");
+                    "Authenticated admin ID is required");
         }
 
         if (decisionType == null) {
@@ -157,7 +163,8 @@ public class SpeakerService {
         // Existing entity uses applicationId.
         // This stores the proposal ID until the team refactors the entity.
         approvalDecision.setApplicationId(proposalId);
-        approvalDecision.setAdminReviewerId(adminReviewerId);
+        approvalDecision.setAdminReviewerId(
+                authenticatedAdminId);
         approvalDecision.setDecision(decisionType);
         approvalDecision.setComment(comment);
 
