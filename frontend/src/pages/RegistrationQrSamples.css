@@ -1,0 +1,359 @@
+.qr-samples-page {
+  min-height: 100vh;
+  padding: 48px 24px 96px;
+  background: #e9e4da;
+  color: #101418;
+}
+
+.qr-samples-header {
+  display: flex;
+  width: min(100%, 1080px);
+  margin: 0 auto 64px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.qr-samples-header h1 {
+  margin: 10px 0 14px;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.qr-samples-header > div > p:last-child {
+  max-width: 650px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.qr-print-button {
+  flex: 0 0 auto;
+}
+
+.qr-sample-section {
+  width: min(100%, 1080px);
+  margin: 0 auto 96px;
+}
+
+.qr-sample-label {
+  max-width: 620px;
+  margin-bottom: 28px;
+}
+
+.qr-sample-label h2 {
+  margin: 8px 0 12px;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.04em;
+}
+
+.qr-sample-label > p:last-child {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Full 8.5 × 11 standalone flyer */
+
+.steam-registration-flyer {
+  display: flex;
+  width: min(100%, 8.5in);
+  min-height: 11in;
+  margin: 0 auto;
+  border: 3px solid #101418;
+  background: #fffaf1;
+  box-shadow: 14px 14px 0 #101418;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.steam-flyer-color-bar {
+  display: grid;
+  height: 18px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.steam-flyer-color-bar span:nth-child(1) {
+  background: #68cee2;
+}
+
+.steam-flyer-color-bar span:nth-child(2) {
+  background: #f6bd16;
+}
+
+.steam-flyer-color-bar span:nth-child(3) {
+  background: #b8c4ca;
+}
+
+.steam-flyer-color-bar span:nth-child(4) {
+  background: #f46528;
+}
+
+.steam-flyer-color-bar span:nth-child(5) {
+  background: #22bd72;
+}
+
+.steam-flyer-header {
+  display: flex;
+  padding: 32px 42px;
+  border-bottom: 2px solid #101418;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.steam-flyer-logo {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.steam-flyer-logo span {
+  color: #f46528;
+}
+
+.steam-flyer-status {
+  margin: 0;
+  padding: 9px 13px;
+  border: 1.5px solid #101418;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.steam-flyer-content {
+  display: grid;
+  padding: 46px 42px;
+  flex: 1;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  align-items: stretch;
+  gap: 36px;
+  background:
+    radial-gradient(circle at 5% 15%, rgba(104, 206, 226, 0.2), transparent 26%),
+    radial-gradient(circle at 80% 90%, rgba(244, 101, 40, 0.16), transparent 28%),
+    #fffaf1;
+}
+
+.steam-flyer-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.steam-flyer-copy h2 {
+  max-width: 520px;
+  margin: 18px 0 24px;
+  font-size: clamp(3.5rem, 7vw, 5.6rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+
+.steam-flyer-lead {
+  max-width: 510px;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.steam-flyer-tracks {
+  display: flex;
+  margin: 32px 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.steam-flyer-tracks span {
+  padding: 7px 10px;
+  border: 1.5px solid #101418;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.steam-flyer-highlights {
+  display: grid;
+  margin-top: auto;
+  border: 2px solid #101418;
+  border-radius: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.steam-flyer-highlights div {
+  display: flex;
+  min-height: 100px;
+  padding: 16px 10px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.steam-flyer-highlights div + div {
+  border-left: 2px solid #101418;
+}
+
+.steam-flyer-highlights strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.steam-flyer-highlights span {
+  margin-top: 7px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.steam-flyer-registration {
+  display: flex;
+  padding: 28px;
+  border: 3px solid #101418;
+  border-radius: 24px;
+  background: #a9d9ee;
+  box-shadow: 8px 8px 0 #101418;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.steam-flyer-registration h3 {
+  margin: 12px 0 24px;
+  font-size: 2.5rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.steam-flyer-qr {
+  width: min(100%, 290px);
+  padding: 15px;
+  border: 3px solid #101418;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.steam-flyer-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.steam-flyer-scan {
+  margin: 24px 0 8px;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.steam-flyer-url {
+  max-width: 280px;
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.steam-flyer-footer {
+  display: flex;
+  padding: 24px 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #101418;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.steam-flyer-footer p {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .qr-samples-page {
+    padding: 32px 16px 72px;
+  }
+
+  .qr-samples-header {
+    margin-bottom: 48px;
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .steam-registration-flyer {
+    min-height: auto;
+    box-shadow: 7px 7px 0 #101418;
+  }
+
+  .steam-flyer-header {
+    padding: 24px;
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .steam-flyer-content {
+    padding: 32px 24px;
+    grid-template-columns: 1fr;
+  }
+
+  .steam-flyer-copy h2 {
+    font-size: clamp(3.25rem, 15vw, 5rem);
+  }
+
+  .steam-flyer-registration {
+    padding: 24px;
+  }
+
+  .steam-flyer-footer {
+    padding: 24px;
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+@page {
+  size: letter;
+  margin: 0;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .qr-samples-page {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .qr-samples-header,
+  .qr-sample-label {
+    display: none;
+  }
+
+  .qr-sample-section {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0;
+    break-after: page;
+  }
+
+  .registration-qr-card {
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .steam-registration-flyer {
+    width: 8.5in;
+    height: 11in;
+    min-height: 11in;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}

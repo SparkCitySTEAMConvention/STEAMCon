@@ -36,7 +36,7 @@ export default function Header() {
           <a href="/#events">Events</a>
           <a href="/#tracks">Tracks</a>
           <Link to="/speakers">Speakers</Link>
-          <a href="/#travel">Travel</a>
+          <Link to="/travel">Travel</Link>
           {isAuthenticated ? <details className="nav-login" ref={loginRef} onToggle={event => setOpen(event.currentTarget.open)}>
             <summary aria-expanded={open} aria-controls="account-disclosure">{user.displayName || 'Account'}</summary>
             <ul id="account-disclosure">
