@@ -99,6 +99,17 @@ export default function TravelInfoPage() {
               </article>
             ))}
           </div>
+          <div className="flight-booking-callout">
+            <div>
+              <p className="eyebrow">Pass first. Travel second.</p>
+              <h3>Ready to plan your flight?</h3>
+              <p>Choose your STEAM Con pass before adding flight or train details. Once registered, your travel plans stay with your attendee itinerary.</p>
+            </div>
+            <div className="flight-booking-actions">
+              <Link className="button button-dark" to="/register?role=attendee">Choose a conference pass <span aria-hidden="true">→</span></Link>
+              <Link className="flight-booking-link" to="/attendee/travel">Already registered? Book travel <span aria-hidden="true">↗</span></Link>
+            </div>
+          </div>
         </section>
 
         <section className="travel-guide-transit" id="departures" aria-labelledby="transit-heading">
