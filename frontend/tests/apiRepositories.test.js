@@ -35,7 +35,7 @@ const cases = [
   ['scoped forums', () => forums.getForums('TRACK &/?'), '/api/forums?scope=TRACK+%26%2F%3F', 'GET', undefined, []],
   ['forum messages', () => forums.getMessages('id /?', 'role &/?', 'permission &/?'), '/api/forums/id%20%2F%3F/messages?role=role+%26%2F%3F&permission=permission+%26%2F%3F', 'GET', undefined, [{ body: 'Hello' }]],
   ['create message', () => forums.createMessage(forumId, { ...message, status: 'ACTIVE', extra: true }), `/api/forums/${forumId}/messages`, 'POST', { ...message, body: 'Hello forum' }, { id: userId, body: 'Hello forum' }],
-  ['create proposal', () => speakers.createProposal({ ...proposal, abstract: 'exclude', format: 'Panel', durationMinutes: 60, status: 'Approved' }), '/api/proposals', 'POST', { ...proposal, title: 'Title', description: 'Description' }, { id: forumId, status: 'SUBMITTED' }],
+  ['create proposal', () => speakers.createProposal({ ...proposal, abstract: 'exclude', format: 'Panel', durationMinutes: 60, status: 'Approved' }), '/api/proposals', 'POST', { title: 'Title', description: 'Description', trackId }, { id: forumId, status: 'SUBMITTED' }],
 ]
 
 for (const [name, call, url, method, body, payload] of cases) {
@@ -92,11 +92,11 @@ test('forum required IDs, role, permission and nonblank body prevent fetch', asy
 test('proposal missing IDs and blank title/description prevent fetch', async t => {
   setup(t, async () => { throw new Error('fetch must not run') })
   for (const value of [undefined, null, '', '   ']) {
-    for (const field of ['speakerId', 'trackId', 'title', 'description']) {
+    for (const field of ['trackId', 'title', 'description']) {
       await assert.rejects(() => speakers.createProposal({ ...proposal, [field]: value }), new RegExp(`${field} is required`))
     }
   }
-  await assert.rejects(() => speakers.createProposal(), /speakerId is required/)
+  await assert.rejects(() => speakers.createProposal(), /title is required/)
   assert.equal(globalThis.fetch.mock.callCount(), 0)
 })
 

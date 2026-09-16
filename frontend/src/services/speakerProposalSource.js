@@ -1,13 +1,14 @@
 import { tracks } from '../mocks/tracks.js'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-// SessionProposal uses default JPA string columns (255 characters).
-export const proposalTextLimit = 255
+// Validation limits match CreateProposalRequest.
+export const proposalTextLimit = 2000
+export const proposalTitleLimit = 200
 export function validateProposal({ title, description, trackId } = {}) {
   const errors = {}
   for (const [field, label, value] of [['title', 'Title', title], ['description', 'Description', description]]) {
     if (typeof value !== 'string' || !value.trim()) errors[field] = `${label} is required.`
-    else if (value.trim().length > proposalTextLimit) errors[field] = `${label} must be ${proposalTextLimit} characters or fewer.`
+    else if (value.trim().length > (field === 'title' ? proposalTitleLimit : proposalTextLimit)) errors[field] = `${label} must be ${field === 'title' ? proposalTitleLimit : proposalTextLimit} characters or fewer.`
   }
   if (typeof trackId !== 'string' || !trackId.trim()) errors.trackId = 'Choose a primary track.'
   return errors
@@ -63,9 +64,9 @@ export function createSpeakerProposalSource(repository, trackRepository, user, a
       if (Object.keys(errors).length) throw new Error(Object.values(errors)[0])
       const { title, description, trackId } = values
       if ((!demo && !uuid.test(trackId)) || !loadedTracks.some(track => track.id === trackId)) throw new Error('Choose an available track from the loaded list.')
-      const payload = { speakerId: user.id, title: title.trim(), description: description.trim(), trackId }
+      const payload = { title: title.trim(), description: description.trim(), trackId }
       if (!demo) return repository.createProposal(payload)
-      const proposal = { id: `preview-proposal-${++nextId}`, ...payload, status: 'SUBMITTED' }
+      const proposal = { id: `preview-proposal-${++nextId}`, ...payload, speakerId: user.id, status: 'SUBMITTED' }
       local.push(proposal)
       return { ...proposal }
     },

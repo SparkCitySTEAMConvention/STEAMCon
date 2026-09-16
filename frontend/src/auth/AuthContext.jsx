@@ -3,12 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/authService.js'
 import { AuthContext } from './useAuth.js'
 export default function AuthProvider({children}) {
- const [session,setSession] = useState(() => authService.restore())
- const [isLoading,setLoading] = useState(false)
+ const [session,setSession] = useState(null)
+ const [isLoading,setLoading] = useState(true)
  const navigate = useNavigate()
  useEffect(() => {
+  let active = true
+  authService.restore().then(restored => { if (active) { setSession(restored); setLoading(false) } })
+  return () => { active = false }
+ },[])
+ useEffect(() => {
   if (!session) return
-  const timer = setTimeout(() => { void authService.logout(); setSession(null) },Math.max(0,Date.parse(session.expiresAt)-Date.now()))
+  const timer = setTimeout(() => { void authService.logout().catch(() => {}); setSession(null) },Math.max(0,Date.parse(session.expiresAt)-Date.now()))
   return () => clearTimeout(timer)
  },[session])
  const authenticate = async action => {
