@@ -3,7 +3,7 @@
 // No current affiliations are displayed except Bill Nye's, verified 2026-09-15:
 // https://www.planetary.org/profiles/bill-nye
 export const speakers = [
-  ['bill-nye', 'Bill Nye', ['science'], 'Science educator and communicator.'],
+  ['bill-nye', 'Bill Nye', ['science'], 'Science educator, mechanical engineer, author, television presenter, and former CEO of The Planetary Society from 2010 to 2026.'],
   ['neil-degrasse-tyson', 'Neil deGrasse Tyson', ['science'], 'Astrophysicist and science communicator.'],
   ['raven-baxter', 'Raven Baxter', ['science'], 'Science communicator and educator.'],
   ['fei-fei-li', 'Fei-Fei Li', ['technology'], 'Researcher in artificial intelligence.'],

@@ -1,15 +1,18 @@
 package com.sparkcity.steamcon.communication;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -85,6 +88,7 @@ class CommunicationServiceTest {
                                 ForumScope.TRACK);
 
         assertEquals(1, result.size());
+
         assertEquals(
                 ForumScope.TRACK,
                 result.get(0).getScope());
@@ -346,6 +350,7 @@ class CommunicationServiceTest {
                                 ForumPermission.READ);
 
         assertEquals(1, result.size());
+
         assertEquals(
                 "Visible",
                 result.get(0).getBody());

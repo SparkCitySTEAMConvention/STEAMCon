@@ -98,8 +98,7 @@
 .portal-filters button { min-height: 44px; padding: 0.45rem 0.75rem; background: var(--color-surface); color: var(--color-ink); border: 1px solid var(--color-ink); border-radius: var(--radius-small); cursor: pointer; }
 .portal-filters button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); text-decoration: underline; text-underline-offset: 0.25em; }
 .portal-result-count { font-size: 0.875rem; margin-bottom: 1rem; }
-.portal-preview-picker { display: grid; gap: 0.5rem; max-width: 30rem; margin-bottom: 2rem; }
-.portal-preview-picker select, .portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
+.portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
 .portal-proposal-main { max-width: 960px; overflow-wrap: anywhere; }
 .portal-proposal-main h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
 .portal-detail-section { margin-block: 2rem; }
@@ -116,3 +115,15 @@
 .portal-action-status { margin-top: 1rem; }
 @media (max-width: 900px) { .portal-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .portal-summary, .portal-detail-facts { grid-template-columns: 1fr; } }
+
+.portal-profile-tracks { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.portal-notifications { margin-bottom: 2rem; padding: 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius-medium); }
+.portal-notifications h2 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+.portal-schedule-actions p { margin-top: 0.75rem; }
+.speaker-portal { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .portal-actions { flex-direction: column; align-items: stretch; }
+  .portal-actions .button { white-space: normal; text-align: center; }
+  .portal-propose { width: 100%; }
+  .portal-session-facts > div { grid-template-columns: 1fr; gap: 0.25rem; }
+}
