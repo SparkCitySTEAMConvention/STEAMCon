@@ -9,6 +9,7 @@ import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
 import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
 import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
+import SpeakerForums from './pages/speaker/SpeakerForums.jsx'
 
 import LoginPage from './pages/LoginPage.jsx'
 import AccessDenied from './pages/AccessDenied.jsx'
@@ -31,6 +32,7 @@ export default function App() {
       '/attendee/car': 'Reserve a Car | STEAM Con',
       '/speakers': 'Proposed speakers | STEAM Con',
       '/speaker': 'Speaker Portal | STEAM Con',
+      '/speaker/forums': 'Speaker Forum & Messaging | STEAM Con',
     }
     document.title = pathname.startsWith('/speaker/proposals/')
       ? 'Proposal details | STEAM Con'
@@ -57,6 +59,7 @@ export default function App() {
           <Route path="/attendee/car" element={<TravelBookingPage kind="car" />} />
         </Route>
         <Route element={<RoleRoute role="SPEAKER" />}>
+          <Route path="/speaker/forums" element={<SpeakerForums />} />
           <Route path="/speaker/proposals/:proposalId" element={<ProposalDetails />} />
           <Route path="/speaker" element={<SpeakerDashboard />} />
         </Route>

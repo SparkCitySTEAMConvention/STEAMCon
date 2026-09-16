@@ -72,11 +72,6 @@ preview error override intentionally keeps failing until removed from the URL.
   conditional schedule action, and every requested presentation state implemented.
 - Issue #81: all 15 specified names, all five specified panels, neutral bios,
   source/disclaimer notes, nullable program fields and mixed state fixtures added.
-- Chromium checks passed at 320px, 768px and 1440px: homepage, dashboard,
-  detail/editor screens and all state previews have no horizontal overflow.
-- Keyboard filters and card links, route focus, editor autofocus and return focus,
-  all 15 workspace selections, reduced motion, and absence of runtime errors passed.
-- Detail screenshots visually reviewed at all three widths.
 - `node --test frontend/tests/speakerRepository.test.js` from repository root:
   three tests passed (relationships/nullability, schedule eligibility, draft saves).
 - `npm run lint` and `npm run build` from frontend, and `git diff --check` passed.
@@ -91,16 +86,9 @@ From `frontend/`:
 
 - `npm test` runs the existing repository tests plus nullable schedule,
   timezone formatting, Bill Nye programming, and calendar eligibility checks.
-- `CHROME_PATH=/path/to/chromium npm run test:browser` runs actual browser
-  navigation and rendering tests at 320, 768, and 1440 pixels. Requires Node 22+
-  and a local Chromium executable; no additional package is required.
-  Set `SCREENSHOT_DIR` to an existing directory to save dashboard screenshots.
 - `npm run lint`, `npm run build`; run `git diff --check` from the repository.
 
-The browser suite checks both homepage speaker links, proposal detail navigation,
-multiple panelists, null and confirmed scheduling, keyboard focus, reduced motion,
-empty/error/loading states, and horizontal overflow. Homepage atom animation and
-track-card implementations are unchanged.
+Homepage atom animation and track-card implementations are unchanged.
 
 Backend integration still needs speaker identity/authentication, profile updates,
 proposal submission and persistence, organizer feedback/notification data, confirmed

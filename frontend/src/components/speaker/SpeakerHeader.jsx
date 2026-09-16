@@ -24,7 +24,7 @@ export default function SpeakerHeader({ speaker }) {
           <p id="proposal-availability">Proposal submissions coming soon.</p>
         </div>
       </div>
-      <div className="container"><AccountNavigation /></div>
+      <div className="container"><nav aria-label="Speaker navigation"><Link className="portal-home" to="/speaker/forums">Forum &amp; Messaging</Link></nav><AccountNavigation /></div>
     </header>
   )
 }

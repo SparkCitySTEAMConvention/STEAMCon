@@ -20,5 +20,5 @@ export default function AuthProvider({children}) {
   try { await authService.logout() }
   finally { setSession(null); navigate('/') }
  }
- return <AuthContext.Provider value={{user:session?.user ?? null,isAuthenticated:!!session,isLoading,login:credentials => authenticate(() => authService.login(credentials)),loginAsDemo:role => authenticate(() => authService.loginAsDemo(role)),logout}}>{children}</AuthContext.Provider>
+ return <AuthContext.Provider value={{user:session?.user ?? null,authSource:session?.source ?? null,isAuthenticated:!!session,isLoading,login:credentials => authenticate(() => authService.login(credentials)),loginAsDemo:role => authenticate(() => authService.loginAsDemo(role)),logout}}>{children}</AuthContext.Provider>
 }
