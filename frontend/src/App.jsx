@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import RegistrationQrSamples from './pages/RegistrationQrSamples.jsx'
+import TravelInfoPage from './pages/TravelInfoPage.jsx'
 import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
@@ -30,6 +31,7 @@ export default function App() {
       '/access-denied': 'Access denied | STEAM Con',
       '/register': 'Register | STEAM Con',
       '/registration-qr': 'Registration QR Samples | STEAM Con',
+      '/travel': 'Plan Your New York Visit | STEAM Con',
       '/attendee': 'Attendee Portal | STEAM Con',
       '/attendee/travel': 'Book Travel | STEAM Con',
       '/attendee/hotel': 'Book a Hotel | STEAM Con',
@@ -59,6 +61,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<RegistrationPage />} />
+      <Route path="/travel" element={<TravelInfoPage />} />
       <Route
         path="/registration-qr"
         element={<RegistrationQrSamples />}
