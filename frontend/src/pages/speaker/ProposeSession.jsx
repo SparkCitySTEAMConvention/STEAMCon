@@ -4,7 +4,7 @@ import { useAuth } from '../../auth/useAuth.js'
 import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import { eventRepository } from '../../services/eventRepository.js'
-import { getSpeakerProposalSource, validateProposal, proposalTextLimit } from '../../services/speakerProposalSource.js'
+import { getSpeakerProposalSource, validateProposal, proposalTextLimit, proposalTitleLimit } from '../../services/speakerProposalSource.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import './SpeakerDashboard.css'
 
@@ -48,14 +48,14 @@ function ProposalForm({ source }) {
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <h1>Propose a Session</h1>
       {source.demo && <p className="portal-demo">Speaker preview. Submissions are saved locally for this application session and never sent to the backend. Bill Nye is a proposed participant example, not a confirmed participant.</p>}
-      {!source.available && <p role="alert">Proposal submission is unavailable. A verified backend speaker identity, SPEAKER role and active session are required. Sign in again or use the speaker preview. Backend login currently does not supply roles.</p>}
+      {!source.available && <p role="alert">Proposal submission is unavailable. A verified backend speaker identity, SPEAKER role and active session are required. Sign in again or use the speaker preview.</p>}
       {source.available && <>
         {resource.status === 'loading' && <p role="status">Loading tracks…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load tracks.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry loading tracks</button></div>}
         {resource.status === 'ready' && !resource.data.length && <p role="alert">No tracks are available. Please try again later.</p>}
         <div aria-live="polite">{sending && <p>Submitting proposal…</p>}{saved && <p>{source.demo ? 'Your preview proposal was saved locally for this application session. Nothing was sent to the backend.' : 'Your proposal was submitted successfully to the backend. Live proposal reads are not yet available in the Speaker Portal.'}</p>}</div>
         {saved ? <Link className="button button-dark" to="/speaker">Back to Speaker Portal</Link> : <form ref={form} className="portal-editor portal-create-form" noValidate onSubmit={submit} aria-busy={sending}>
-          <p>Title and description must each be {proposalTextLimit} characters or fewer.</p>
+          <p>Titles must be {proposalTitleLimit} characters or fewer; descriptions must be {proposalTextLimit} characters or fewer.</p>
           {['title', 'description', 'trackId'].map(field => <div key={field}>
             <label htmlFor={`proposal-${field}`}>{field === 'title' ? 'Session title' : field === 'description' ? 'Description / abstract' : 'Primary track'}</label>
             {field === 'trackId' ? <select id={`proposal-${field}`} name={field} value={values[field]} onChange={change} required disabled={sending || resource.status !== 'ready'} aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined}><option value="">Choose a track</option>{resource.data?.map(track => <option key={track.id} value={track.id}>{track.name}</option>)}</select> : field === 'description' ? <textarea id={`proposal-${field}`} name={field} rows={6} value={values[field]} onChange={change} required disabled={sending} aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} /> : <input id={`proposal-${field}`} name={field} value={values[field]} onChange={change} required disabled={sending} aria-invalid={!!errors[field]} aria-describedby={errors[field] ? `${field}-error` : undefined} />}
