@@ -1,0 +1,32 @@
+:root {
+  --color-ink: #0f1418;
+  --color-paper: #fffaf0;
+  --color-white: #ffffff;
+  --color-ice: #a3d3e8;
+  --color-steel: #99a7b5;
+
+  --color-science: #42b4c5;
+  --color-technology: #e8b213;
+  --color-engineering: #99a7b5;
+  --color-art: #dc6528;
+  --color-art-pink: #f23868;
+  --color-art-purple: #824dd6;
+  --color-mathematics: #12b764;
+
+  --color-text: #0f1418;
+  --color-text-muted: #55616b;
+  --color-border: #c7d8e3;
+  --color-surface: #ffffff;
+  --color-focus: #42b4c5;
+
+  --color-success: #15864d;
+  --color-warning: #c88700;
+  --color-danger: #c93b32;
+
+  --radius-small: 8px;
+  --radius-medium: 16px;
+  --radius-large: 28px;
+
+  --shadow-small: 0 4px 0 var(--color-ink);
+  --shadow-large: 10px 12px 0 var(--color-ink);
+}
