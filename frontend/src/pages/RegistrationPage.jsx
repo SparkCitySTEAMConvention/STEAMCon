@@ -39,6 +39,21 @@ const initialValues = {
   password: '', eventUpdates: false,
 }
 
+const demoValues = {
+  attendee: {
+    firstName: 'Avery', lastName: 'Johnson', email: 'avery.attendee@steamcon.demo',
+    phone: '555-0142', organization: '', track: 'Technology', passType: 'All-Access Pass',
+    sessionTitle: '', sessionFormat: '', sessionSummary: '', password: 'DemoPass123!', eventUpdates: true,
+  },
+  speaker: {
+    firstName: 'Jordan', lastName: 'Lee', email: 'jordan.speaker@steamcon.demo',
+    phone: '555-0188', organization: 'STEAM Con Demo Lab', track: 'Engineering',
+    passType: 'All-Access Pass', sessionTitle: 'Designing for Curious Communities',
+    sessionFormat: 'Workshop', sessionSummary: 'Attendees will leave with a practical framework for designing inclusive STEAM experiences.',
+    password: 'DemoPass123!', eventUpdates: true,
+  },
+}
+
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const requestedRole = searchParams.get('role')
@@ -66,6 +81,13 @@ export default function RegistrationPage() {
     setValues(current => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
     if (errors[name]) setErrors(current => ({ ...current, [name]: undefined }))
     if (requestError) setRequestError('')
+  }
+
+  function fillDemoInformation() {
+    setValues(demoValues[role])
+    setErrors({})
+    setRequestError('')
+    setStatus('idle')
   }
 
   async function completeRegistration() {
@@ -222,6 +244,7 @@ export default function RegistrationPage() {
                   <p className="eyebrow">{roleCopy.label} registration</p>
                   <h2 id="registration-form-heading">{roleCopy.heading}</h2>
                   <p>{roleCopy.description}</p>
+                  <button className="registration-demo-fill" type="button" onClick={fillDemoInformation}>Fill demo information</button>
                 </div>
 
                 <fieldset>

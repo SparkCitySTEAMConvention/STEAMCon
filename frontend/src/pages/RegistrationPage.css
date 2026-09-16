@@ -41,7 +41,9 @@
 .registration-form, .registration-success, .registration-checkout { padding: clamp(1.5rem, 4vw, 3.5rem); }
 .registration-form-heading { margin-bottom: 2.25rem; }
 .registration-form-heading h2, .registration-success h2 { margin-block: 0.65rem 0.8rem; font-size: clamp(2rem, 4vw, 3.4rem); }
-.registration-form-heading > p:last-child, .registration-success > p:not(.eyebrow) { max-width: 620px; color: var(--color-text-muted); }
+.registration-form-heading > p:not(.eyebrow), .registration-success > p:not(.eyebrow) { max-width: 620px; color: var(--color-text-muted); }
+.registration-demo-fill { min-height: 44px; margin-top: 1rem; padding: 0.55rem 0.85rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-paper); color: var(--color-ink); font-weight: 800; cursor: pointer; box-shadow: 3px 3px 0 var(--color-ink); }
+.registration-demo-fill:hover { background: var(--color-ice); }
 .registration-form fieldset { padding: 0; margin: 0 0 2.25rem; border: 0; }
 .registration-form legend { width: 100%; margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; font-weight: 900; }
 .registration-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
