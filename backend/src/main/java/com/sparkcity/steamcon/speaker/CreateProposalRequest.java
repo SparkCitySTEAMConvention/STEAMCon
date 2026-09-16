@@ -14,7 +14,6 @@ public record CreateProposalRequest(
 
         @Size(max = 2000, message = "Description cannot exceed 2000 characters")
         String description,
-
-        @NotNull(message = "Track ID is required")
-        UUID trackId
-) {}
+        UUID trackId,
+        ProposalStatus status) {
+}
