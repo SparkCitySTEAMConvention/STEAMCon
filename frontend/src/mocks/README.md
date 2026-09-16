@@ -103,3 +103,5 @@ the required schedule data exists.
 ## Proposal submission preview
 
 The five shared tracks supply preview choices. speakerProposalSource creates local SUBMITTED records without modifying the shared proposal fixtures or calling the backend. Records stay in memory per AuthContext user for the current login/application session, survive portal navigation, and reset on new login or refresh. Separate source instances are isolated. Locally submitted proposals appear separately on the dashboard; they do not imply confirmed participation or scheduling.
+
+Preview-created SUBMITTED, unscheduled proposals may be deleted after dashboard confirmation during the current preview session. Only records owned by the current preview source can be removed. Original Bill Nye fixtures, approved/scheduled proposals and panel memberships stay protected. Deletion remains local, preserves other records, and does not call a backend endpoint; the backend currently has no proposal deletion/cancellation/withdrawal contract.
