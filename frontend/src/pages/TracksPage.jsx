@@ -1,4 +1,7 @@
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { passRegistrationDestination } from '../utils/registrationQuery.js'
+import { passes } from '../config/passes.js'
+import './TracksPage.css'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import TrackFeature from '../components/TrackFeature.jsx'
@@ -39,7 +42,22 @@ export default function TracksPage() {
           }}>{item.name}</button>)}
         </div>
         <TrackFeature track={track} sessions={resource.data.sessions} />
-        <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />
+        <div className="track-program-layout">
+          <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />
+          {track && <aside className="track-pass-section" aria-labelledby="track-pass-heading">
+            <p className="eyebrow">Plan your visit</p>
+            <h2 id="track-pass-heading">Choose your pass</h2>
+            <p>Start your registration with {track.name} as your primary track.</p>
+            <div className="track-pass-list">
+              {Object.entries(passes).map(([name, pass]) => <article className="track-pass-card" key={pass.slug}>
+                <h3>{name}</h3>
+                <p className="track-pass-price">${pass.price}</p>
+                <p>{pass.description}</p>
+                <Link to={passRegistrationDestination(track, pass)} aria-label={`Choose this pass: ${name}`}>Choose this pass <span aria-hidden="true">↗</span></Link>
+              </article>)}
+            </div>
+          </aside>}
+        </div>
       </>}
     </main>
     <Footer />

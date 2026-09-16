@@ -1,16 +1,11 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import './RegistrationPage.css'
+import { passes } from '../config/passes.js'
 import { submitRegistration } from '../services/registrationRepository'
 import { validateRegistration } from '../utils/registrationValidation'
 
-const tracks = ['Science', 'Technology', 'Engineering', 'Art', 'Mathematics']
-
-const passes = {
-  'All-Access Pass': { price: 249, description: 'All three days, every track, and evening events' },
-  'Single-Day Pass': { price: 99, description: 'One convention day and its scheduled sessions' },
-  'Student Pass': { price: 79, description: 'All three days with valid student identification' },
-}
+import { registrationTracks as tracks, registrationPrefill } from '../utils/registrationQuery.js'
 
 const roles = {
   attendee: {
@@ -56,9 +51,11 @@ const demoValues = {
 
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const requestedRole = searchParams.get('role')
-  const [role, setRole] = useState(requestedRole === 'speaker' ? 'speaker' : 'attendee')
-  const [values, setValues] = useState(initialValues)
+  const prefill = registrationPrefill(searchParams)
+  const [role, setRole] = useState(prefill.role)
+  const [values, setValues] = useState(() => ({
+    ...initialValues, track: prefill.track, passType: prefill.passType,
+  }))
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [requestError, setRequestError] = useState('')

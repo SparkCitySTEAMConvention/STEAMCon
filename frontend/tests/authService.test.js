@@ -10,6 +10,8 @@ test('isolated demos restore without stored passwords or fake backend headers',a
  for (const role of ['ATTENDEE','SPEAKER']) {
   const session=await authService.loginAsDemo(role)
   assert.equal(session.user.role,role)
+  assert.equal(session.user.displayName, role === 'ATTENDEE' ? 'Avery' : 'Bill Nye')
+  assert.equal((await authService.restore()).user.displayName, role === 'ATTENDEE' ? 'Avery' : 'Bill Nye')
   assert.equal((await authService.restore()).user.displayName,demoAccounts[role].displayName)
   assert.equal([...values.values()].join('').includes(demoAccounts[role].password),false)
   assert.deepEqual(authService.headers(),{})
@@ -17,13 +19,28 @@ test('isolated demos restore without stored passwords or fake backend headers',a
  }
  await assert.rejects(authService.login({email:demoAccounts.SPEAKER.email,password:'wrong'}),{code:'credentials'})
 })
+for (const [role, displayName, email] of [
+ ['ATTENDEE', 'Avery', 'attendee@steamcon.demo'],
+ ['SPEAKER', 'Bill Nye', 'speaker@steamcon.demo'],
+]) test(`${role} demo login and stored-session restoration display ${displayName}`, async () => {
+ const session = await authService.login({email, password:'SteamConDemo!'})
+ assert.equal(session.user.displayName, displayName)
+ assert.equal(session.user.role, role)
+ // A stored display name must not override the centralized demo identity.
+ values.set('steamcon.auth', JSON.stringify({...session, user:{...session.user, displayName:'Stale name'}}))
+ const restored = await authService.restore()
+ assert.equal(restored.user.displayName, displayName)
+ assert.equal(restored.user.role, role)
+ await authService.logout()
+})
+
 test('backend credentials, current session and logout use confirmed contracts',async () => {
  let request
  global.fetch=async (url,options) => {request={url,options};return {ok:true,json:async () => ({sessionId:'11111111-1111-4111-8111-111111111111',createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+3600000).toISOString(),status:'ACTIVE',user:{id:'22222222-2222-4222-8222-222222222222',email:'someone@example.test',displayName:'Speaker',organization:'STEAM',roles:['ATTENDEE','SPEAKER']}})}}
  const session=await authService.login({email:'someone@example.test',password:'editable-value'})
  assert.equal(request.url,'/api/auth/login');assert.equal(request.options.method,'POST')
  assert.deepEqual(JSON.parse(request.options.body),{email:'someone@example.test',password:'editable-value'})
- assert.equal(session.user.role,'SPEAKER');assert.deepEqual(session.user.roles,['ATTENDEE','SPEAKER']);assert.equal(session.user.organization,'STEAM')
+ assert.equal(session.user.displayName,'Speaker');assert.notEqual(session.user.displayName,'Avery');assert.equal(session.user.role,'SPEAKER');assert.deepEqual(session.user.roles,['ATTENDEE','SPEAKER']);assert.equal(session.user.organization,'STEAM')
  assert.deepEqual(authService.headers(),{'X-Session-Id':'11111111-1111-4111-8111-111111111111'})
  await authenticatedFetch('/api/future',{headers:{Accept:'application/json'}})
  assert.equal(request.options.headers.get('X-Session-Id'),'11111111-1111-4111-8111-111111111111')
@@ -55,7 +72,10 @@ test('backend roles are authoritative and failed logout still clears local stora
  global.fetch=async () => ({ok:true,json:async () => response})
  assert.equal((await authService.login({email:response.user.email,password:'password'})).user.role,null)
  response.user.roles=['ATTENDEE']
- assert.equal((await authService.restore()).user.role,'ATTENDEE')
+ const restored = await authService.restore()
+ assert.equal(restored.user.role,'ATTENDEE')
+ assert.equal(restored.user.displayName,'User')
+ assert.notEqual(restored.user.displayName,'Avery')
  global.fetch=async () => {throw new Error('offline')}
  await assert.rejects(() => authService.logout(),/offline/)
  assert.equal(values.size,0)
