@@ -80,3 +80,33 @@
 @media (max-width: 850px) { .travel-map-layout { grid-template-columns: 1fr; } .travel-map { min-height: 440px; } }
 @media (max-width: 560px) { .travel-map { min-height: 360px; } .map-pin small { display: none; } .map-location-list li { padding: 1rem; } .map-scale { font-size: 0.62rem; } }
 @media (prefers-reduced-motion: reduce) { .map-traveler { animation: none; } .map-walking-route { opacity: 0.65; } }
+
+.departures-section { border-top: 2px solid var(--color-ink); }
+.departures-board { overflow: hidden; border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ink); color: var(--color-paper); box-shadow: var(--shadow-large); }
+.departures-board-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.35rem; border-bottom: 1px solid color-mix(in srgb, var(--color-paper) 28%, transparent); }
+.departures-board-header > div { display: flex; align-items: center; gap: 0.65rem; }
+.departures-board-header > span { color: var(--color-border); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.status-light { width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--color-mathematics); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-mathematics) 22%, transparent); }
+.departures-columns, .departures-list li { display: grid; grid-template-columns: 0.65fr 2fr 1.2fr 0.8fr; gap: 1rem; align-items: center; }
+.departures-columns { padding: 0.75rem 1.35rem; background: color-mix(in srgb, var(--color-paper) 8%, transparent); color: var(--color-border); font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+.departures-list { padding: 0; margin: 0; list-style: none; }
+.departures-list li { min-height: 5rem; padding: 1rem 1.35rem; border-top: 1px solid color-mix(in srgb, var(--color-paper) 18%, transparent); }
+.departures-list time { color: var(--color-technology); font-family: monospace; font-size: 1.05rem; font-weight: 900; }
+.departures-list li > div { display: grid; gap: 0.2rem; }
+.departures-list li > div span { color: var(--color-border); font-size: 0.86rem; }
+.terminal-label { color: var(--color-paper); font-size: 0.86rem; }
+.departure-status { justify-self: start; padding: 0.35rem 0.55rem; border: 1px solid var(--color-mathematics); border-radius: 999px; color: var(--color-mathematics); font-size: 0.72rem; font-weight: 900; white-space: nowrap; }
+.departure-status.is-boarding { border-color: var(--color-technology); background: var(--color-technology); color: var(--color-ink); }
+.departures-note { margin-top: 1rem; color: var(--color-text-muted); font-size: 0.9rem; }
+@media (max-width: 700px) {
+  .departures-columns { display: none; }
+  .departures-list li { grid-template-columns: 0.75fr 2fr auto; }
+  .terminal-label { grid-column: 2; }
+  .departure-status { grid-column: 3; grid-row: 1 / span 2; }
+}
+@media (max-width: 480px) {
+  .departures-board-header { align-items: flex-start; flex-direction: column; }
+  .departures-list li { grid-template-columns: 1fr auto; gap: 0.55rem 1rem; }
+  .departures-list time, .departures-list li > div, .terminal-label { grid-column: 1; }
+  .departure-status { grid-column: 2; grid-row: 1; }
+}
