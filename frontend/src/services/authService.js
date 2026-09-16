@@ -43,6 +43,13 @@ export const authService = {
   return login(demoAccounts[role])
  },
  async logout() { cleanup() }, // Local only: no backend logout endpoint exists.
+ hasValidBackendSession() {
+  try {
+   const session = JSON.parse(sessionStorage.getItem(key))
+   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+   return valid(session) && session.source === 'backend' && uuid.test(session.sessionId || '') && uuid.test(session.user.id || '')
+  } catch { return false }
+ },
  headers() {
   try {
    const session = JSON.parse(sessionStorage.getItem(key))

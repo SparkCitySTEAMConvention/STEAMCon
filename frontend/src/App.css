@@ -287,3 +287,9 @@
 .nav-login summary { min-height: 44px; align-content: center; padding: 0.4rem 1rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); cursor: pointer; font-size: 0.875rem; font-weight: 700; }
 .nav-login ul { position: absolute; right: 0; z-index: 5; width: 12rem; padding: 0.75rem; margin: 0; list-style: none; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-paper); box-shadow: var(--shadow-small); }
 @media (max-width: 760px) { .nav-login ul { position: static; max-width: 100%; } }
+
+/* Published titles and descriptions can be longer than preview copy. */
+.track-card, .session-copy, .schedule-time, .schedule-session-copy, .schedule-location {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
