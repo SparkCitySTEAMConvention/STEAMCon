@@ -50,7 +50,13 @@ try {
     await evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event('input',{bubbles:true}));})()`);await settle();
   };
   const selectPortal = async role => {
+    const hadError = await evaluate('document.querySelector("form [role=alert]") !== null');
+    const height = await evaluate('document.querySelector("form").getBoundingClientRect().height');
     await evaluate(`(()=>{const el=document.querySelector('#login-portal');el.value=${JSON.stringify(role)};el.dispatchEvent(new Event('change',{bubbles:true}));})()`);await settle();
+    assert.equal(await evaluate('document.querySelector("form [role=status]").textContent'),`${role === 'ATTENDEE' ? 'Attendee' : 'Speaker'} Portal credentials selected.`);
+    assert.deepEqual(await evaluate(`(()=>{const el=document.querySelector('form [role=status]');const style=getComputedStyle(el);return [el.getAttribute('aria-live'),style.position,style.width,style.height,style.clipPath]})()`),['polite','absolute','1px','1px','inset(50%)']);
+    if (!hadError) assert.equal(await evaluate('document.querySelector("form").getBoundingClientRect().height'),height);
+    assert.doesNotMatch(await evaluate('document.body.innerText'),/Portal credentials selected\. You can edit or delete both values\./);
   };
   for (const width of [320,768,1440]) {
     await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
