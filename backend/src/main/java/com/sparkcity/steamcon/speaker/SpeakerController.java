@@ -16,7 +16,9 @@ public class SpeakerController {
 
     private final SpeakerService speakerService;
 
-    public SpeakerController(SpeakerService speakerService) {
+    public SpeakerController(
+            SpeakerService speakerService) {
+
         this.speakerService = speakerService;
     }
 
@@ -24,11 +26,12 @@ public class SpeakerController {
     public ResponseEntity<SessionProposal> createProposal(
             @RequestBody CreateProposalRequest request) {
 
-        SessionProposal proposal = speakerService.createProposal(
-                request.speakerId(),
-                request.title(),
-                request.description(),
-                request.trackId());
+        SessionProposal proposal =
+                speakerService.createProposal(
+                        request.speakerId(),
+                        request.title(),
+                        request.description(),
+                        request.trackId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -36,8 +39,10 @@ public class SpeakerController {
     }
 
     @PostMapping("/speaker-applications")
-    public ResponseEntity<SpeakerApplication> createSpeakerApplication(
-            @RequestBody CreateSpeakerApplicationRequest request) {
+    public ResponseEntity<SpeakerApplication>
+            createSpeakerApplication(
+                    @RequestBody
+                    CreateSpeakerApplicationRequest request) {
 
         SpeakerApplication application =
                 speakerService.createSpeakerApplication(
@@ -50,9 +55,11 @@ public class SpeakerController {
     }
 
     @PostMapping("/proposals/{id}/decision")
-    public ResponseEntity<ApprovalDecision> decideProposal(
-            @PathVariable UUID id,
-            @RequestBody ProposalDecisionRequest request) {
+    public ResponseEntity<ApprovalDecision>
+            decideProposal(
+                    @PathVariable UUID id,
+                    @RequestBody
+                    ProposalDecisionRequest request) {
 
         ApprovalDecision decision =
                 speakerService.makeProposalDecision(
@@ -62,5 +69,19 @@ public class SpeakerController {
                         request.comment());
 
         return ResponseEntity.ok(decision);
+    }
+
+    @PostMapping("/speaker-applications/{id}/status")
+    public ResponseEntity<SpeakerApplication>
+            updateSpeakerApplicationStatus(
+                    @PathVariable UUID id,
+                    @RequestBody
+                    SpeakerApplicationStatusRequest request) {
+
+        return ResponseEntity.ok(
+                speakerService
+                        .updateSpeakerApplicationStatus(
+                                id,
+                                request.status()));
     }
 }

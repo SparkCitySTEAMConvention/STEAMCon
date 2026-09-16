@@ -1,5 +1,6 @@
 package com.sparkcity.steamcon.speaker;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,16 +15,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
+import com.sparkcity.steamcon.communication.NotificationService;
+import com.sparkcity.steamcon.communication.NotificationType;
+
 class SpeakerServiceTest {
 
     @Mock
-    private SessionProposalRepository sessionProposalRepository;
+    private SessionProposalRepository
+            sessionProposalRepository;
 
     @Mock
-    private SpeakerApplicationRepository speakerApplicationRepository;
+    private SpeakerApplicationRepository
+            speakerApplicationRepository;
 
     @Mock
-    private ApprovalDecisionRepository approvalDecisionRepository;
+    private ApprovalDecisionRepository
+            approvalDecisionRepository;
+
+    @Mock
+    private NotificationService
+            notificationService;
 
     private SpeakerService speakerService;
 
@@ -35,7 +46,8 @@ class SpeakerServiceTest {
         speakerService = new SpeakerService(
                 sessionProposalRepository,
                 speakerApplicationRepository,
-                approvalDecisionRepository);
+                approvalDecisionRepository,
+                notificationService);
     }
 
     @Test
@@ -44,25 +56,42 @@ class SpeakerServiceTest {
         UUID speakerId = UUID.randomUUID();
         UUID trackId = UUID.randomUUID();
 
-        when(sessionProposalRepository.save(any(SessionProposal.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(sessionProposalRepository
+                .save(any(SessionProposal.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
-        SessionProposal result = speakerService.createProposal(
-                speakerId,
-                "Building Better APIs",
-                "A session about API design.",
-                trackId);
+        SessionProposal result =
+                speakerService.createProposal(
+                        speakerId,
+                        "Building Better APIs",
+                        "A session about API design.",
+                        trackId);
 
         assertNotNull(result);
-        assertEquals(speakerId, result.getSpeakerId());
-        assertEquals(trackId, result.getTrackId());
-        assertEquals("Building Better APIs", result.getTitle());
         assertEquals(
-                "A session about API design.",
-                result.getDescription());
+                speakerId,
+                result.getSpeakerId());
 
-        verify(sessionProposalRepository)
-                .save(any(SessionProposal.class));
+        assertEquals(
+                trackId,
+                result.getTrackId());
+
+        assertEquals(
+                "Building Better APIs",
+                result.getTitle());
+    }
+
+    @Test
+    void createProposalShouldRejectBlankTitle() {
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> speakerService.createProposal(
+                        UUID.randomUUID(),
+                        " ",
+                        "Description",
+                        UUID.randomUUID()));
     }
 
     @Test
@@ -72,100 +101,213 @@ class SpeakerServiceTest {
         UUID sessionId = UUID.randomUUID();
 
         when(speakerApplicationRepository
+                .findAll())
+                .thenReturn(List.of());
+
+        when(speakerApplicationRepository
                 .save(any(SpeakerApplication.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
         SpeakerApplication result =
-                speakerService.createSpeakerApplication(
-                        speakerId,
-                        sessionId);
+                speakerService
+                        .createSpeakerApplication(
+                                speakerId,
+                                sessionId);
 
         assertNotNull(result);
-        assertEquals(speakerId, result.getSpeakerId());
-        assertEquals(sessionId, result.getSessionId());
 
-        verify(speakerApplicationRepository)
-                .save(any(SpeakerApplication.class));
+        assertEquals(
+                speakerId,
+                result.getSpeakerId());
+
+        assertEquals(
+                sessionId,
+                result.getSessionId());
     }
 
     @Test
-    void approveProposalShouldUpdateProposalStatus() {
+    void duplicateSpeakerApplicationShouldFail() {
+
+        UUID speakerId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+
+        SpeakerApplication existing =
+                new SpeakerApplication();
+
+        existing.setSpeakerId(speakerId);
+        existing.setSessionId(sessionId);
+
+        when(speakerApplicationRepository
+                .findAll())
+                .thenReturn(List.of(existing));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> speakerService
+                        .createSpeakerApplication(
+                                speakerId,
+                                sessionId));
+    }
+
+    @Test
+    void approveProposalShouldCreateNotification() {
 
         UUID proposalId = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
+        UUID speakerId = UUID.randomUUID();
 
-        SessionProposal proposal = new SessionProposal();
+        SessionProposal proposal =
+                new SessionProposal();
 
-        when(sessionProposalRepository.findById(proposalId))
+        proposal.setSpeakerId(speakerId);
+        proposal.setTitle("Java APIs");
+
+        when(sessionProposalRepository
+                .findById(proposalId))
                 .thenReturn(Optional.of(proposal));
 
-        when(sessionProposalRepository.save(any(SessionProposal.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(sessionProposalRepository
+                .save(any(SessionProposal.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
-        when(approvalDecisionRepository.save(any(ApprovalDecision.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(approvalDecisionRepository
+                .save(any(ApprovalDecision.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
-        ApprovalDecision result =
-                speakerService.makeProposalDecision(
-                        proposalId,
-                        adminId,
-                        ApprovalDecisionType.APPROVE,
-                        "Looks good.");
-
-        assertEquals(ProposalStatus.APPROVED, proposal.getStatus());
-        assertEquals(
+        speakerService.makeProposalDecision(
+                proposalId,
+                adminId,
                 ApprovalDecisionType.APPROVE,
-                result.getDecision());
+                "Looks good.");
 
-        verify(sessionProposalRepository).save(proposal);
-        verify(approvalDecisionRepository)
-                .save(any(ApprovalDecision.class));
+        assertEquals(
+                ProposalStatus.APPROVED,
+                proposal.getStatus());
+
+        verify(notificationService)
+                .createNotification(
+                        speakerId,
+                        "Your proposal \"Java APIs\" was approved.",
+                        NotificationType.PROPOSAL_APPROVED);
     }
 
     @Test
-    void rejectProposalShouldUpdateProposalStatus() {
+    void rejectProposalShouldCreateNotification() {
 
         UUID proposalId = UUID.randomUUID();
-        UUID adminId = UUID.randomUUID();
+        UUID speakerId = UUID.randomUUID();
 
-        SessionProposal proposal = new SessionProposal();
+        SessionProposal proposal =
+                new SessionProposal();
 
-        when(sessionProposalRepository.findById(proposalId))
+        proposal.setSpeakerId(speakerId);
+        proposal.setTitle("Java APIs");
+
+        when(sessionProposalRepository
+                .findById(proposalId))
                 .thenReturn(Optional.of(proposal));
 
-        when(sessionProposalRepository.save(any(SessionProposal.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(sessionProposalRepository
+                .save(any(SessionProposal.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
-        when(approvalDecisionRepository.save(any(ApprovalDecision.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(approvalDecisionRepository
+                .save(any(ApprovalDecision.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0));
 
-        ApprovalDecision result =
-                speakerService.makeProposalDecision(
-                        proposalId,
-                        adminId,
-                        ApprovalDecisionType.REJECT,
-                        "Needs more detail.");
-
-        assertEquals(ProposalStatus.REJECTED, proposal.getStatus());
-        assertEquals(
+        speakerService.makeProposalDecision(
+                proposalId,
+                UUID.randomUUID(),
                 ApprovalDecisionType.REJECT,
-                result.getDecision());
+                "Needs work.");
+
+        assertEquals(
+                ProposalStatus.REJECTED,
+                proposal.getStatus());
+
+        verify(notificationService)
+                .createNotification(
+                        speakerId,
+                        "Your proposal \"Java APIs\" was rejected.",
+                        NotificationType.PROPOSAL_REJECTED);
     }
 
     @Test
-    void decisionShouldThrowWhenProposalDoesNotExist() {
+    void decisionShouldThrowWhenProposalMissing() {
 
         UUID proposalId = UUID.randomUUID();
 
-        when(sessionProposalRepository.findById(proposalId))
+        when(sessionProposalRepository
+                .findById(proposalId))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> speakerService.makeProposalDecision(
-                        proposalId,
-                        UUID.randomUUID(),
-                        ApprovalDecisionType.APPROVE,
-                        "Approved"));
+                () -> speakerService
+                        .makeProposalDecision(
+                                proposalId,
+                                UUID.randomUUID(),
+                                ApprovalDecisionType.APPROVE,
+                                "Approved"));
+    }
+
+    @Test
+    void speakerApplicationStatusShouldUpdateAndNotify() {
+
+        UUID applicationId = UUID.randomUUID();
+        UUID speakerId = UUID.randomUUID();
+
+        SpeakerApplication application =
+                new SpeakerApplication();
+
+        application.setSpeakerId(speakerId);
+
+        when(speakerApplicationRepository
+                .findById(applicationId))
+                .thenReturn(Optional.of(application));
+
+        when(speakerApplicationRepository
+                .save(application))
+                .thenReturn(application);
+
+        SpeakerApplication result =
+                speakerService
+                        .updateSpeakerApplicationStatus(
+                                applicationId,
+                                ApplicationStatus.APPROVED);
+
+        assertEquals(
+                ApplicationStatus.APPROVED,
+                result.getStatus());
+
+        verify(notificationService)
+                .createNotification(
+                        speakerId,
+                        "Your speaker application status changed to APPROVED.",
+                        NotificationType
+                                .SPEAKER_APPLICATION_UPDATED);
+    }
+
+    @Test
+    void missingSpeakerApplicationShouldFail() {
+
+        UUID applicationId =
+                UUID.randomUUID();
+
+        when(speakerApplicationRepository
+                .findById(applicationId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> speakerService
+                        .updateSpeakerApplicationStatus(
+                                applicationId,
+                                ApplicationStatus.APPROVED));
     }
 }
