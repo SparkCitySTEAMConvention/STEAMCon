@@ -1,3 +1,4 @@
+import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { Link } from 'react-router-dom'
 import TrackBadge from './TrackBadge.jsx'
 import logo from '../../assets/steamcon-logo.png'
@@ -23,6 +24,7 @@ export default function SpeakerHeader({ speaker }) {
           <p id="proposal-availability">Proposal submissions coming soon.</p>
         </div>
       </div>
+      <div className="container"><AccountNavigation /></div>
     </header>
   )
 }

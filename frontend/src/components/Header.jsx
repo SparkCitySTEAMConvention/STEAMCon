@@ -1,12 +1,16 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { portalFor, useAuth } from '../auth/useAuth.js'
+import '../pages/Authentication.css'
 
 export default function Header() {
+  const { user, isAuthenticated, logout } = useAuth()
+  const [open, setOpen] = useState(false)
   const loginRef = useRef(null)
 
   useEffect(() => {
     const closeOutside = event => {
-      if (!loginRef.current?.contains(event.target)) loginRef.current.open = false
+      if (loginRef.current && !loginRef.current.contains(event.target)) loginRef.current.open = false
     }
     const closeOnEscape = event => {
       if (event.key === 'Escape' && loginRef.current?.open) {
@@ -33,13 +37,13 @@ export default function Header() {
           <a href="/#tracks">Tracks</a>
           <Link to="/speakers">Speakers</Link>
           <a href="/#travel">Travel</a>
-          <details className="nav-login" ref={loginRef}>
-            <summary>Log in</summary>
-            <ul>
-              <li><Link to="/attendee" onClick={closeLogin}>Attendee Portal</Link></li>
-              <li><Link to="/speaker" onClick={closeLogin}>Speaker Portal</Link></li>
+          {isAuthenticated ? <details className="nav-login" ref={loginRef} onToggle={event => setOpen(event.currentTarget.open)}>
+            <summary aria-expanded={open} aria-controls="account-disclosure">{user.displayName || 'Account'}</summary>
+            <ul id="account-disclosure">
+              {portalFor(user.role) && <li><Link to={portalFor(user.role)} onClick={closeLogin}>{user.role === 'SPEAKER' ? 'Speaker Portal' : 'Attendee Portal'}</Link></li>}
+              <li><button onClick={() => { closeLogin(); void logout() }}>Log out</button></li>
             </ul>
-          </details>
+          </details> : <Link to="/login">Log in</Link>}
         </nav>
       </div>
     </header>

@@ -1,3 +1,4 @@
+import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { Link } from 'react-router-dom'
 import logo from '../../assets/steamcon-logo.png'
 
@@ -11,6 +12,7 @@ export default function BookingPageHeader({ label }) {
         </Link>
         <Link className="booking-page-back" to="/attendee">← Attendee dashboard</Link>
       </div>
+      <div className="container"><AccountNavigation /></div>
     </header>
   )
 }

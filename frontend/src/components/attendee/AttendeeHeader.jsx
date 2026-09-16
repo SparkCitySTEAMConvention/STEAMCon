@@ -1,3 +1,4 @@
+import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { Link } from 'react-router-dom'
 import logo from '../../assets/steamcon-logo.png'
 
@@ -33,6 +34,7 @@ export default function AttendeeHeader({ attendee, admission }) {
           <span aria-hidden="true">→</span>
         </a>
       </div>
+      <div className="container"><AccountNavigation /></div>
     </header>
   )
 }

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
+import { demoAccounts } from '../src/auth/demoConfig.js';
 if (!process.env.CHROME_PATH) throw new Error('Set CHROME_PATH to a Chromium executable.');
 const profile = await mkdtemp(tmpdir() + '/steam-speaker-test-');
 const origin='http://127.0.0.1:4178';
@@ -44,6 +45,92 @@ try {
 
   const key=async(key,code,num)=>{await cdp('Input.dispatchKeyEvent',{type:'keyDown',key,code,windowsVirtualKeyCode:num,...(key==='Enter'?{text:'\r'}:{})});await cdp('Input.dispatchKeyEvent',{type:'keyUp',key,code,windowsVirtualKeyCode:num});await settle()};
 
+
+  const setField = async (selector,value) => {
+    await evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event('input',{bubbles:true}));})()`);await settle();
+  };
+  const selectPortal = async role => {
+    await evaluate(`(()=>{const el=document.querySelector('#login-portal');el.value=${JSON.stringify(role)};el.dispatchEvent(new Event('change',{bubbles:true}));})()`);await settle();
+  };
+  for (const width of [320,768,1440]) {
+    await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
+    await navigate('/');await evaluate('sessionStorage.clear()');
+    for (const path of ['/speaker','/attendee','/attendee/travel','/attendee/hotel','/attendee/car','/speaker/proposals/proposal-bill-nye']) {
+      await navigate(path);assert.equal(await evaluate('location.pathname'),'/login');await noOverflow();
+    }
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('form input')].map(el=>[el.value,el.disabled])`),[['',false],['',false]]);
+    assert.equal(await evaluate('document.querySelector("#login-portal").value'),'');
+    assert.equal(await evaluate(`(()=>{const controls=[...document.querySelectorAll('form select, form input, form button')];return controls.every(el=>{const r=el.getBoundingClientRect();return r.width>0 && r.left>=0 && r.right<=innerWidth}) && controls.every((el,i)=>!i || el.getBoundingClientRect().top>=controls[i-1].getBoundingClientRect().bottom)})()`),true);
+    assert.equal(await evaluate('document.querySelector("label[for=login-portal]").textContent'),'Choose your portal');
+    assert.deepEqual(await evaluate(`[...document.querySelector('#login-portal').options].map(el=>el.textContent)`),['Select a portal','Attendee Portal','Speaker Portal']);
+    assert.doesNotMatch(await evaluate('document.body.innerText'),/Frontend demo|Use attendee demo credentials|Use speaker demo credentials|demonstration identities/);
+    await evaluate(`document.querySelector('#login-portal').focus()`);
+    assert.equal(await evaluate('getComputedStyle(document.activeElement).outlineStyle'),'solid');
+    await key('Tab','Tab',9);
+    assert.equal(await evaluate('document.activeElement.id'),'login-email');
+    assert.equal(await evaluate('location.pathname'),'/login');
+    await setField('#login-email','different@example.test');await setField('#login-password','different-password');
+    assert.equal(await evaluate('document.querySelector("#login-email").value'),'different@example.test');
+    await selectPortal('ATTENDEE');
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('form input')].map(el=>el.value)`),[demoAccounts.ATTENDEE.email,demoAccounts.ATTENDEE.password]);
+    assert.equal(await evaluate('location.pathname'),'/login');
+    assert.equal(await evaluate('sessionStorage.getItem("steamcon.auth")'),null);
+    await setField('#login-email','');await setField('#login-password','');
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('form input')].map(el=>el.value)`),['','']);
+    await setField('#login-email','another@example.test');await setField('#login-password','another-password');
+    assert.equal(await evaluate('document.querySelector("#login-password").value'),'another-password');
+    await selectPortal('SPEAKER');
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('form input')].map(el=>el.value)`),[demoAccounts.SPEAKER.email,demoAccounts.SPEAKER.password]);
+    assert.equal(await evaluate('location.pathname'),'/login');
+    assert.equal(await evaluate('sessionStorage.getItem("steamcon.auth")'),null);
+    await click('form button[type="button"]');assert.equal(await evaluate('document.querySelector("#login-password").type'),'text');
+    await setField('#login-password','wrong');await click('form button[type="submit"]');
+    assert.match(await evaluate('document.body.innerText'),/Invalid email or password/);
+    assert.equal(await evaluate('document.activeElement.getAttribute("role")'),'alert');
+    await selectPortal('SPEAKER');await click('form button[type="submit"]');
+    assert.equal(await evaluate('location.pathname'),'/speaker');
+    await navigate('/speaker');assert.match(await evaluate('document.body.innerText'),/Welcome back, Bill/);
+    assert.equal(await evaluate('document.querySelectorAll("select").length'),0);await noOverflow();
+    await navigate('/speaker');assert.match(await evaluate('document.body.innerText'),/Bill Nye/);
+    assert.equal(await evaluate('JSON.stringify(sessionStorage).includes("SteamConDemo!")'),false);
+    await navigate('/attendee');assert.equal(await evaluate('location.pathname'),'/access-denied');await noOverflow();
+    assert.equal(await evaluate('document.querySelector("main a").getAttribute("href")'),'/speaker');
+    await click('main button');assert.equal(await evaluate('location.pathname'),'/');
+    assert.equal(await evaluate('sessionStorage.getItem("steamcon.auth")'),null);
+    await navigate('/login');await selectPortal('ATTENDEE');await click('form button[type="submit"]');
+    assert.equal(await evaluate('location.pathname'),'/attendee');await noOverflow();
+    await navigate('/attendee');assert.equal(await evaluate('location.pathname'),'/attendee');
+    for (const path of ['/attendee/travel','/attendee/hotel','/attendee/car']) {await navigate(path);assert.equal(await evaluate('location.pathname'),path);await noOverflow();}
+    await navigate('/speaker');assert.equal(await evaluate('location.pathname'),'/access-denied');await noOverflow();
+    await navigate('/speakers');assert.equal(await evaluate('document.querySelectorAll("[id^=speaker-]").length'),15);
+    await click('.nav-login summary');await noOverflow();
+    await key('Escape','Escape',27);
+    assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
+    assert.equal(await evaluate('document.activeElement.tagName'),'SUMMARY');
+    await click('.nav-login summary');await click('h1');
+    assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
+    await click('.nav-login summary');await click('.nav-login button');
+    assert.equal(await evaluate('location.pathname'),'/');assert.equal(await evaluate('sessionStorage.getItem("steamcon.auth")'),null);
+    console.log(`PASS: ${width}px editable login, both demos, redirect, roles, restoration, logout, public directory and preserved child routes`);
+  }
+  // Stub only the existing login endpoint to prove backend UI states without a running API.
+  await navigate('/login');
+  await selectPortal('ATTENDEE');
+  await setField('#login-email','normal@example.test');await setField('#login-password','editable-password');
+  await evaluate(`window.fetch = (url,options) => { window.submittedLogin = {url,body:JSON.parse(options.body)}; return new Promise(resolve => { window.finishLogin = resolve; }); }`);
+  await click('form button[type="submit"]');
+  assert.deepEqual(await evaluate('window.submittedLogin'),{url:'/api/auth/login',body:{email:'normal@example.test',password:'editable-password'}});
+  assert.equal(await evaluate('document.querySelector("form").getAttribute("aria-busy")'),'true');
+  assert.equal(await evaluate('document.querySelector("form button[type=submit]").disabled'),true);
+  await evaluate(`window.finishLogin({ok:false,status:500,text:async () => 'Service unavailable'})`);await settle();
+  assert.match(await evaluate('document.body.innerText'),/could not complete your request/);
+  assert.equal(await evaluate('document.activeElement.getAttribute("role")'),'alert');
+  await evaluate(`window.fetch = async () => ({ok:true,json:async () => ({id:'backend-session',userId:'backend-user',status:'ACTIVE',expiresAt:new Date(Date.now()+3600000).toISOString()})})`);
+  await click('form button[type="submit"]');
+  assert.equal(await evaluate('location.pathname'),'/access-denied');
+  assert.match(await evaluate('document.body.innerText'),/backend does not yet provide the role/);
+  await click('main button');assert.equal(await evaluate('location.pathname'),'/');
+  console.log('PASS: backend login loading, general error, unknown role and local logout UI states');
   const text = () => evaluate('document.body.innerText');
   const noScheduleActions = async () => {
     assert.equal(await evaluate(`[...document.querySelectorAll('button,a')].some(el => /Request Schedule Change|Add to Calendar/.test(el.textContent))`), false);
@@ -53,6 +140,8 @@ try {
   };
   for (const width of [320,768,1440]) {
     await cdp('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
+    await navigate('/');
+    await evaluate('sessionStorage.clear()');
     await navigate('/');
     await noOverflow();
     assert.equal(await evaluate('document.querySelectorAll(".track-card").length'),5);
@@ -88,34 +177,15 @@ try {
       await writeFile(`${process.env.SCREENSHOT_DIR}/directory-${width}.png`, Uint8Array.from(atob(screenshot.data), c => c.charCodeAt(0)));
     }
     assert.deepEqual(await evaluate(`[...document.querySelectorAll('.site-header nav > a')].map(a => [a.textContent, a.getAttribute('href')])`), [
-      ['Events', '/#events'], ['Tracks', '/#tracks'], ['Speakers', '/speakers'], ['Travel', '/#travel'],
+      ['Events', '/#events'], ['Tracks', '/#tracks'], ['Speakers', '/speakers'], ['Travel', '/#travel'], ['Log in', '/login'],
     ]);
-    assert.equal(await evaluate('document.querySelectorAll(".nav-login summary").length'), 1);
-    await evaluate('document.querySelector(".nav-login summary").focus()');
-    for (const [name, code, number] of [['Enter','Enter',13], [' ','Space',32]]) {
-      await key(name,code,number);
-      assert.equal(await evaluate('document.querySelector(".nav-login").open'),true);
-      await noOverflow();
-      assert.equal(await evaluate(`(()=>{const r=document.querySelector('.nav-login ul').getBoundingClientRect();return r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight})()`),true);
-      await key('Tab','Tab',9);
-      assert.equal(await evaluate('document.activeElement.textContent'),'Attendee Portal');
-      assert.equal(await evaluate('getComputedStyle(document.activeElement).outlineStyle'),'solid');
-      await key('Escape','Escape',27);
-      assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
-      assert.equal(await evaluate('document.activeElement.tagName'),'SUMMARY');
-      assert.equal(await evaluate('getComputedStyle(document.activeElement).outlineStyle'),'solid');
-    }
-    await click('.directory-grid > li:nth-child(2) .directory-card');
-    assert.equal(await evaluate('location.pathname'),'/speakers');
-    await click('.nav-login summary');
-    await click('h1');
-    assert.equal(await evaluate('document.querySelector(".nav-login").open'),false);
-    // Retain the element to verify selection closes it before route unmount.
-    await evaluate('void (window.previousLogin = document.querySelector(".nav-login"))');
-    await click('.nav-login summary');
-    await click('.nav-login a[href="/attendee"]');
-    assert.equal(await evaluate('location.pathname'), '/attendee');
-    assert.equal(await evaluate('window.previousLogin.open'),false);
+    assert.equal(await evaluate('document.querySelectorAll(".nav-login").length'),0);
+    assert.equal(await evaluate(`document.querySelectorAll('header a[href="/login"]').length`),1);
+    assert.doesNotMatch(await text(), /Continue as Attendee|Continue as Speaker|Frontend demo access|Log in with another account/);
+    await click('header a[href="/login"]');
+    assert.equal(await evaluate('location.pathname'),'/login');
+    await selectPortal('ATTENDEE');await click('form button[type="submit"]');
+    assert.equal(await evaluate('location.pathname'),'/attendee');
     assert.equal(await evaluate('document.querySelector("#attendee-main") !== null'),true);
     assert.match(await text(), /Your itinerary/);
     await noOverflow();
@@ -138,13 +208,13 @@ try {
     assert.equal(await evaluate('location.pathname'),'/register');
     assert.match(await text(), /Choose how you’ll show up/);
     await noOverflow();
+    await navigate('/attendee');
+    await click('.auth-account-navigation button');
     await navigate('/speakers');
-    // Open the menu if the shared header was remounted by routing.
-    if (!await evaluate('document.querySelector(".nav-login").open')) await click('.nav-login summary');
-    await evaluate('void (window.previousLogin = document.querySelector(".nav-login"))');
-    await evaluate(`document.querySelector('.nav-login a[href="/speaker"]').focus()`);
+    await click('header a[href="/login"]');
+    await selectPortal('SPEAKER');
+    await evaluate(`document.querySelector('form button[type="submit"]').focus()`);
     await key('Enter','Enter',13);
-    assert.equal(await evaluate('window.previousLogin.open'),false);
     await waitFor('document.querySelectorAll(".portal-proposal").length === 2');
     assert.equal(await evaluate('location.pathname'), '/speaker');
     assert.match(await text(), /Welcome back, Bill/);
