@@ -35,7 +35,7 @@ Non-demo credentials use the real POST `/api/auth/login` endpoint. The notificat
 
 All protected adapters reuse `authenticatedFetch`, reject missing required values before fetching, and return backend JSON. Message bodies and proposal title/description are trimmed. Extra frontend fields are excluded from POST bodies. Live use requires a backend-authenticated account and real UUIDs; adapters do not generate fake UUIDs or translate mock/demo IDs into backend IDs.
 
-These adapters are not complete end-to-end features. Bill Nye's dashboard remains intentionally mock-backed, draft edits remain in memory, notifications are not active in that demo, forums have no UI connection, and the Propose button is not connected. Backend proposal GET/update/dashboard endpoints remain unavailable.
+These adapters are not complete end-to-end features. Bill Nye's dashboard remains intentionally mock-backed, draft edits remain in memory, notifications are not active in that demo, the speaker forum UI uses isolated local data during demo authentication, and the Propose button is not connected. Backend proposal GET/update/dashboard endpoints remain unavailable.
 
 Permanent tests in `tests/apiRepositories.test.js` verify adapter contracts, validation, responses and failures. Existing speaker tests preserve mock lookup/dashboard/editing coverage. `tests/viteProxy.test.js` checks the proxy and confirms production browser output excludes the default and overridden Spring Boot targets. These tests do not prove live backend integration.
 
@@ -49,8 +49,16 @@ The shared `eventRepository` now reads `/api/tracks`, `/api/sessions` and `/api/
 4. Configure the production same-origin API deployment; the existing proxy is development-only.
 5. Seed backend demo accounts and roles; replace adapter dispatch with real endpoint login, then disable/remove frontend demo identities.
 6. Backend owner must supply supported proposal GET/update/dashboard endpoints before replacing mock reads and in-memory edits.
-7. UI integration remains future work for the existing notification, forum and proposal-creation adapters; use verified backend identity and real UUIDs.
+7. Live forum access remains blocked by missing backend roles; notification and proposal-creation UI integration remains future work. Use verified backend identity and real UUIDs.
 
 ## Login navigation
 
 The logged-out public header links directly to `/login`. Its labeled native portal selector populates credentials from demoConfig.js without signing in. Both fields remain editable and submission uses their current values; selection never grants a role. Successful configured logins open `/attendee` or `/speaker` (Bill Nye), while roleless backend sessions open Access Denied with a distinct account-role explanation. The authenticated account menu retains portal navigation, Escape/outside-click dismissal, and logout.
+
+## Speaker Forum interface
+
+`/speaker/forums` remains behind ProtectedRoute and the SPEAKER RoleRoute. AuthContext exposes the existing session source without changing login, restoration or logout. `speakerForumSource` isolates demo forum examples and in-memory messages from all backend requests. Examples live in `mocks/forumData.js`, not JSX, and are labeled on the page. Leaving the page discards demo messages.
+
+Backend dispatch requires a backend session source, SPEAKER role and valid user UUID, then uses the existing forumRepository with exact scope values, READ for message reads, and POST plus the authenticated author ID and trimmed body for submissions. Backend login currently supplies no role, so real users still reach Access Denied; no role is inferred. Forum policies remain enforced by the backend. The UI preserves failed drafts, guards duplicate submissions, and handles loading, empty data and retry states. It displays returned author/flair IDs because no name/flair lookup contract is available.
+
+Permanent `speakerForumSource.test.js` tests cover demo isolation, incomplete identities, exact dispatch and errors. Adapter tests continue to cover HTTP contracts and failures. Run these tests with `npm test` from `frontend/`. These checks do not establish live backend integration.
