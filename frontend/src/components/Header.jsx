@@ -34,7 +34,7 @@ export default function Header() {
         <Link className="wordmark" to="/" aria-label="STEAM Con home">STEAM <span>Con</span><span className="brand-dot" aria-hidden="true" /></Link>
         <nav aria-label="Main navigation">
           <a href="/#events">Events</a>
-          <a href="/#tracks">Tracks</a>
+          <Link to="/tracks">Tracks</Link>
           <Link to="/speakers">Speakers</Link>
           <a href="/#travel">Travel</a>
           {isAuthenticated ? <details className="nav-login" ref={loginRef} onToggle={event => setOpen(event.currentTarget.open)}>

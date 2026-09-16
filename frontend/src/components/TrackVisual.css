@@ -1,0 +1,52 @@
+.track-visual-panel { position: relative; display: grid; place-items: center; min-width: 0; min-height: 440px; padding: 32px; overflow: hidden; contain: paint; background: var(--track-feature-color); border-right: 2px solid var(--color-ink); color: var(--color-ink); }
+.track-visual-stage { width: min(100%, 320px); aspect-ratio: 1; animation: visual-arrive 240ms ease-out both; }
+.track-illustration { display: block; width: 100%; height: 100%; overflow: visible; }
+/* At the narrowest panel the stage is 192px. The atom's 134px diameter
+   and 800px perspective leave ample room for the complete projected orbit. */
+.science-perspective { width: 100%; height: 100%; display: grid; place-items: center; perspective: 800px; }
+.science-atom { position: relative; width: 70%; aspect-ratio: 1; transform-style: preserve-3d; }
+.science-plane { position: absolute; inset: 0; transform-style: preserve-3d; }
+.science-plane-1 { transform: rotateX(64deg) rotateY(12deg) rotateZ(-25deg); }
+.science-plane-2 { transform: rotateX(22deg) rotateY(65deg) rotateZ(35deg); }
+.science-plane-3 { transform: rotateX(-52deg) rotateY(40deg) rotateZ(75deg); }
+.science-ring { position: absolute; inset: 0; border: 2px solid var(--color-ink); border-radius: 50%; transform-style: preserve-3d; animation: science-orbit 24s linear infinite; }
+.science-ring-2 { animation-duration: 32s; animation-direction: reverse; opacity: 0.8; }
+.science-ring-3 { animation-duration: 40s; opacity: 0.65; }
+.science-electron { position: absolute; left: calc(50% - 6px); top: -7px; width: 12px; height: 12px; background: var(--color-paper); border: 2px solid var(--color-ink); border-radius: 50%; }
+.science-nucleus { position: absolute; inset: 40%; border-radius: 50%; background: radial-gradient(circle at 32% 28%, var(--color-paper), var(--color-ink) 65%); transform: translateZ(16px); box-shadow: 0 2px 0 var(--color-ink); }
+.circuit-wire, .blueprint-lines, .math-grid, .math-axes { fill: none; stroke: currentColor; stroke-width: 2; }
+.circuit-wire { stroke-width: 4; }
+.circuit-pulse { fill: none; stroke: var(--color-paper); stroke-width: 3; stroke-dasharray: 5 95; animation: circuit-flow 12s linear infinite; }
+.circuit-pulse-1 { animation-duration: 16s; animation-delay: -4s; }
+.circuit-pulse-2 { animation-duration: 20s; animation-delay: -8s; }
+.circuit-node { fill: var(--color-paper); stroke: currentColor; stroke-width: 3; animation: circuit-glow 12s ease-in-out infinite; }
+.blueprint-lines, .math-grid { opacity: 0.25; }
+.mechanical-gear { fill: var(--color-paper); stroke: currentColor; stroke-width: 3; animation: gear-turn 36s linear infinite; }
+.mechanical-gear-reverse { animation-direction: reverse; }
+.gear-hub { fill: currentColor; }
+.art-swatch { stroke: currentColor; stroke-width: 3; }
+.art-swatch-purple { fill: var(--color-art-purple); animation: art-drift 18s ease-in-out infinite; }
+.art-swatch-pink { fill: var(--color-art-pink); animation: art-drift 22s ease-in-out infinite reverse; }
+.art-brush { fill: none; stroke: var(--color-paper); stroke-width: 15; stroke-linecap: round; stroke-dasharray: 100; animation: art-draw 16s ease-in-out infinite; }
+.art-brush-fine { stroke: var(--color-ink); stroke-width: 4; animation-delay: -5s; }
+.art-shape { fill: var(--color-technology); stroke: currentColor; stroke-width: 2; }
+.math-graph { fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 100; animation: math-draw 18s ease-in-out infinite; }
+.math-shape { fill: none; stroke: currentColor; stroke-width: 2; transform-origin: 211px 205px; animation: math-transform 24s ease-in-out infinite; }
+.track-illustration text { fill: currentColor; font: 32px Georgia, serif; }
+.neutral-shape { fill: none; stroke: currentColor; stroke-width: 3; }
+.neutral-center { fill: var(--color-paper); stroke: currentColor; stroke-width: 3; }
+.track-visual-panel[data-illustration='neutral'] .track-visual-stage { animation: none; }
+@keyframes visual-arrive { from { opacity: 0.65; } to { opacity: 1; } }
+@keyframes science-orbit { to { transform: rotateZ(360deg); } }
+@keyframes circuit-flow { to { stroke-dashoffset: -100; } }
+@keyframes circuit-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes gear-turn { to { transform: rotate(360deg); } }
+@keyframes art-drift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+@keyframes art-draw { 0%, 100% { stroke-dashoffset: 0; } 50% { stroke-dashoffset: 28; } }
+@keyframes math-draw { 0%, 100% { stroke-dashoffset: 0; } 50% { stroke-dashoffset: 35; } }
+@keyframes math-transform { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(30deg); } }
+@media (max-width: 767px) { .track-visual-panel { min-height: 300px; border-right: 0; border-bottom: 2px solid var(--color-ink); } }
+@media (prefers-reduced-motion: reduce) {
+  .track-visual-stage, .science-ring, .circuit-pulse, .circuit-node, .mechanical-gear, .art-swatch, .art-brush, .math-graph, .math-shape { animation: none; transition: none; }
+  .art-brush, .math-graph { stroke-dashoffset: 0; }
+}

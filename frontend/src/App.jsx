@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import './App.css'
 import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import HomePage from './pages/HomePage.jsx'
+import TracksPage from './pages/TracksPage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
@@ -25,6 +26,7 @@ export default function App() {
   useEffect(() => {
     const pageTitles = {
       '/': 'STEAM Con',
+      '/tracks': 'Tracks | STEAM Con',
       '/login': 'Log in | STEAM Con',
       '/access-denied': 'Access denied | STEAM Con',
       '/register': 'Register | STEAM Con',
@@ -50,6 +52,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/tracks" element={<TracksPage />} />
       <Route path="/register" element={<RegistrationPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/access-denied" element={<AccessDenied />} />
