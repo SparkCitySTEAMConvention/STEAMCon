@@ -95,3 +95,7 @@ proposal submission and persistence, organizer feedback/notification data, confi
 scheduling, and schedule-change requests. Edit Profile and Propose a Session remain
 explained unavailable placeholders. Calendar downloads are generated locally when
 the required schedule data exists.
+
+## Notification preview
+
+`notificationData.js` centralizes sample Bill Nye notifications with stable IDs, valid creation timestamps, backend types, and mixed read/unread states. Organizer feedback, proposal information and pending scheduling are sample UI copy. Scheduling dates remain null in shared proposal/session fixtures, and no attendance is confirmed. Preview read state stays in memory for the application session and never calls the API. Separate source instances are isolated for tests.

@@ -11,19 +11,25 @@ import UpcomingSessionCard from '../../components/speaker/UpcomingSessionCard.js
 import SpeakerFeedback from '../../components/speaker/SpeakerFeedback.jsx'
 import EmptyState from '../../components/speaker/EmptyState.jsx'
 import { speakerData, developmentDisclaimer } from '../../mocks/speakerData.js'
-import { conventionScheduleLabel, locationLabel, hasSchedule } from '../../utils/proposalPresentation.js'
+import { conventionScheduleLabel, locationLabel } from '../../utils/proposalPresentation.js'
+import { useAuth } from '../../auth/useAuth.js'
+import { notificationRepository } from '../../services/notificationRepository.js'
+import { getSpeakerNotificationSource } from '../../services/speakerNotificationSource.js'
+import SpeakerNotifications from '../../components/speaker/SpeakerNotifications.jsx'
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
+  const { user, authSource, hasBackendSession } = useAuth()
+  const notifications = useMemo(() => getSpeakerNotificationSource(notificationRepository, user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
   const [params] = useSearchParams()
   const scenario = import.meta.env.DEV ? params.get('preview') : null
   const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
   const loader = useCallback(() => source.getDashboard(), [source])
   const resource = useSpeakerResource(loader, scenario)
-  return <SpeakerDashboardView data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} />
+  return <SpeakerDashboardView data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
-function SpeakerDashboardView({ data, resource }) {
+function SpeakerDashboardView({ data, resource, notifications, notificationKey }) {
   const [trackId, setTrackId] = useState('all')
   const { speaker, convention, proposals, sessions, feedback } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
@@ -41,6 +47,7 @@ function SpeakerDashboardView({ data, resource }) {
         <p className="portal-demo">{developmentDisclaimer}</p>
         {resource.status === 'loading' && <p role="status">Loading proposals…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load proposals.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
+        <SpeakerNotifications key={notificationKey} source={notifications} />
         {resource.status === 'ready' && <>
         <section className="portal-detail-section" aria-labelledby="experience-heading">
           <h2 id="experience-heading">Professional experience</h2>
@@ -50,11 +57,6 @@ function SpeakerDashboardView({ data, resource }) {
           <h2 id="event-heading">{convention.name}</h2>
           <p>{conventionScheduleLabel(convention)}</p>
           <p>{locationLabel(convention)}</p>
-        </section>
-        <section className="portal-notifications" aria-labelledby="notifications-heading">
-          <h2 id="notifications-heading">Notifications &amp; next steps</h2>
-          <p>{sessions.some(session => !hasSchedule(session)) ? 'Scheduling is pending. Your approved proposals will show dates, times, and rooms here when assigned.' : 'No scheduling actions needed.'}</p>
-          <p>{feedback.some(item => !item.read) ? 'You have unread organizer feedback below.' : 'No new organizer feedback.'}</p>
         </section>
         <ProposalSummary proposals={proposals} />
         <div className="portal-columns">
