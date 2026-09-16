@@ -92,7 +92,7 @@ Homepage atom animation and track-card implementations are unchanged.
 
 Backend integration still needs speaker identity/authentication, profile updates,
 proposal submission and persistence, organizer feedback/notification data, confirmed
-scheduling, and schedule-change requests. Edit Profile remains an explained unavailable placeholder. Propose a Session now supports local preview submission and guarded backend dispatch. Calendar downloads are generated locally when
+scheduling, and schedule-change requests. Edit Profile supports session-local preview edits; live profile editing awaits a verified backend contract. Propose a Session now supports local preview submission and guarded backend dispatch. Calendar downloads are generated locally when
 the required schedule data exists.
 
 ## Notification preview
@@ -105,3 +105,8 @@ the required schedule data exists.
 The five shared tracks supply preview choices. speakerProposalSource creates local SUBMITTED records without modifying the shared proposal fixtures or calling the backend. Records stay in memory per AuthContext user for the current login/application session, survive portal navigation, and reset on new login or refresh. Separate source instances are isolated. Locally submitted proposals appear separately on the dashboard; they do not imply confirmed participation or scheduling.
 
 Preview-created SUBMITTED, unscheduled proposals may be deleted after dashboard confirmation during the current preview session. Only records owned by the current preview source can be removed. Original Bill Nye fixtures, approved/scheduled proposals and panel memberships stay protected. Deletion remains local, preserves other records, and does not call a backend endpoint; the backend currently has no proposal deletion/cancellation/withdrawal contract.
+
+
+## Speaker profile preview
+
+`speakerProfileSource` clones the Bill Nye record and owns in-memory edits for the current login/application session. Dashboard and edit form share that source across navigation; new login or refresh resets it. Profile and track reads and saves never call the API. The public directory and imported fixtures stay unchanged, as do proposal, forum and notification state. Display name, professional title (`role`), organization, biography and primary track are editable and required; text is trimmed. Text limits are 255 characters for name/title/organization and 2000 for biography. Title, biography and primary profile track are preview-only backend fields; no profile-update endpoint exists. Edits do not imply confirmed participation, and the disclaimer remains visible.

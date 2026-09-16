@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import { previewRepository } from '../../mocks/previewScenarios.js'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import TrackFilters from '../../components/speaker/TrackFilters.jsx'
@@ -18,6 +18,7 @@ import { getSpeakerNotificationSource } from '../../services/speakerNotification
 import SpeakerNotifications from '../../components/speaker/SpeakerNotifications.jsx'
 import { eventRepository } from '../../services/eventRepository.js'
 import { getSpeakerProposalSource } from '../../services/speakerProposalSource.js'
+import { getSpeakerProfileSource } from '../../services/speakerProfileSource.js'
 import PreviewProposalList from '../../components/speaker/PreviewProposalList.jsx'
 import './SpeakerDashboard.css'
 
@@ -28,8 +29,14 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const [params] = useSearchParams()
   const scenario = import.meta.env.DEV ? params.get('preview') : null
   const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
-  const loader = useCallback(() => source.getDashboard(), [source])
-  const resource = useSpeakerResource(loader, scenario)
+  const profileSource = useMemo(() => getSpeakerProfileSource(user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
+  const profileRevision = useSyncExternalStore(profileSource.subscribe, profileSource.getRevision, profileSource.getRevision)
+  const loader = useCallback(async () => {
+    const data = await source.getDashboard()
+    return profileSource.demo ? { ...data, speaker: await profileSource.getProfile() } : data
+  }, [source, profileSource])
+  const resourceKey = useMemo(() => ({ loader, profileRevision }), [loader, profileRevision])
+  const resource = useSpeakerResource(loader, resourceKey)
   return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
@@ -45,7 +52,7 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
       <main className="container portal-main" id="speaker-main" tabIndex={-1}>
         <div className="portal-welcome">
           <p className="eyebrow">Your perspective belongs here</p>
-          <h1>Welcome back, {speaker.firstName}.</h1>
+          <h1>Welcome back, {speaker.name}.</h1>
           <p>Keep an eye on your proposals, upcoming sessions, and organizer feedback. Your next great conversation starts here.</p>
         </div>
         <p className="portal-demo">{developmentDisclaimer}</p>
