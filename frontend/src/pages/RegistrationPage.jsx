@@ -6,13 +6,19 @@ import { validateRegistration } from '../utils/registrationValidation'
 
 const tracks = ['Science', 'Technology', 'Engineering', 'Art', 'Mathematics']
 
+const passes = {
+  'All-Access Pass': { price: 249, description: 'All three days, every track, and evening events' },
+  'Single-Day Pass': { price: 99, description: 'One convention day and its scheduled sessions' },
+  'Student Pass': { price: 79, description: 'All three days with valid student identification' },
+}
+
 const roles = {
   attendee: {
     label: 'Attendee',
     eyebrow: 'I want to attend',
     heading: 'Build your STEAM Con experience.',
     description: 'Create your account, choose a pass, and get ready to make a personal schedule across all five tracks.',
-    submit: 'Create attendee account',
+    submit: 'Continue to payment',
     portal: '/attendee',
     portalLabel: 'Open attendee preview',
   },
@@ -41,6 +47,7 @@ export default function RegistrationPage() {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [requestError, setRequestError] = useState('')
+  const [checkout, setCheckout] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const roleCopy = roles[role]
 
@@ -50,6 +57,7 @@ export default function RegistrationPage() {
     setErrors({})
     setRequestError('')
     setStatus('idle')
+    setCheckout(false)
     setSearchParams({ role: nextRole }, { replace: true })
   }
 
@@ -58,6 +66,23 @@ export default function RegistrationPage() {
     setValues(current => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
     if (errors[name]) setErrors(current => ({ ...current, [name]: undefined }))
     if (requestError) setRequestError('')
+  }
+
+  async function completeRegistration() {
+    if (status === 'submitting') return
+    setStatus('submitting')
+    setRequestError('')
+    try {
+      await submitRegistration({ ...values, role, paymentMode: role === 'attendee' ? 'demo' : undefined })
+      setSubmitted(true)
+      setCheckout(false)
+      setStatus('success')
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        setRequestError(error.message || 'Registration could not be completed. Please try again.')
+        setStatus('error')
+      }
+    }
   }
 
   async function handleSubmit(event) {
@@ -72,17 +97,13 @@ export default function RegistrationPage() {
       return
     }
 
-    setStatus('submitting')
-    try {
-      await submitRegistration({ ...values, role })
-      setSubmitted(true)
-      setStatus('success')
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        setRequestError(error.message || 'Registration could not be completed. Please try again.')
-        setStatus('error')
-      }
+    if (role === 'attendee') {
+      setCheckout(true)
+      setStatus('idle')
+      return
     }
+
+    await completeRegistration()
   }
 
   const fieldProps = name => ({
@@ -148,14 +169,53 @@ export default function RegistrationPage() {
             {submitted ? (
               <div className="registration-success" aria-live="polite">
                 <span className="registration-success-mark" aria-hidden="true">✓</span>
-                <p className="eyebrow">Form preview complete</p>
-                <h2 id="registration-form-heading">Your {roleCopy.label.toLowerCase()} details look good.</h2>
-                <p>Nothing was sent yet. This front-end flow is ready to connect to the registration API when the backend endpoint is available.</p>
+                <p className="eyebrow">{role === 'attendee' ? 'Admission confirmed' : 'Form preview complete'}</p>
+                <h2 id="registration-form-heading">{role === 'attendee' ? 'Your pass and attendee account are ready.' : 'Your speaker details look good.'}</h2>
+                <p>{role === 'attendee' ? `Demo purchase complete for the ${values.passType}. No real payment was processed.` : 'Nothing was sent yet. This front-end flow is ready to connect to the registration API when the backend endpoint is available.'}</p>
                 <div className="registration-success-actions">
                   <Link className="button button-dark" to={roleCopy.portal}>{roleCopy.portalLabel} <span aria-hidden="true">↗</span></Link>
                   <button className="registration-text-button" type="button" onClick={() => setSubmitted(false)}>Edit my details</button>
                 </div>
               </div>
+            ) : checkout ? (
+              <section className="registration-checkout" aria-labelledby="registration-form-heading">
+                <p className="eyebrow">Secure checkout preview</p>
+                <h2 id="registration-form-heading">Review your pass.</h2>
+                <p className="registration-checkout-intro">Confirm the demo purchase to create your attendee account and activate admission.</p>
+
+                <div className="registration-order-card">
+                  <div>
+                    <span>STEAM Con admission</span>
+                    <strong>{values.passType}</strong>
+                    <small>{passes[values.passType].description}</small>
+                  </div>
+                  <strong>${passes[values.passType].price}.00</strong>
+                </div>
+
+                <dl className="registration-order-details">
+                  <div><dt>Attendee</dt><dd>{values.firstName} {values.lastName}</dd></div>
+                  <div><dt>Email</dt><dd>{values.email}</dd></div>
+                  <div><dt>Primary track</dt><dd>{values.track}</dd></div>
+                  <div><dt>Total</dt><dd>${passes[values.passType].price}.00</dd></div>
+                </dl>
+
+                <div className="registration-demo-payment" role="note">
+                  <strong>Demo payment</strong>
+                  <span>No card details or real money are used in this prototype.</span>
+                </div>
+
+                {requestError && (
+                  <div className="registration-request-error" role="alert">
+                    <strong>We couldn’t complete the demo purchase.</strong>
+                    <span>{requestError} Your entries are still here.</span>
+                  </div>
+                )}
+
+                <button className="button button-dark registration-submit" type="button" disabled={status === 'submitting'} onClick={completeRegistration}>
+                  {status === 'submitting' ? 'Confirming…' : 'Confirm demo purchase & create account'}
+                </button>
+                <button className="registration-text-button registration-checkout-back" type="button" disabled={status === 'submitting'} onClick={() => setCheckout(false)}>← Edit registration</button>
+              </section>
             ) : (
               <form className="registration-form" onSubmit={handleSubmit} noValidate aria-busy={status === 'submitting'}>
                 <div className="registration-form-heading">
@@ -205,9 +265,7 @@ export default function RegistrationPage() {
                       <label>
                         <span>Pass type</span>
                         <select {...fieldProps('passType')} required>
-                          <option>All-Access Pass</option>
-                          <option>Single-Day Pass</option>
-                          <option>Student Pass</option>
+                          {Object.entries(passes).map(([name, pass]) => <option key={name} value={name}>{name} — ${pass.price}</option>)}
                         </select>
                       </label>
                     </div>

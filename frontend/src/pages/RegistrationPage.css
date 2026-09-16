@@ -38,7 +38,7 @@
 .role-switcher button span, .role-switcher button strong { display: block; }
 .role-switcher button span { margin-bottom: 0.25rem; font: 700 0.68rem/1.5 'Courier New', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
 .role-switcher button strong { font-size: 1.15rem; }
-.registration-form, .registration-success { padding: clamp(1.5rem, 4vw, 3.5rem); }
+.registration-form, .registration-success, .registration-checkout { padding: clamp(1.5rem, 4vw, 3.5rem); }
 .registration-form-heading { margin-bottom: 2.25rem; }
 .registration-form-heading h2, .registration-success h2 { margin-block: 0.65rem 0.8rem; font-size: clamp(2rem, 4vw, 3.4rem); }
 .registration-form-heading > p:last-child, .registration-success > p:not(.eyebrow) { max-width: 620px; color: var(--color-text-muted); }
@@ -60,6 +60,18 @@
 .registration-submit { width: 100%; margin-top: 1.5rem; cursor: pointer; }
 .registration-submit:disabled { cursor: wait; opacity: 0.72; }
 .registration-request-error { display: grid; gap: 0.25rem; margin-top: 1.5rem; padding: 1rem; border: 2px solid #a32222; border-radius: var(--radius-small); background: color-mix(in srgb, #a32222 8%, var(--color-paper)); color: #701313; font-size: 0.8rem; }
+.registration-checkout h2 { margin-block: 0.65rem 0.8rem; font-size: clamp(2rem, 4vw, 3.4rem); }
+.registration-checkout-intro { color: var(--color-text-muted); }
+.registration-order-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-top: 2rem; padding: 1.25rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-ice); box-shadow: var(--shadow-small); }
+.registration-order-card > div { display: grid; gap: 0.3rem; }
+.registration-order-card span, .registration-order-card small { color: var(--color-text-muted); }
+.registration-order-details { display: grid; gap: 0; margin: 2rem 0; border-block: 1px solid var(--color-border); }
+.registration-order-details > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--color-border); }
+.registration-order-details > div:last-child { border-bottom: 0; font-weight: 900; }
+.registration-order-details dd { margin: 0; text-align: right; }
+.registration-demo-payment { display: grid; gap: 0.25rem; padding: 1rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-paper); font-size: 0.8rem; }
+.registration-demo-payment span { color: var(--color-text-muted); }
+.registration-checkout-back { margin-top: 1rem; }
 .registration-portal-link { margin-top: 1.25rem; color: var(--color-text-muted); font-size: 0.78rem; text-align: center; }
 .registration-portal-link a { color: var(--color-ink); font-weight: 800; }
 .registration-success { min-height: 620px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
