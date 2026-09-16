@@ -50,7 +50,7 @@ export default function TravelInfoPage() {
             <p>This planning map uses placeholder locations and estimated walking times. We will replace them with confirmed hotel names, addresses, and distances when the venue is announced.</p>
           </div>
           <div className="travel-map-layout">
-            <div className="travel-map" role="img" aria-label="Illustrative neighborhood map showing the STEAM Con Conference Center and three nearby hotels">
+            <div className="travel-map" role="img" tabIndex={0} aria-label="Illustrative neighborhood map showing the STEAM Con Conference Center and three nearby hotels. Hover over or focus the map to watch a person walk the route.">
               <span className="map-water" aria-hidden="true" />
               <span className="map-park" aria-hidden="true">CITY PARK</span>
               <span className="map-road map-road-one" aria-hidden="true" />
@@ -62,7 +62,9 @@ export default function TravelInfoPage() {
                   <b>{location.marker}</b><small>{location.id === 'venue' ? 'Conference center' : `Hotel ${location.marker}`}</small>
                 </span>
               ))}
-              <span className="map-scale" aria-hidden="true">5 min walk</span>
+              <span className="map-walking-route" aria-hidden="true" />
+              <span className="map-traveler" aria-hidden="true"><span>●</span></span>
+              <span className="map-scale" aria-hidden="true">Hover to explore · 5 min walk</span>
             </div>
             <ol className="map-location-list">
               {mapLocations.map(location => (
