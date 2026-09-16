@@ -72,11 +72,6 @@ preview error override intentionally keeps failing until removed from the URL.
   conditional schedule action, and every requested presentation state implemented.
 - Issue #81: all 15 specified names, all five specified panels, neutral bios,
   source/disclaimer notes, nullable program fields and mixed state fixtures added.
-- Chromium checks passed at 320px, 768px and 1440px: homepage, dashboard,
-  detail/editor screens and all state previews have no horizontal overflow.
-- Keyboard filters and card links, route focus, editor autofocus and return focus,
-  all 15 workspace selections, reduced motion, and absence of runtime errors passed.
-- Detail screenshots visually reviewed at all three widths.
 - `node --test frontend/tests/speakerRepository.test.js` from repository root:
   three tests passed (relationships/nullability, schedule eligibility, draft saves).
 - `npm run lint` and `npm run build` from frontend, and `git diff --check` passed.
@@ -91,19 +86,27 @@ From `frontend/`:
 
 - `npm test` runs the existing repository tests plus nullable schedule,
   timezone formatting, Bill Nye programming, and calendar eligibility checks.
-- `CHROME_PATH=/path/to/chromium npm run test:browser` runs actual browser
-  navigation and rendering tests at 320, 768, and 1440 pixels. Requires Node 22+
-  and a local Chromium executable; no additional package is required.
-  Set `SCREENSHOT_DIR` to an existing directory to save dashboard screenshots.
 - `npm run lint`, `npm run build`; run `git diff --check` from the repository.
 
-The browser suite checks both homepage speaker links, proposal detail navigation,
-multiple panelists, null and confirmed scheduling, keyboard focus, reduced motion,
-empty/error/loading states, and horizontal overflow. Homepage atom animation and
-track-card implementations are unchanged.
+Homepage atom animation and track-card implementations are unchanged.
 
 Backend integration still needs speaker identity/authentication, profile updates,
 proposal submission and persistence, organizer feedback/notification data, confirmed
-scheduling, and schedule-change requests. Edit Profile and Propose a Session remain
-explained unavailable placeholders. Calendar downloads are generated locally when
+scheduling, and schedule-change requests. Edit Profile supports session-local preview edits; live profile editing awaits a verified backend contract. Propose a Session now supports local preview submission and guarded backend dispatch. Calendar downloads are generated locally when
 the required schedule data exists.
+
+## Notification preview
+
+`notificationData.js` centralizes sample Bill Nye notifications with stable IDs, valid creation timestamps, backend types, and mixed read/unread states. Organizer feedback, proposal information and pending scheduling are sample UI copy. Scheduling dates remain null in shared proposal/session fixtures, and no attendance is confirmed. Preview read state stays in memory for the application session and never calls the API. Separate source instances are isolated for tests.
+
+
+## Proposal submission preview
+
+The five shared tracks supply preview choices. speakerProposalSource creates local SUBMITTED records without modifying the shared proposal fixtures or calling the backend. Records stay in memory per AuthContext user for the current login/application session, survive portal navigation, and reset on new login or refresh. Separate source instances are isolated. Locally submitted proposals appear separately on the dashboard; they do not imply confirmed participation or scheduling.
+
+Preview-created SUBMITTED, unscheduled proposals may be deleted after dashboard confirmation during the current preview session. Only records owned by the current preview source can be removed. Original Bill Nye fixtures, approved/scheduled proposals and panel memberships stay protected. Deletion remains local, preserves other records, and does not call a backend endpoint; the backend currently has no proposal deletion/cancellation/withdrawal contract.
+
+
+## Speaker profile preview
+
+`speakerProfileSource` clones the Bill Nye record and owns in-memory edits for the current login/application session. Dashboard and edit form share that source across navigation; new login or refresh resets it. Profile and track reads and saves never call the API. The public directory and imported fixtures stay unchanged, as do proposal, forum and notification state. Display name, professional title (`role`), organization, biography and primary track are editable and required; text is trimmed. Text limits are 255 characters for name/title/organization and 2000 for biography. Title, biography and primary profile track are preview-only backend fields; no profile-update endpoint exists. Edits do not imply confirmed participation, and the disclaimer remains visible.

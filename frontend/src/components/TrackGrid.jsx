@@ -1,14 +1,8 @@
 import TrackCard from './TrackCard.jsx'
 
-const tracks = [
-  { name: 'Science', slug: 'science', symbol: '◎', description: 'Ask bigger questions. Discover new perspectives.' },
-  { name: 'Technology', slug: 'technology', symbol: '</>', description: 'Explore the tools changing how we connect and create.' },
-  { name: 'Engineering', slug: 'engineering', symbol: '⌘', description: 'Turn bold ideas into things that work.' },
-  { name: 'Art', slug: 'art', symbol: '✳', description: 'Challenge the familiar. Make room for imagination.' },
-  { name: 'Mathematics', slug: 'mathematics', symbol: '∞', description: 'Find the patterns that open up new possibilities.' },
-]
+import { publicTracks } from '../mocks/publicProgram.js'
 
-export default function TrackGrid() {
+export default function TrackGrid({ tracks = publicTracks }) {
   return (
     <section className="section tracks-section" id="tracks" aria-labelledby="tracks-heading">
       <div className="container">
@@ -16,8 +10,9 @@ export default function TrackGrid() {
           <div><p className="eyebrow">01 / Find your spark</p><h2 id="tracks-heading">Different disciplines.<br />Shared curiosity.</h2></div>
           <p>Start with what you love.<br />Leave with a whole new way of thinking.</p>
         </div>
+        {!tracks.length && <p role="status">No tracks have been published yet.</p>}
         <ul className="track-grid">
-          {tracks.map((track, index) => <TrackCard key={track.slug} {...track} number={`0${index + 1}`} />)}
+          {tracks.map((track, index) => <TrackCard key={track.id || track.slug} {...track} number={`0${index + 1}`} />)}
         </ul>
       </div>
     </section>

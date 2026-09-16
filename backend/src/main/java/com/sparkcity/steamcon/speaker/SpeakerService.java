@@ -41,7 +41,7 @@ public class SpeakerService {
     // ---------------------------------------------------------
 
     public SessionProposal createProposal(
-            UUID speakerId,
+            UUID authenticatedUserId,
             String title,
             String description,
             UUID trackId) {
@@ -82,7 +82,7 @@ public class SpeakerService {
         SessionProposal proposal =
                 new SessionProposal();
 
-        proposal.setSpeakerId(speakerId);
+        proposal.setSpeakerId(authenticatedUserId);
         proposal.setTitle(title);
         proposal.setDescription(description);
         proposal.setTrackId(trackId);
@@ -220,7 +220,7 @@ public class SpeakerService {
     // ---------------------------------------------------------
 
     public SpeakerApplication createSpeakerApplication(
-            UUID speakerId,
+            UUID authenticatedUserId,
             UUID sessionId) {
 
         if (speakerId == null) {
@@ -249,7 +249,7 @@ public class SpeakerService {
         SpeakerApplication application =
                 new SpeakerApplication();
 
-        application.setSpeakerId(speakerId);
+        application.setSpeakerId(authenticatedUserId);
         application.setSessionId(sessionId);
 
         return speakerApplicationRepository
@@ -297,13 +297,13 @@ public class SpeakerService {
 
     public ApprovalDecision makeProposalDecision(
             UUID proposalId,
-            UUID adminReviewerId,
+            UUID authenticatedAdminId,
             ApprovalDecisionType decisionType,
             String comment) {
 
         if (adminReviewerId == null) {
             throw new IllegalArgumentException(
-                    "Admin reviewer ID is required");
+                    "Authenticated admin ID is required");
         }
 
         if (decisionType == null) {

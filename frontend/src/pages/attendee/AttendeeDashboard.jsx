@@ -4,11 +4,13 @@ import AttendeeSummary from '../../components/attendee/AttendeeSummary.jsx'
 import BookingCard from '../../components/attendee/BookingCard.jsx'
 import ItineraryItem from '../../components/attendee/ItineraryItem.jsx'
 import SessionCard from '../../components/attendee/SessionCard.jsx'
-import { attendeeData } from '../../mocks/attendeeData.js'
+import { attendeeRepository } from '../../services/attendeeRepository.js'
 import { buildTravelItinerary, getBookingCards, loadTravelBookings } from '../../utils/travelBookings.js'
 import './AttendeeDashboard.css'
 
-export default function AttendeeDashboard({ data = attendeeData }) {
+const attendeePreview = attendeeRepository.getPreview()
+
+export default function AttendeeDashboard({ data = attendeePreview }) {
   const [selectedSessionIds, setSelectedSessionIds] = useState(
     () => data.sessions.filter(session => session.enrolled).map(session => session.id),
   )

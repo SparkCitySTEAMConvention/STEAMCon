@@ -40,7 +40,7 @@ public class SpeakerController {
 
         SessionProposal proposal =
                 speakerService.createProposal(
-                        request.speakerId(),
+                        authenticatedUserId,
                         request.title(),
                         request.description(),
                         request.trackId(),
@@ -142,11 +142,13 @@ public class SpeakerController {
     // ---------------------------------------------------------
 
     @PostMapping("/proposals/{id}/decision")
-    public ResponseEntity<ApprovalDecision>
-            decideProposal(
-                    @PathVariable UUID id,
-                    @RequestBody
-                    ProposalDecisionRequest request) {
+    public ResponseEntity<ApprovalDecision> decideProposal(
+            @PathVariable UUID id,
+            @RequestBody ProposalDecisionRequest request,
+            Authentication authentication) {
+
+        UUID authenticatedUserId =
+                getAuthenticatedUserId(authentication);
 
         return ResponseEntity.ok(
                 speakerService
@@ -187,10 +189,34 @@ public class SpeakerController {
                     SpeakerApplicationStatusRequest request) {
 
         return ResponseEntity.ok(
-                speakerService
-                        .updateSpeakerApplicationStatus(
-                                id,
-                                request.status()));
+                speakerService.updateSpeakerApplicationStatus(
+                        id,
+                        request.status()));
+    }
+
+    private UUID getAuthenticatedUserId(
+            Authentication authentication) {
+
+        if (authentication == null
+                || authentication.getPrincipal() == null) {
+
+            throw new IllegalStateException(
+                    "Authenticated user is required");
+        }
+
+        Object principal =
+                authentication.getPrincipal();
+
+        if (principal instanceof UUID userId) {
+            return userId;
+        }
+
+        try {
+            return UUID.fromString(principal.toString());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalStateException(
+                    "Invalid authenticated user ID");
+        }
     }
 
     // ---------------------------------------------------------

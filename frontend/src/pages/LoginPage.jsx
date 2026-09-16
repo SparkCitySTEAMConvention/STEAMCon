@@ -17,9 +17,9 @@ export default function LoginPage() {
  const navigate = useNavigate()
  const populate = role => {
   setPortal(role)
-  if (!role) return
+  if (!role) { setNotice(''); return }
   setEmail(demoAccounts[role].email); setPassword(demoAccounts[role].password); setError('')
-  setNotice('Portal credentials selected. You can edit or delete both values.')
+  setNotice(`${role === 'ATTENDEE' ? 'Attendee' : 'Speaker'} Portal credentials selected.`)
  }
  const submit = async event => {
   event.preventDefault(); setError('')
@@ -42,7 +42,7 @@ export default function LoginPage() {
    <button type="button" className="button button-paper" aria-controls="login-password" aria-pressed={show} onClick={() => setShow(!show)}>{show ? 'Hide password' : 'Show password'}</button>
    {error && <p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}
    <button className="button button-dark" type="submit" disabled={isLoading}>{isLoading ? 'Signing in…' : 'Log in'}</button>
-   <p role="status" aria-live="polite">{isLoading ? 'Signing in…' : notice}</p>
+   <span className="portal-sr-only" role="status" aria-live="polite">{isLoading ? 'Signing in…' : notice}</span>
   </form>
 
  </main><Footer /></>
