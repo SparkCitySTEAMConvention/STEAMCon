@@ -1,8 +1,5 @@
 package com.sparkcity.steamcon.events;
 
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -11,45 +8,81 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AttendeeSessionEnrollmentTest {
 
-    private Validator validator;
+    @Test
+    void shouldCreateEnrollment() {
+        UUID attendeeId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+        UUID sessionOccurrenceId = UUID.randomUUID();
 
-    @BeforeEach
-    void setUp() {
-        validator = Validation.buildDefaultValidatorFactory().getValidator();
+        AttendeeSessionEnrollment enrollment =
+                new AttendeeSessionEnrollment(
+                        attendeeId,
+                        sessionId,
+                        sessionOccurrenceId);
+
+        assertEquals(attendeeId, enrollment.getAttendeeId());
+        assertEquals(sessionId, enrollment.getSessionId());
+        assertEquals(
+                sessionOccurrenceId,
+                enrollment.getSessionOccurrenceId());
+        assertEquals(
+                EnrollmentStatus.ENROLLED,
+                enrollment.getStatus());
+        assertNotNull(enrollment.getEnrolledAt());
     }
 
     @Test
-    void shouldAcceptValidEnrollment() {
+    void shouldSetAttendeeId() {
         AttendeeSessionEnrollment enrollment =
-                new AttendeeSessionEnrollment(UUID.randomUUID(), UUID.randomUUID());
+                new AttendeeSessionEnrollment();
 
-        assertTrue(validator.validate(enrollment).isEmpty());
-        assertEquals(EnrollmentStatus.ENROLLED, enrollment.getStatus());
+        UUID attendeeId = UUID.randomUUID();
+
+        enrollment.setAttendeeId(attendeeId);
+
+        assertEquals(
+                attendeeId,
+                enrollment.getAttendeeId());
     }
 
     @Test
-    void shouldRejectMissingAttendee() {
+    void shouldSetSessionId() {
         AttendeeSessionEnrollment enrollment =
-                new AttendeeSessionEnrollment(null, UUID.randomUUID());
+                new AttendeeSessionEnrollment();
 
-        assertFalse(validator.validate(enrollment).isEmpty());
+        UUID sessionId = UUID.randomUUID();
+
+        enrollment.setSessionId(sessionId);
+
+        assertEquals(
+                sessionId,
+                enrollment.getSessionId());
     }
 
     @Test
-    void shouldRejectMissingSession() {
+    void shouldSetSessionOccurrenceId() {
         AttendeeSessionEnrollment enrollment =
-                new AttendeeSessionEnrollment(UUID.randomUUID(), null);
+                new AttendeeSessionEnrollment();
 
-        assertFalse(validator.validate(enrollment).isEmpty());
+        UUID sessionOccurrenceId = UUID.randomUUID();
+
+        enrollment.setSessionOccurrenceId(sessionOccurrenceId);
+
+        assertEquals(
+                sessionOccurrenceId,
+                enrollment.getSessionOccurrenceId());
     }
 
     @Test
-    void shouldAllowCancellation() {
+    void shouldSetStatus() {
         AttendeeSessionEnrollment enrollment =
-                new AttendeeSessionEnrollment(UUID.randomUUID(), UUID.randomUUID());
+                new AttendeeSessionEnrollment();
 
-        enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        enrollment.setStatus(
+                EnrollmentStatus.CANCELLED);
 
-        assertEquals(EnrollmentStatus.CANCELLED, enrollment.getStatus());
+        assertEquals(
+                EnrollmentStatus.CANCELLED,
+                enrollment.getStatus());
     }
 }

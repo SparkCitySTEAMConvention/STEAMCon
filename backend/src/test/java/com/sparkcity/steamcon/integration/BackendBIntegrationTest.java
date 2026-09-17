@@ -87,17 +87,33 @@ class BackendBIntegrationTest {
 
         session = sessionRepository.save(session);
 
+        SessionOccurrence occurrence = new SessionOccurrence();
+        occurrence.setSessionId(session.getId());
+        occurrence.setStartsAt(
+                Instant.parse("2026-10-01T14:00:00Z"));
+        occurrence.setEndsAt(
+                Instant.parse("2026-10-01T15:00:00Z"));
+
+        occurrence = occurrenceRepository.save(occurrence);
+
         ticketRepository.save(
                 new Ticket(attendeeId, track.getId()));
 
         AttendeeSessionEnrollment enrollment =
                 enrollmentService.enroll(
                         attendeeId,
-                        session.getId());
+                        occurrence.getId());
 
         assertNotNull(enrollment.getId());
-        assertEquals(attendeeId, enrollment.getAttendeeId());
-        assertEquals(session.getId(), enrollment.getSessionId());
+        assertEquals(
+                attendeeId,
+                enrollment.getAttendeeId());
+        assertEquals(
+                session.getId(),
+                enrollment.getSessionId());
+        assertEquals(
+                occurrence.getId(),
+                enrollment.getSessionOccurrenceId());
         assertEquals(
                 EnrollmentStatus.ENROLLED,
                 enrollment.getStatus());
@@ -122,16 +138,26 @@ class BackendBIntegrationTest {
 
         session = sessionRepository.save(session);
 
-        // Store the ID in a final variable so the lambda can use it.
-        final UUID sessionId = session.getId();
+        SessionOccurrence occurrence = new SessionOccurrence();
+        occurrence.setSessionId(session.getId());
+        occurrence.setStartsAt(
+                Instant.parse("2026-10-01T14:00:00Z"));
+        occurrence.setEndsAt(
+                Instant.parse("2026-10-01T15:00:00Z"));
+
+        occurrence = occurrenceRepository.save(occurrence);
+
+        final UUID sessionOccurrenceId = occurrence.getId();
 
         assertThrows(
                 IllegalArgumentException.class,
                 () -> enrollmentService.enroll(
                         attendeeId,
-                        sessionId));
+                        sessionOccurrenceId));
 
-        assertEquals(0, enrollmentRepository.count());
+        assertEquals(
+                0,
+                enrollmentRepository.count());
     }
 
     @Test
@@ -151,20 +177,31 @@ class BackendBIntegrationTest {
 
         session = sessionRepository.save(session);
 
+        SessionOccurrence occurrence = new SessionOccurrence();
+        occurrence.setSessionId(session.getId());
+        occurrence.setStartsAt(
+                Instant.parse("2026-10-01T14:00:00Z"));
+        occurrence.setEndsAt(
+                Instant.parse("2026-10-01T15:00:00Z"));
+
+        occurrence = occurrenceRepository.save(occurrence);
+
         ticketRepository.save(
                 new Ticket(
                         attendeeId,
                         allowedTrack.getId()));
 
-        final UUID sessionId = session.getId();
+        final UUID sessionOccurrenceId = occurrence.getId();
 
         assertThrows(
                 IllegalArgumentException.class,
                 () -> enrollmentService.enroll(
                         attendeeId,
-                        sessionId));
+                        sessionOccurrenceId));
 
-        assertEquals(0, enrollmentRepository.count());
+        assertEquals(
+                0,
+                enrollmentRepository.count());
     }
 
     @Test
@@ -181,6 +218,15 @@ class BackendBIntegrationTest {
 
         session = sessionRepository.save(session);
 
+        SessionOccurrence occurrence = new SessionOccurrence();
+        occurrence.setSessionId(session.getId());
+        occurrence.setStartsAt(
+                Instant.parse("2026-10-01T14:00:00Z"));
+        occurrence.setEndsAt(
+                Instant.parse("2026-10-01T15:00:00Z"));
+
+        occurrence = occurrenceRepository.save(occurrence);
+
         ticketRepository.save(
                 new Ticket(
                         attendeeId,
@@ -189,9 +235,10 @@ class BackendBIntegrationTest {
         AttendeeSessionEnrollment enrollment =
                 enrollmentService.autoEnrollMandatorySession(
                         attendeeId,
-                        session.getId());
+                        occurrence.getId());
 
         assertNotNull(enrollment.getId());
+
         assertEquals(
                 EnrollmentStatus.ENROLLED,
                 enrollment.getStatus());
@@ -203,5 +250,9 @@ class BackendBIntegrationTest {
         assertEquals(
                 session.getId(),
                 enrollment.getSessionId());
+
+        assertEquals(
+                occurrence.getId(),
+                enrollment.getSessionOccurrenceId());
     }
 }

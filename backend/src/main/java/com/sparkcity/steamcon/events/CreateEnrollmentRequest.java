@@ -6,10 +6,8 @@ import java.util.UUID;
 
 public record CreateEnrollmentRequest(
 
-        @NotNull(message = "Attendee ID is required")
-        UUID attendeeId,
+        @NotNull(message = "Session occurrence ID is required")
+        UUID sessionOccurrenceId
 
-        @NotNull(message = "Session ID is required")
-        UUID sessionId
 ) {
 }

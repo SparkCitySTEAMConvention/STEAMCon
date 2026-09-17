@@ -8,8 +8,9 @@ import java.util.UUID;
 public interface AttendeeSessionEnrollmentRepository
         extends JpaRepository<AttendeeSessionEnrollment, UUID> {
 
-    Optional<AttendeeSessionEnrollment> findByAttendeeIdAndSessionIdAndStatus(
+    Optional<AttendeeSessionEnrollment>
+    findByAttendeeIdAndSessionOccurrenceIdAndStatus(
             UUID attendeeId,
-            UUID sessionId,
+            UUID sessionOccurrenceId,
             EnrollmentStatus status);
 }

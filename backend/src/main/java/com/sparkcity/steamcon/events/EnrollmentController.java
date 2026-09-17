@@ -30,7 +30,7 @@ public class EnrollmentController {
         AttendeeSessionEnrollment enrollment =
                 enrollmentService.enroll(
                         authenticatedUserId,
-                        request.sessionId());
+                        request.sessionOccurrenceId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -42,14 +42,21 @@ public class EnrollmentController {
             @RequestParam UUID attendeeId,
             @RequestParam UUID sessionId) {
 
-        enrollmentService.cancelEnrollment(attendeeId, sessionId);
+        enrollmentService.cancelEnrollment(
+                attendeeId,
+                sessionId);
 
         return ResponseEntity.noContent().build();
     }
 
-    private UUID getAuthenticatedUserId(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new IllegalStateException("Authenticated user is required");
+    private UUID getAuthenticatedUserId(
+            Authentication authentication) {
+
+        if (authentication == null
+                || authentication.getPrincipal() == null) {
+
+            throw new IllegalStateException(
+                    "Authenticated user is required");
         }
 
         Object principal = authentication.getPrincipal();
@@ -59,9 +66,13 @@ public class EnrollmentController {
         }
 
         try {
-            return UUID.fromString(principal.toString());
+            return UUID.fromString(
+                    principal.toString());
+
         } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException("Invalid authenticated user ID");
+
+            throw new IllegalStateException(
+                    "Invalid authenticated user ID");
         }
     }
 }
