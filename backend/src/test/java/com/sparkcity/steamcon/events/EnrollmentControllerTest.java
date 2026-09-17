@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -56,6 +57,8 @@ class EnrollmentControllerTest {
                         sessionId);
 
         mockMvc.perform(post("/api/enrollments")
+                        .principal(new UsernamePasswordAuthenticationToken(
+                                attendeeId, null))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -131,6 +134,8 @@ class EnrollmentControllerTest {
                         sessionId);
 
         mockMvc.perform(post("/api/enrollments")
+                        .principal(new UsernamePasswordAuthenticationToken(
+                                attendeeId, null))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
