@@ -104,9 +104,21 @@ the required schedule data exists.
 
 The five shared tracks supply preview choices. speakerProposalSource creates local SUBMITTED records without modifying the shared proposal fixtures or calling the backend. Records stay in memory per AuthContext user for the current login/application session, survive portal navigation, and reset on new login or refresh. Separate source instances are isolated. Locally submitted proposals appear separately on the dashboard; they do not imply confirmed participation or scheduling.
 
-Preview-created SUBMITTED, unscheduled proposals may be deleted after dashboard confirmation during the current preview session. Only records owned by the current preview source can be removed. Original Bill Nye fixtures, approved/scheduled proposals and panel memberships stay protected. Deletion remains local, preserves other records, and does not call a backend endpoint; the backend currently has no proposal deletion/cancellation/withdrawal contract.
+Preview-created SUBMITTED, unscheduled proposals may be deleted after dashboard confirmation during the current preview session. Only records owned by the current preview source can be removed. Original Bill Nye fixtures, approved/scheduled proposals and panel memberships stay protected. Deletion remains local, preserves other records, and does not call a backend endpoint; live proposal withdrawal uses a separate confirmed DELETE contract; it never removes preview fixtures.
 
 
 ## Speaker profile preview
 
 `speakerProfileSource` clones the Bill Nye record and owns in-memory edits for the current login/application session. Dashboard and edit form share that source across navigation; new login or refresh resets it. Profile and track reads and saves never call the API. The public directory and imported fixtures stay unchanged, as do proposal, forum and notification state. Display name, professional title (`role`), organization, biography and primary track are editable and required; text is trimmed. Text limits are 255 characters for name/title/organization and 2000 for biography. Title, biography and primary profile track are preview-only backend fields; no profile-update endpoint exists. Edits do not imply confirmed participation, and the disclaimer remains visible.
+
+### Authenticated speaker boundary
+
+`services/speakerProposalSource.js` separates the Bill Nye demo from live speaker
+operations. Only `authSource === 'demo'` uses fixtures and preview scenarios.
+Backend speakers load `/api/speaker/dashboard` and `/api/proposals` detail/list
+routes with the authenticated UUID in the temporary `speakerId` query; edits use
+PATCH with title, description and trackId, and named withdrawal uses DELETE 204.
+`services/speakerPresentation.js` keeps original backend records and centralizes
+presentation aliases/status labels. Live errors never substitute these fixtures.
+Profile updates, scheduling and speaker/session relationships still await backend
+contracts. See `../../AUTH_INTEGRATION.md` for connected routes and constraints.
