@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom'
 import { createServer } from 'vite'
 import { act, createElement } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createMemoryRouter, RouterProvider } from 'react-router-dom'
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom'
 import { eventExperiences, eventsForExperience } from '../src/config/eventExperiences.js'
 
 test('mounted public Events page reacts to query navigation, collection changes, and Back/Forward', async t => {
@@ -24,9 +24,19 @@ test('mounted public Events page reacts to query navigation, collection changes,
     const { default: App } = await server.ssrLoadModule('/src/App.jsx')
     const { AuthContext } = await server.ssrLoadModule('/src/auth/useAuth.js')
     const auth = { user: null, isAuthenticated: false, isLoading: false, authSource: null, hasBackendSession: false }
-    router = createMemoryRouter([{ path: '*', element: createElement(AuthContext.Provider, { value: auth }, createElement(App)) }], { initialEntries: ['/events'] })
+    router = createMemoryRouter([{ path: '*', element: createElement(AuthContext.Provider, { value: auth }, createElement(App)) }], { initialEntries: ['/'] })
     root = createRoot(document.getElementById('root'))
     await act(async () => { root.render(createElement(RouterProvider, { router })) })
+    await t.test('Events is an accessible direct link to the public Events page without a disclosure', async () => {
+      const nav = document.querySelector('nav[aria-label="Main navigation"]')
+      const link = nav.querySelector('a[href="/events"]')
+      assert.equal(link.textContent, 'Events')
+      assert.equal(link.tabIndex, 0)
+      assert.equal(nav.querySelector('details, summary, button, #events-disclosure'), null)
+      await act(async () => { link.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })) })
+      assert.equal(router.state.location.pathname, '/events')
+      assert.ok(document.querySelector('.events-page'))
+    })
     const originalMain = document.querySelector('main')
     await t.test('compact introduction leads directly to reachable experience filters and the selected heading', () => {
       const introduction = document.querySelector('.events-hero')
@@ -75,7 +85,7 @@ test('mounted public Events page reacts to query navigation, collection changes,
       return { heading: experience.label, collection }
     }
     const clickExperience = async key => {
-      const link = document.querySelector(`#events-disclosure a[href="/events?experience=${key}"]`)
+      const link = document.querySelector(`[aria-label="Choose an event experience"] a[href="/events?experience=${key}"]`)
       await act(async () => { link.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true, button: 0 })) })
     }
     expectSelection('schedule')
@@ -116,6 +126,38 @@ test('mounted public Events page reacts to query navigation, collection changes,
     })
     await act(async () => { await router.navigate('/events?experience=invalid') })
     expectSelection('schedule')
+    await t.test('account menu keeps Escape focus, pointer dismissal, portal links, and logout behavior', async () => {
+      const { default: Header } = await server.ssrLoadModule('/src/components/Header.jsx')
+      let logouts = 0
+      for (const role of ['SPEAKER', 'ATTENDEE']) {
+        const account = { ...auth, isAuthenticated: true, user: { role, displayName: 'Account' }, logout: async () => { logouts++ } }
+        await act(async () => { root.render(createElement(MemoryRouter, null, createElement(AuthContext.Provider, { value: account }, createElement(Header)))) })
+        const menu = document.querySelector('details')
+        const summary = menu.querySelector('summary')
+        const open = async () => { await act(async () => { menu.open = true; menu.dispatchEvent(new dom.window.Event('toggle')) }) }
+        await open()
+        assert.equal(summary.getAttribute('aria-expanded'), 'true')
+        await act(async () => { summary.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true })) })
+        assert.equal(menu.open, true)
+        await act(async () => { summary.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })) })
+        assert.equal(menu.open, false)
+        assert.equal(document.activeElement, summary)
+        await open()
+        await act(async () => { summary.dispatchEvent(new dom.window.Event('pointerdown', { bubbles: true })) })
+        assert.equal(menu.open, true)
+        await act(async () => { document.body.dispatchEvent(new dom.window.Event('pointerdown', { bubbles: true })) })
+        assert.equal(menu.open, false)
+        await open()
+        const portal = menu.querySelector('a')
+        assert.equal(portal.getAttribute('href'), role === 'SPEAKER' ? '/speaker' : '/attendee')
+        await act(async () => { portal.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true })) })
+        assert.equal(menu.open, false)
+        await open()
+        await act(async () => { menu.querySelector('button').click() })
+        assert.equal(menu.open, false)
+      }
+      assert.equal(logouts, 2)
+    })
     assert.equal(fetch.mock.callCount(), 0)
   } finally {
     if (root) await act(async () => { root.unmount() })
