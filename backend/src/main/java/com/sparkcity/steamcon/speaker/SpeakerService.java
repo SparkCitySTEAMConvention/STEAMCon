@@ -41,7 +41,7 @@ public class SpeakerService {
     // ---------------------------------------------------------
 
     public SessionProposal createProposal(
-            UUID authenticatedUserId,
+            UUID speakerId,
             String title,
             String description,
             UUID trackId) {
@@ -82,7 +82,7 @@ public class SpeakerService {
         SessionProposal proposal =
                 new SessionProposal();
 
-        proposal.setSpeakerId(authenticatedUserId);
+        proposal.setSpeakerId(speakerId);
         proposal.setTitle(title);
         proposal.setDescription(description);
         proposal.setTrackId(trackId);
@@ -223,7 +223,7 @@ public class SpeakerService {
             UUID authenticatedUserId,
             UUID sessionId) {
 
-        if (speakerId == null) {
+        if (authenticatedUserId == null) {
             throw new IllegalArgumentException(
                     "Speaker ID is required");
         }
@@ -235,7 +235,7 @@ public class SpeakerService {
 
         boolean duplicate =
                 speakerApplicationRepository
-                        .findBySpeakerId(speakerId)
+                        .findBySpeakerId(authenticatedUserId)
                         .stream()
                         .anyMatch(application ->
                                 sessionId.equals(
@@ -301,7 +301,7 @@ public class SpeakerService {
             ApprovalDecisionType decisionType,
             String comment) {
 
-        if (adminReviewerId == null) {
+        if (authenticatedAdminId == null) {
             throw new IllegalArgumentException(
                     "Authenticated admin ID is required");
         }
@@ -366,7 +366,7 @@ public class SpeakerService {
                 proposalId);
 
         approvalDecision.setAdminReviewerId(
-                adminReviewerId);
+                authenticatedAdminId);
 
         approvalDecision.setDecision(
                 decisionType);

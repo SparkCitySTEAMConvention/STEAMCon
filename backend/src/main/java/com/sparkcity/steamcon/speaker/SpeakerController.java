@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,7 +37,10 @@ public class SpeakerController {
     public ResponseEntity<SessionProposal>
             createProposal(
                     @RequestBody
-                    CreateProposalRequest request) {
+                    CreateProposalRequest request,
+                    Authentication authentication) {
+
+        UUID authenticatedUserId = getAuthenticatedUserId(authentication);
 
         SessionProposal proposal =
                 speakerService.createProposal(
@@ -154,7 +158,7 @@ public class SpeakerController {
                 speakerService
                         .makeProposalDecision(
                                 id,
-                                request.adminReviewerId(),
+                                authenticatedUserId,
                                 request.decision(),
                                 request.comment()));
     }
@@ -167,12 +171,13 @@ public class SpeakerController {
     public ResponseEntity<SpeakerApplication>
             createSpeakerApplication(
                     @RequestBody
-                    CreateSpeakerApplicationRequest request) {
+                    CreateSpeakerApplicationRequest request,
+                    Authentication authentication) {
 
         SpeakerApplication application =
                 speakerService
                         .createSpeakerApplication(
-                                request.speakerId(),
+                                getAuthenticatedUserId(authentication),
                                 request.sessionId());
 
         return ResponseEntity
