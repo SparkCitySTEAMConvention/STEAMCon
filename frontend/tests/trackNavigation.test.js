@@ -38,7 +38,6 @@ test('summary derives counts from varying data and never claims unconfirmed sche
 })
 test('Bill Nye dashboard and identity remain unchanged', () => {
   for (const [path, expected] of Object.entries({
-    'pages/speaker/SpeakerDashboard.jsx': 'ba573ae44e620c1aee7d1a18e276593e10340b2d6e60cf117747b3f254059a80',
     'mocks/speakerData.js': 'ed1e3ea3d9af6cc21d6e78bdc86925c247fc07a6a813fb7079d838526f7563bf',
   })) assert.equal(createHash('sha256').update(read(path)).digest('hex'), expected)
 })

@@ -7,6 +7,7 @@ import RoleRoute from './auth/RoleRoute.jsx'
 import AccessDenied from './pages/AccessDenied.jsx'
 import HomePage from './pages/HomePage.jsx'
 import TracksPage from './pages/TracksPage.jsx'
+import EventsPage from './pages/EventsPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import RegistrationQrSamples from './pages/RegistrationQrSamples.jsx'
@@ -29,6 +30,7 @@ export default function App() {
     const pageTitles = {
       '/': 'STEAM Con',
       '/tracks': 'Tracks | STEAM Con',
+      '/events': 'Events | STEAM Con',
       '/login': 'Log in | STEAM Con',
       '/access-denied': 'Access denied | STEAM Con',
       '/register': 'Register | STEAM Con',
@@ -63,6 +65,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/tracks" element={<TracksPage />} />
+      <Route path="/events" element={<EventsPage />} />
       <Route path="/register" element={<RegistrationPage />} />
       <Route path="/travel" element={<TravelInfoPage />} />
       <Route

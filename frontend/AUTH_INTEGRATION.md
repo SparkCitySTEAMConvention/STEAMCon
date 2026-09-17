@@ -38,11 +38,11 @@ Live POST `/api/proposals` sends exactly:
 { title, description, trackId }
 ```
 
-Title and description are trimmed. No `speakerId`, `status`, abstract, format, duration or other frontend field reaches the live request. Speaker identity belongs to the authenticated backend session, rather than a caller-supplied ownership field. `speakerId` is added only to preview/mock proposal ownership records; preview records also use local SUBMITTED status.
+Title and description are trimmed. No `speakerId`, `status`, abstract, format, duration or other frontend field reaches the live request. Speaker identity belongs to the authenticated backend session, rather than a caller-supplied ownership field. `speakerId` is excluded from creation bodies; it remains a temporary authenticated ownership query for live reads and mutations. Preview records also use local SUBMITTED status.
 
 Validation follows the text limits in `CreateProposalRequest`: title permits 200 characters and description permits 2,000 characters. The form requires nonblank title/description and a selected track, rejects overlong trimmed values without truncating, and requires a loaded backend track UUID for live submission. Live creation also requires a verified backend speaker UUID, SPEAKER role and active session flag. Tracks load through the existing eventRepository GET `/api/tracks`; backend responses are returned unchanged. Submission failures preserve entries for retry.
 
-The local backend still needs synchronization before end-to-end proposal validation: SpeakerController references an undefined `authenticatedUserId` in proposal creation and uses `Authentication` without an import. The request record also retains a status field, and SessionProposal retains default JPA string columns despite the request's 2,000-character description limit. The frontend follows the exact three-field body and request validation limits documented here; backend compilation and persistence have not been verified.
+Backend status supplied for this integration: `mvn test` passes with 104 tests. Frontend verification below tests request contracts without running backend persistence.
 
 ## Demo identities and preserved preview behavior
 
@@ -61,7 +61,7 @@ Profile editing remains an isolated Bill Nye preview. Saved fields and dashboard
 
 ## Existing live sources and adapters
 
-Verified backend roles unlock the existing speaker forum, notification and proposal creation sources. Demos continue to use isolated local data, without backend requests.
+Verified backend roles unlock the speaker dashboard, proposal, forum and notification sources. Demos continue to use isolated local data, without backend requests.
 
 - notificationRepository uses GET `/api/notifications/me?userId=…` and POST `/api/notifications/{id}/read`. Live reads require a backend user UUID and active session; failed updates preserve unread state.
 - forumRepository uses GET `/api/forums` with optional scope, GET `/api/forums/{id}/messages` with role/permission, and POST to that messages path with `{ authorId, body, role, permission }`. Speaker sources use READ for reads and POST for submissions, preserve failed drafts and provide retry states. Forum policies remain backend-enforced.
@@ -71,15 +71,58 @@ Verified backend roles unlock the existing speaker forum, notification and propo
 
 The following integrations remain unavailable and are not unlocked by authentication:
 
-- Proposal list/read/update/delete. The existing dashboard, detail and draft-edit flows remain mock-backed; live deletion is disabled. Local SpeakerController contains read/update/withdrawal routes with caller-supplied speakerId, but they have not been integrated or established as working secured ownership contracts. Live creation does not manufacture dashboard persistence.
 - Profile update. No verified editable profile read/update contract supports the preview's complete fields; backend profile editing remains disabled. Authentication identity fields are not a profile update API.
-- Speaker application list/status reads. No live application listing or status-reading adapter/UI is integrated. Creation and admin status-write endpoints do not provide these reads.
 - Speaker-to-session scheduling reads. Shared sessions and occurrences do not establish a verified speaker/proposal scheduling relationship. The frontend does not invent assignments, dates or calendar eligibility.
 
-Supported backend ownership, authorization, response and validation contracts must be confirmed before connecting these operations. No new Tracks-page speaker buttons are added.
+Profile updates and scheduling still require supported backend contracts. No new Tracks-page speaker buttons are added.
 
 ## Development proxy and verification
 
 The Vite development server proxies `/api` to `http://localhost:8080`; `VITE_API_PROXY_TARGET` overrides the target through loadEnv. Production build and preview do not provide this proxy, so deployment requires an API at the application origin.
 
 Run `npm test`, `npm run lint` and `npm run build` from `frontend/`, and `git diff --check` from the repository. Tests cover nested authentication, demo restoration/isolation, backend roles, current-session restoration, logout cleanup, exact adapter bodies and headers, proposal limit boundaries, and preservation of existing preview behavior. These checks verify frontend contracts; they do not establish a running backend connection or successful backend persistence.
+
+## Live speaker dashboard and proposals
+
+Backend SPEAKER sessions with an active session and valid user UUID now connect
+`/speaker` and `/speaker/proposals/:proposalId` to the authenticated speaker
+source. The dashboard reads applications and approval feedback from the dashboard
+endpoint and the visible proposal list from `/api/proposals/me`. Both reads must
+succeed; failure in either exposes Retry without preview fallback.
+Real users display their authenticated `displayName`; live failures expose an
+accessible error and Retry rather than falling back to Bill Nye.
+
+Connected contracts (all protected requests use `authenticatedFetch` and
+`X-Session-Id`):
+
+- `GET /api/speaker/dashboard?speakerId={authenticatedUserId}`
+- `GET /api/proposals/me?speakerId={authenticatedUserId}` (visible dashboard proposal list)
+- `GET /api/proposals/{proposalId}?speakerId={authenticatedUserId}`
+- `POST /api/proposals` with `{title, description, trackId}`
+- `PATCH /api/proposals/{proposalId}?speakerId={authenticatedUserId}` with only
+  `{title, description, trackId}` (nullable fields supported by repository)
+- `DELETE /api/proposals/{proposalId}?speakerId={authenticatedUserId}` returning
+  204, without JSON parsing
+
+The `speakerId` query is a temporary backend limitation. The source derives it
+from a snapshot of the authenticated backend user, ignoring caller, form and route ownership values.
+The backend must continue enforcing ownership; a future session-derived backend
+contract can remove this query. Proposal and track identifiers are validated as
+UUIDs before live dispatch.
+
+DRAFT and SUBMITTED proposals expose editing and named withdrawal confirmation.
+Live edits validate the existing title/description limits, require an available
+backend track, and retain the current track while choices load or retry. Empty
+or failed track loads block saving with explanatory text and Retry. Pending
+saves disable inputs and reject duplicate submission.
+
+Failed saves preserve draft inputs; failed withdrawal preserves the proposal and
+confirmation for retry. Confirmation must finish or be cancelled before editing;
+cancellation restores focus to the withdrawal action. Withdrawal succeeds with a live announcement and focus
+on the withdrawn heading. Profile editing remains unavailable live until a
+profile-update endpoint exists. Scheduling, proposal-to-session and speaker
+relationships remain unavailable and receive neutral presentation.
+
+Demo SPEAKER sessions retain Bill Nye fixtures, local proposal creation/deletion,
+profile edits, notifications and forums. Development preview scenarios apply
+only to demo sessions and cannot replace live results.

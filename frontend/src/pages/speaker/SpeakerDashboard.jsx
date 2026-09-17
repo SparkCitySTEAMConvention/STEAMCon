@@ -20,6 +20,7 @@ import { eventRepository } from '../../services/eventRepository.js'
 import { getSpeakerProposalSource } from '../../services/speakerProposalSource.js'
 import { getSpeakerProfileSource } from '../../services/speakerProfileSource.js'
 import PreviewProposalList from '../../components/speaker/PreviewProposalList.jsx'
+import { liveSpeaker } from '../../services/speakerPresentation.js'
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
@@ -27,8 +28,8 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const notifications = useMemo(() => getSpeakerNotificationSource(notificationRepository, user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
   const proposalSource = useMemo(() => getSpeakerProposalSource(repository, eventRepository, user, authSource, hasBackendSession), [repository, user, authSource, hasBackendSession])
   const [params] = useSearchParams()
-  const scenario = import.meta.env.DEV ? params.get('preview') : null
-  const source = useMemo(() => previewRepository(repository, scenario), [repository, scenario])
+  const scenario = authSource === 'demo' && import.meta.env.DEV ? params.get('preview') : null
+  const source = useMemo(() => previewRepository(proposalSource, scenario), [proposalSource, scenario])
   const profileSource = useMemo(() => getSpeakerProfileSource(user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
   const profileRevision = useSyncExternalStore(profileSource.subscribe, profileSource.getRevision, profileSource.getRevision)
   const loader = useCallback(async () => {
@@ -37,7 +38,7 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   }, [source, profileSource])
   const resourceKey = useMemo(() => ({ loader, profileRevision }), [loader, profileRevision])
   const resource = useSpeakerResource(loader, resourceKey)
-  return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { ...speakerData, proposals: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { speaker: proposalSource.demo ? speakerData.speaker : liveSpeaker(user), convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
 function SpeakerDashboardView({ proposalSource, data, resource, notifications, notificationKey }) {
@@ -55,12 +56,12 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
           <h1>Welcome back, {speaker.name}.</h1>
           <p>Keep an eye on your proposals, upcoming sessions, and organizer feedback. Your next great conversation starts here.</p>
         </div>
-        <p className="portal-demo">{developmentDisclaimer}</p>
+        <p className="portal-demo">{proposalSource.demo ? developmentDisclaimer : 'Live speaker workspace'}</p>
         {resource.status === 'loading' && <p role="status">Loading proposals…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load proposals.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
         <SpeakerNotifications key={notificationKey} source={notifications} />
         {resource.status === 'ready' && <>
-        <section className="portal-detail-section" aria-labelledby="experience-heading">
+        {proposalSource.demo && <><section className="portal-detail-section" aria-labelledby="experience-heading">
           <h2 id="experience-heading">Professional experience</h2>
           <p>{speaker.bio}</p>
         </section>
@@ -68,20 +69,20 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
           <h2 id="event-heading">{convention.name}</h2>
           <p>{conventionScheduleLabel(convention)}</p>
           <p>{locationLabel(convention)}</p>
-        </section>
-        {proposalSource.demo ? <PreviewProposalList key={notificationKey} source={proposalSource} /> : <p className="portal-demo">Proposal removal is unavailable until the backend provides a supported deletion or withdrawal contract.</p>}
-        <ProposalSummary proposals={proposals} />
+        </section></>}
+        {proposalSource.demo ? <PreviewProposalList key={notificationKey} source={proposalSource} /> : <section aria-labelledby="applications-heading"><h2 id="applications-heading">Applications</h2>{data.applications.length ? <ul>{data.applications.map(item => <li key={item.id}>{item.status || 'Status unavailable'}</li>)}</ul> : <p>No applications yet.</p>}</section>}
+        <ProposalSummary proposals={proposals} live={!proposalSource.demo} />
         <div className="portal-columns">
           <section aria-labelledby="proposals-heading">
             <div className="portal-section-heading"><h2 id="proposals-heading">Your Proposals</h2><span>{proposals.length} total</span></div>
-            <TrackFilters value={trackId} onChange={setTrackId} />
+            <TrackFilters value={trackId} onChange={setTrackId} options={proposalSource.demo ? undefined : [...new Set(proposals.map(item => item.trackId).filter(Boolean))].map((id, index) => ({ id, name: `Track ${index + 1} (name unavailable)` }))} />
             <p className="portal-result-count" role="status">{filtered.length} proposals shown</p>
             {filtered.length ? <ul className="portal-list portal-proposals">{filtered.map(proposal => <ProposalCard key={proposal.id} proposal={proposal} />)}</ul> : <EmptyState title={proposals.length ? "No proposals in this track." : "Make room for your first idea."}>{proposals.length ? 'Choose another track or return to All to explore your proposals.' : 'Use Propose a Session to submit your idea.'}</EmptyState>}
           </section>
           <div className="portal-sidebar">
             <section aria-labelledby="sessions-heading">
               <h2 id="sessions-heading">Upcoming speaking engagements</h2>
-              <p className="portal-muted">Preview schedule · The backend does not expose a speaker proposal-to-session relationship.</p>
+              <p className="portal-muted">{proposalSource.demo ? 'Preview schedule' : 'Scheduling unavailable'} · The backend does not expose a speaker proposal-to-session relationship.</p>
               {sessions.length ? <ul className="portal-list">{sessions.map(session => <UpcomingSessionCard key={session.id} session={session} />)}</ul> : <EmptyState title="Your stage is still taking shape.">Upcoming sessions will appear here when they are assigned.</EmptyState>}
             </section>
             <SpeakerFeedback feedback={feedback} />
@@ -89,7 +90,7 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
         </div>
         </>}
       </main>
-      <footer className="container portal-footer"><p>STEAM Con · A place for curious minds.</p><p>Speaker Portal / Preview</p></footer>
+      <footer className="container portal-footer"><p>STEAM Con · A place for curious minds.</p><p>Speaker Portal{proposalSource.demo ? ' / Preview' : ''}</p></footer>
     </div>
   )
 }

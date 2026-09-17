@@ -3,6 +3,7 @@ package com.sparkcity.steamcon.events;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,12 +21,16 @@ public class EnrollmentController {
 
     @PostMapping
     public ResponseEntity<EnrollmentResponse> enroll(
-            @Valid @RequestBody CreateEnrollmentRequest request) {
+            @Valid @RequestBody CreateEnrollmentRequest request,
+            Authentication authentication) {
+
+        UUID authenticatedUserId =
+                getAuthenticatedUserId(authentication);
 
         AttendeeSessionEnrollment enrollment =
                 enrollmentService.enroll(
-                        request.attendeeId(),
-                        request.sessionId());
+                        authenticatedUserId,
+                        request.sessionOccurrenceId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -37,8 +42,37 @@ public class EnrollmentController {
             @RequestParam UUID attendeeId,
             @RequestParam UUID sessionId) {
 
-        enrollmentService.cancelEnrollment(attendeeId, sessionId);
+        enrollmentService.cancelEnrollment(
+                attendeeId,
+                sessionId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private UUID getAuthenticatedUserId(
+            Authentication authentication) {
+
+        if (authentication == null
+                || authentication.getPrincipal() == null) {
+
+            throw new IllegalStateException(
+                    "Authenticated user is required");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UUID userId) {
+            return userId;
+        }
+
+        try {
+            return UUID.fromString(
+                    principal.toString());
+
+        } catch (IllegalArgumentException exception) {
+
+            throw new IllegalStateException(
+                    "Invalid authenticated user ID");
+        }
     }
 }

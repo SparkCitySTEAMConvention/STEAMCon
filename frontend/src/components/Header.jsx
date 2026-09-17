@@ -7,7 +7,6 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const loginRef = useRef(null)
-
   useEffect(() => {
     const closeOutside = event => {
       if (loginRef.current && !loginRef.current.contains(event.target)) loginRef.current.open = false
@@ -33,7 +32,7 @@ export default function Header() {
       <div className="container header-inner">
         <Link className="wordmark" to="/" aria-label="STEAM Con home">STEAM <span>Con</span><span className="brand-dot" aria-hidden="true" /></Link>
         <nav aria-label="Main navigation">
-          <a href="/#events">Events</a>
+          <Link to="/events">Events</Link>
           <Link to="/tracks">Tracks</Link>
           <Link to="/speakers">Speakers</Link>
           <Link to="/travel">Travel</Link>

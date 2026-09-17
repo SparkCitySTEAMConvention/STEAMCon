@@ -194,10 +194,10 @@ test('separate preview sessions do not leak deletions', async () => {
   assert.deepEqual(second.source.getPreviewProposals(), [second.proposal])
   assert.deepEqual(first.source.getPreviewProposals(), [])
 })
-test('live deletion is unavailable without a backend contract and never fetches', async t => {
+test('local deletion stays preview-only; live proposals require confirmed withdrawal', async t => {
   const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('Fetch called') })
   const source = live()
   assert.equal(source.canDeleteProposal('any-id'), false)
-  await assert.rejects(() => source.deleteProposal('any-id'), /backend provides/)
+  await assert.rejects(() => source.deleteProposal('any-id'), /confirmed withdrawal/)
   assert.equal(fetch.mock.callCount(), 0)
 })

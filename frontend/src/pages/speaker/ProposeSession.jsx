@@ -53,7 +53,7 @@ function ProposalForm({ source }) {
         {resource.status === 'loading' && <p role="status">Loading tracks…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load tracks.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry loading tracks</button></div>}
         {resource.status === 'ready' && !resource.data.length && <p role="alert">No tracks are available. Please try again later.</p>}
-        <div aria-live="polite">{sending && <p>Submitting proposal…</p>}{saved && <p>{source.demo ? 'Your preview proposal was saved locally for this application session. Nothing was sent to the backend.' : 'Your proposal was submitted successfully to the backend. Live proposal reads are not yet available in the Speaker Portal.'}</p>}</div>
+        <div aria-live="polite">{sending && <p>Submitting proposal…</p>}{saved && <p>{source.demo ? 'Your preview proposal was saved locally for this application session. Nothing was sent to the backend.' : 'Your proposal was submitted successfully to the backend. Return to the Speaker Portal to view it.'}</p>}</div>
         {saved ? <Link className="button button-dark" to="/speaker">Back to Speaker Portal</Link> : <form ref={form} className="portal-editor portal-create-form" noValidate onSubmit={submit} aria-busy={sending}>
           <p>Titles must be {proposalTitleLimit} characters or fewer; descriptions must be {proposalTextLimit} characters or fewer.</p>
           {['title', 'description', 'trackId'].map(field => <div key={field}>
