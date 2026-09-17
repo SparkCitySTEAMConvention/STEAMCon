@@ -6,7 +6,6 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 import { eventExperiences, eventsForExperience, previewExperienceEvents, selectedExperience, experienceDestination } from '../src/config/eventExperiences.js'
-import { listenForDisclosureDismissal } from '../src/utils/disclosure.js'
 import { createPublicProgramSource, adaptProgram } from '../src/services/publicProgramSource.js'
 
 const anonymous = { user: null, isAuthenticated: false, isLoading: false, authSource: null, hasBackendSession: false }
@@ -37,67 +36,29 @@ test('public Events route renders anonymously and preserves existing route desti
   } finally { await server.close() }
 })
 
-test('header exposes native keyboard disclosure, all Events links, and unchanged speaker account links', async () => {
+test('header exposes a direct Events link and unchanged account and login navigation', async () => {
   const server = await createServer({ server: { middlewareMode: true, watch: null, ws: false }, appType: 'custom' })
   try {
     const { default: Header } = await server.ssrLoadModule('/src/components/Header.jsx')
     const { AuthContext } = await server.ssrLoadModule('/src/auth/useAuth.js')
-    const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(AuthContext.Provider, { value: { ...anonymous, isAuthenticated: true, user: { role: 'SPEAKER', displayName: 'Bill Nye' } } }, createElement(Header))))
-    assert.match(html, /<details[^>]*><summary aria-expanded="false" aria-controls="events-disclosure">Events<\/summary>/)
-    assert.match(html, /href="\/events"[^>]*>All events/)
-    for (const item of eventExperiences) {
-      assert.ok(html.includes(`href="${experienceDestination(item.key)}"`))
-      assert.ok(html.includes(`>${escapeText(item.label)}</a>`))
+    for (const role of [null, 'SPEAKER', 'ATTENDEE']) {
+      const auth = role ? { ...anonymous, isAuthenticated: true, user: { role, displayName: 'Account' } } : anonymous
+      const html = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(AuthContext.Provider, { value: auth }, createElement(Header))))
+      assert.equal((html.match(/href="\/events"/g) || []).length, 1)
+      assert.match(html, /<a href="\/events"[^>]*>Events<\/a>/)
+      assert.doesNotMatch(html, /events-disclosure|<summary[^>]*>Events|All events|experience=/)
+      for (const [route, label] of [['tracks', 'Tracks'], ['speakers', 'Speakers'], ['travel', 'Travel']]) assert.match(html, new RegExp(`href="/${route}"[^>]*>${label}`))
+      if (role) {
+        assert.match(html, /<summary aria-expanded="false" aria-controls="account-disclosure">Account<\/summary>/)
+        assert.match(html, new RegExp(`href="/${role === 'SPEAKER' ? 'speaker' : 'attendee'}"[^>]*>${role === 'SPEAKER' ? 'Speaker' : 'Attendee'} Portal`))
+        assert.match(html, /<button>Log out<\/button>/)
+        assert.doesNotMatch(html, /href="\/login"/)
+      } else {
+        assert.match(html, /href="\/login"[^>]*>Log in/)
+        assert.doesNotMatch(html, /<details|<summary|<button/)
+      }
     }
-    assert.match(html, /href="\/speaker"[^>]*>Speaker Portal/)
-    assert.match(html, /<button>Log out<\/button>/)
-    assert.doesNotMatch(html, /Attendee Portal/)
-    const source = await readFile(new URL('../src/components/Header.jsx', import.meta.url), 'utf8')
-    assert.match(source, /useEffect\(\(\) => listenForDisclosureDismissal\(eventsRef.current\)/)
-    assert.match(source, /onClick=\{\(\) => \{ eventsRef.current.open = false \}\}/)
-    assert.doesNotMatch(source, /onMouseEnter|onMouseOver/)
   } finally { await server.close() }
-})
-
-function disclosureFixture() {
-  const target = new EventTarget()
-  const inside = {}
-  let focused = false
-  const disclosure = { open: true, contains: node => node === inside, querySelector: selector => {
-    assert.equal(selector, 'summary')
-    return { focus: () => { focused = true } }
-  } }
-  const dispose = listenForDisclosureDismissal(disclosure, target)
-  const dispatch = (type, properties = {}) => {
-    const event = new Event(type)
-    for (const [key, value] of Object.entries(properties)) Object.defineProperty(event, key, { value })
-    target.dispatchEvent(event)
-  }
-  return { disclosure, inside, dispatch, dispose, focused: () => focused }
-}
-
-test('Escape closes the Events disclosure and returns focus to its summary', () => {
-  const fixture = disclosureFixture()
-  fixture.dispatch('keydown', { key: 'Tab' })
-  assert.equal(fixture.disclosure.open, true)
-  fixture.dispatch('keydown', { key: 'Escape' })
-  assert.equal(fixture.disclosure.open, false)
-  assert.equal(fixture.focused(), true)
-  fixture.dispose()
-})
-
-test('outside pointer closes the menu; inside pointer preserves it and cleanup removes listeners', () => {
-  const fixture = disclosureFixture()
-  fixture.dispatch('pointerdown', { target: fixture.inside })
-  assert.equal(fixture.disclosure.open, true)
-  fixture.dispatch('pointerdown')
-  assert.equal(fixture.disclosure.open, false)
-  assert.equal(fixture.focused(), false)
-  fixture.disclosure.open = true
-  fixture.dispose()
-  fixture.dispatch('pointerdown')
-  fixture.dispatch('keydown', { key: 'Escape' })
-  assert.equal(fixture.disclosure.open, true)
 })
 
 for (const key of ['workshops', 'talks', 'special', 'showcase', 'schedule']) {
