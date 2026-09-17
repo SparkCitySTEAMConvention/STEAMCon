@@ -18,7 +18,7 @@ export default function SpeakerHeader({ speaker }) {
         <div className="portal-propose">
           <div className="portal-actions">
           <Link className="button button-dark" to="/speaker/proposals/new">Propose a Session <span aria-hidden="true">＋</span></Link>
-          <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>
+          {speaker.profileEditable === false ? <p className="portal-muted">Profile editing is unavailable until a profile-update endpoint exists.</p> : <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>}
           </div>
         </div>
       </div>
