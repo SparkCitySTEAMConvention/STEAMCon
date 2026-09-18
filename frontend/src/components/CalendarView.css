@@ -1,0 +1,24 @@
+.calendar-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding-block: 1rem; }
+.calendar-filters > button:first-child { min-height: 44px; padding-inline: 1rem; border: 2px solid var(--color-ink); border-radius: 99px; background: var(--color-surface); font-weight: 700; cursor: pointer; }
+.calendar-filters > button:first-child[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); }
+.calendar-category { --calendar-track: var(--color-steel); width: 44px; height: 44px; border: 2px solid var(--color-ink); border-radius: 50%; background: var(--color-surface); font: 700 1rem/1 'Courier New', monospace; cursor: pointer; opacity: 0.4; }
+.calendar-category.is-active { opacity: 1; background: var(--calendar-track); box-shadow: var(--shadow-small); }
+.calendar-science { --calendar-track: var(--color-science); }
+.calendar-technology { --calendar-track: var(--color-technology); }
+.calendar-engineering { --calendar-track: var(--color-engineering); }
+.calendar-art { --calendar-track: var(--color-art); }
+.calendar-mathematics { --calendar-track: var(--color-mathematics); }
+.calendar-result-count { color: var(--color-text-muted); font-size: 0.8rem; margin-bottom: 1rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.calendar-day { min-width: 0; border: 2px solid var(--color-ink); border-radius: var(--radius-medium); background: var(--color-surface); padding: 1.25rem; }
+.calendar-day h3 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.calendar-day ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.calendar-event { --calendar-track: var(--color-steel); min-width: 0; border-left: 6px solid var(--calendar-track); padding: 0.6rem 0.75rem; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.4rem 0.75rem; background: var(--color-paper); border-radius: var(--radius-small); overflow-wrap: anywhere; }
+.calendar-event-time { font: 700 0.7rem/1.4 'Courier New', monospace; color: var(--color-text-muted); }
+.calendar-event-category { justify-self: end; font-weight: 900; }
+.calendar-event h4 { grid-column: 1 / -1; font-size: 0.95rem; margin: 0; }
+.calendar-event p { grid-column: 1 / -1; margin: 0; font-size: 0.75rem; color: var(--color-text-muted); }
+.calendar-day-empty { color: var(--color-text-muted); font-size: 0.8rem; }
+.calendar-empty { border: 2px dashed var(--color-border); border-radius: var(--radius-medium); padding: 2rem; text-align: center; }
+.calendar-footnote { margin-top: 1rem; color: var(--color-text-muted); font-size: 0.8rem; }
+@media (max-width: 900px) { .calendar-grid { grid-template-columns: 1fr; } }
