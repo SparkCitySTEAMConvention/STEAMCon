@@ -31,15 +31,15 @@ export default function SpeakerSpotlight() {
                 <p>{speaker.track}</p>
                 <h3>{speaker.name}</h3>
                 <span>{speaker.session}</span>
-                <a className="speaker-photo-credit" href={speaker.portrait.source} target="_blank" rel="noreferrer">
+                {speaker.portrait.source ? <a className="speaker-photo-credit" href={speaker.portrait.source} target="_blank" rel="noreferrer">
                   Photo: {speaker.portrait.credit} · {speaker.portrait.license}
-                </a>
+                </a> : <small className="speaker-photo-credit">{speaker.portrait.credit} · {speaker.portrait.license}</small>}
               </div>
             </li>
           ))}
         </ul>
 
-        <p className="speaker-placeholder-note">Photography is licensed through Wikimedia Commons. Selection does not imply participation or endorsement.</p>
+        <p className="speaker-placeholder-note">Photo sources and rights are noted on each card. Selection does not imply participation or endorsement.</p>
       </div>
     </section>
   )

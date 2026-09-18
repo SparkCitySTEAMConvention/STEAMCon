@@ -56,9 +56,9 @@ export default function SpeakerDirectory() {
                 <h4>Proposed sessions and panels</h4>
                 <ul>{proposals.filter(proposal => proposal.speakerIds.includes(speaker.id)).map(proposal =>
                   <li key={proposal.id}>{proposal.title} <span className="portal-muted">({proposal.format})</span></li>)}</ul>
-                <a className="directory-photo-credit" href={speaker.portrait.source} target="_blank" rel="noreferrer">
+                {speaker.portrait.source ? <a className="directory-photo-credit" href={speaker.portrait.source} target="_blank" rel="noreferrer">
                   Photo: {speaker.portrait.credit} · {speaker.portrait.license}
-                </a>
+                </a> : <small className="directory-photo-credit">{speaker.portrait.credit} · {speaker.portrait.license}</small>}
               </div>
             </article>
           </li>)}

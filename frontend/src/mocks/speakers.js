@@ -1,6 +1,7 @@
 // Public figures are UI-development placeholders only; no participation,
 // endorsement, booking, partnership, or affiliation with STEAM Con is implied.
-// Portraits are served from Wikimedia Commons under the license shown per image.
+// Commons portraits retain their credits. Bill Nye's user-provided classroom
+// image has unverified reuse rights; do not describe it as openly licensed.
 const photo = (file, url, credit, license) => ({
   url,
   source: `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file).replaceAll('%20', '_')}`,
@@ -10,7 +11,7 @@ const photo = (file, url, credit, license) => ({
 
 export const speakers = [
   ['bill-nye', 'Bill Nye', ['science'], 'Science educator, mechanical engineer, author, television presenter, and former CEO of The Planetary Society from 2010 to 2026.',
-    photo('2014 Senator Coons meets with Bill Nye the Science Guy (cropped to Nye).jpg', 'https://upload.wikimedia.org/wikipedia/commons/8/8c/2014_Senator_Coons_meets_with_Bill_Nye_the_Science_Guy_%28cropped_to_Nye%29.jpg', 'Senator Chris Coons', 'Public domain')],
+    { url: '/images/speakers/bill-nye.jpeg', source: null, credit: 'User-provided classroom image', license: 'Rights unverified' }],
   ['neil-degrasse-tyson', 'Neil deGrasse Tyson', ['science'], 'Astrophysicist and science communicator.',
     photo('Neil deGrasse Tyson at CSICon 2022.jpg', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Neil_deGrasse_Tyson_at_CSICon_2022.jpg/960px-Neil_deGrasse_Tyson_at_CSICon_2022.jpg', 'Karl Withakay', 'CC BY-SA 4.0')],
   ['raven-baxter', 'Raven Baxter', ['science'], 'Science communicator and educator.',
