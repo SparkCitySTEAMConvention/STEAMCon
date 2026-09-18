@@ -28,7 +28,10 @@ function setup(t, fetch) {
   }
 }
 
+const profile = { displayName: 'Speaker', title: 'Scientist', organization: 'Lab', biography: 'Biography' }
 const cases = [
+  ['profile GET', () => speakers.getMyProfile('attacker'), '/api/speaker/profile/me', 'GET', undefined, { id: userId, speakerId: userId, ...profile }],
+  ['profile PATCH', () => speakers.updateMyProfile({ ...Object.fromEntries(Object.entries(profile).map(([key, value]) => [key, `  ${value}  `])), id: 'attacker', speakerId: 'attacker', roles: ['ADMIN'], trackId, status: 'APPROVED', proposal: {} }), '/api/speaker/profile/me', 'PATCH', profile, { id: userId, speakerId: userId, ...profile }],
   ['notification GET', () => notifications.getNotifications('user &/?'), '/api/notifications/me?userId=user+%26%2F%3F', 'GET', undefined, [{ id: userId, read: false }]],
   ['notification POST', () => notifications.markAsRead('id /?'), '/api/notifications/id%20%2F%3F/read', 'POST', undefined, { id: userId, read: true }],
   ['all forums', () => forums.getForums(), '/api/forums', 'GET', undefined, [{ id: forumId, scope: 'TRACK' }]],
@@ -55,7 +58,7 @@ for (const [name, call, url, method, body, payload] of cases) {
   })
   test(`${name}: useful HTTP error and propagated transport/JSON errors`, async t => {
     setup(t, async () => new Response('Unavailable', { status: 503 }))
-    await assert.rejects(call, /(?:Notification request|Forum request|Proposal submission) failed \(503\)/)
+    await assert.rejects(call, /(?:Notification request|Forum request|Proposal submission|Speaker profile request) failed \(503\)/)
     globalThis.fetch.mock.mockImplementation(async () => { throw new Error('offline') })
     await assert.rejects(call, /offline/)
     globalThis.fetch.mock.mockImplementation(async () => new Response('invalid JSON'))

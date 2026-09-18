@@ -126,16 +126,39 @@ test('Speaker role is required even with backend UUID and session', async () => 
     await assert.rejects(() => createSpeakerProfileSource({ ...backend, role }, 'backend', true).updateProfile(input), /Speaker role/)
   }
 })
-test('live editing remains unavailable without a verified contract and never fetches', async t => {
-  const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('Fetch called') })
-  const source = createSpeakerProfileSource(backend, 'backend', true)
-  assert.equal(source.identityAvailable, true)
-  assert.equal(source.available, false)
-  await assert.rejects(() => source.getProfile(), /awaits backend support/)
-  await assert.rejects(() => source.getTracks(), /awaits backend support/)
-  await assert.rejects(() => source.updateProfile(input), /awaits backend support/)
+test('live profile responses stay exact and successful saves notify dashboard subscribers', async () => {
+  const record = { displayName: 'Live speaker', title: 'Scientist', organization: 'Lab', biography: 'Experience' }
+  const calls = [], revisions = []
+  const source = createSpeakerProfileSource(backend, 'backend', true, {
+    async getMyProfile(...args) { calls.push(args); return record },
+    async updateMyProfile(body) { calls.push(body); return { ...record, displayName: 'Saved' } },
+  })
+  source.subscribe(() => revisions.push(source.getRevision()))
+  assert.equal(source.available, true)
+  assert.deepEqual(await source.getProfile(), record)
+  const saved = await source.updateProfile(input)
+  assert.deepEqual(calls[0], [])
+  assert.deepEqual(Object.keys(calls[1]), ['displayName', 'title', 'organization', 'biography'])
+  assert.deepEqual(await source.getProfile(), saved)
+  assert.deepEqual(revisions, [1])
+  assert.equal(saved.name, undefined)
+  assert.equal((await preview().getProfile()).name, 'Bill Nye')
+})
+test('live failures propagate without fixtures and pending PATCH cannot duplicate', async () => {
+  let release, count = 0
+  const source = createSpeakerProfileSource(backend, 'backend', true, {
+    async getMyProfile() { throw new Error('offline') },
+    async updateMyProfile() { count++; await new Promise(resolve => { release = resolve }); throw new Error('offline') },
+  })
+  await assert.rejects(() => source.getProfile(), /offline/)
+  const save = source.updateProfile(input)
+  await assert.rejects(() => source.updateProfile(input), /pending/)
+  release()
+  await assert.rejects(() => save, /offline/)
+  assert.equal(count, 1)
+  assert.equal(source.getRevision(), 0)
   assert.equal(input.name, '  Preview Speaker  ')
-  assert.equal(fetch.mock.callCount(), 0)
+  await assert.rejects(() => source.getProfile(), /offline/)
 })
 
 const nameInput = (profile, name) => ({ ...profile, name, trackId: profile.trackIds[0] })
@@ -218,4 +241,15 @@ test('source subscriptions and revisions remain isolated between preview logins'
   assert.deepEqual(observed, [])
   assert.equal((await second.getProfile()).name, 'Bill Nye')
   unsubscribe()
+})
+
+test('invalid live contexts dispatch neither GET nor PATCH', async () => {
+  let calls = 0
+  const repository = { getMyProfile() { calls++ }, updateMyProfile() { calls++ } }
+  for (const [user, session] of [[backend, false], [null, true], [{ ...backend, role: 'ATTENDEE' }, true]]) {
+    const source = createSpeakerProfileSource(user, 'backend', session, repository)
+    await assert.rejects(() => source.getProfile())
+    await assert.rejects(() => source.updateProfile(input))
+  }
+  assert.equal(calls, 0)
 })

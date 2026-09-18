@@ -13,7 +13,7 @@ import ProposalCard from '../../components/speaker/ProposalCard.jsx'
 import UpcomingSessionCard from '../../components/speaker/UpcomingSessionCard.jsx'
 import SpeakerFeedback from '../../components/speaker/SpeakerFeedback.jsx'
 import EmptyState from '../../components/speaker/EmptyState.jsx'
-import { speakerData, developmentDisclaimer } from '../../mocks/speakerData.js'
+import { developmentDisclaimer } from '../../mocks/speakerData.js'
 import { useAuth } from '../../auth/useAuth.js'
 import { notificationRepository } from '../../services/notificationRepository.js'
 import { getSpeakerNotificationSource } from '../../services/speakerNotificationSource.js'
@@ -22,7 +22,6 @@ import { eventRepository } from '../../services/eventRepository.js'
 import { getSpeakerProposalSource } from '../../services/speakerProposalSource.js'
 import { getSpeakerProfileSource } from '../../services/speakerProfileSource.js'
 import PreviewProposalList from '../../components/speaker/PreviewProposalList.jsx'
-import { liveSpeaker } from '../../services/speakerPresentation.js'
 import './SpeakerDashboard.css'
 
 export default function SpeakerDashboard({ repository = speakerRepository }) {
@@ -37,9 +36,12 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const profileRevision = useSyncExternalStore(profileSource.subscribe, profileSource.getRevision, profileSource.getRevision)
   const loader = useCallback(async () => {
     const data = await source.getDashboard()
-    return profileSource.demo ? { ...data, speaker: await profileSource.getProfile() } : data
-  }, [source, profileSource])
-  const resourceKey = useMemo(() => ({ loader, profileRevision }), [loader, profileRevision])
+    return data
+  }, [source])
+  const profileLoader = useCallback(() => profileSource.available ? profileSource.getProfile() : Promise.resolve(null), [profileSource])
+  const profileKey = useMemo(() => ({ profileSource, profileRevision }), [profileSource, profileRevision])
+  const profileResource = useSpeakerResource(profileLoader, profileKey)
+  const resourceKey = useMemo(() => ({ loader }), [loader])
   const resource = useSpeakerResource(loader, resourceKey)
   const { hash } = useLocation()
   useEffect(() => {
@@ -54,18 +56,21 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
     })
     return () => window.cancelAnimationFrame(frame)
   }, [hash, resource.status])
-  return <SpeakerDashboardView calendarSource={calendarSource} proposalSource={proposalSource} data={resource.data || { speaker: proposalSource.demo ? speakerData.speaker : liveSpeaker(user), convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView profileResource={profileResource} profileSource={profileSource} calendarSource={calendarSource} proposalSource={proposalSource} data={resource.data || { convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
-function SpeakerDashboardView({ calendarSource, proposalSource, data, resource, notifications, notificationKey }) {
+function SpeakerDashboardView({ profileResource, profileSource, calendarSource, proposalSource, data, resource, notifications, notificationKey }) {
   const [trackId, setTrackId] = useState('all')
-  const { speaker, proposals, sessions, feedback } = data
+  const { proposals, sessions, feedback } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
 
   return (
     <div className="speaker-portal">
       <a className="skip-link" href="#speaker-main">Skip to content</a>
-      <SpeakerHeader speaker={speaker} />
+      <SpeakerHeader speaker={profileResource.data || {}} live={!profileSource.demo} editable={profileSource.available} />
+      {profileSource.available && profileResource.status === 'loading' && <p role="status">Loading profile…</p>}
+      {profileSource.available && profileResource.status === 'error' && <div role="alert"><p>Unable to load your profile.</p><button type="button" onClick={profileResource.retry}>Retry profile</button></div>}
+      {profileSource.available && profileResource.status === 'ready' && !profileResource.data && <div role="status"><p>No speaker profile is available.</p><button type="button" onClick={profileResource.retry}>Retry profile</button></div>}
       <div className="container portal-main portal-dashboard-main" id="speaker-main" tabIndex={-1}>
         <details className="portal-updates-bar" id="speaker-updates" tabIndex={-1} aria-labelledby="speaker-updates-heading">
           <summary id="speaker-updates-heading">Organizer Updates <span className="portal-muted">Feedback, notifications &amp; next steps</span></summary>
