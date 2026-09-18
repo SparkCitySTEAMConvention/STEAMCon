@@ -24,7 +24,7 @@ test('navigation destinations match existing route declarations and section targ
     }
   }
   const speaker = getPortalNavigation({ roles: ['SPEAKER'] })
-  assert.equal(speaker.find(item => item.id === 'travel').to, '/travel')
+  assert.equal(speaker.find(item => item.id === 'travel').to, null)
   assert.equal(speaker.find(item => item.id === 'hotel').to, null)
   assert.equal(speaker.find(item => item.id === 'car').to, null)
   assert.ok(speaker.every(item => !item.to?.startsWith('/attendee')))
@@ -37,7 +37,7 @@ test('navigation destinations match existing route declarations and section targ
 test('shell is isolated from pages, API adapters and fixtures', async () => {
   const app = await source('App.jsx')
   assert.match(app, /role="ATTENDEE"[\s\S]*?<Route element=\{<PortalShell \/>\}>/)
-  assert.doesNotMatch(app.slice(app.indexOf('role="SPEAKER"')), /PortalShell/)
+  assert.match(app, /role="SPEAKER"[\s\S]*?<Route element=\{<PortalShell \/>\}>/)
   const directory = new URL('../src/components/portal/', import.meta.url)
   for (const name of await readdir(directory)) {
     if (!/\.(jsx|js)$/.test(name)) continue
