@@ -1,4 +1,4 @@
-.track-visual-panel { position: relative; display: grid; place-items: center; min-width: 0; min-height: 440px; padding: 32px; overflow: hidden; contain: paint; background: var(--track-feature-color); border-right: 2px solid var(--color-ink); color: var(--color-ink); }
+.track-visual-panel { position: relative; display: grid; place-items: center; min-width: 0; min-height: 300px; padding: 32px; overflow: hidden; contain: paint; background: var(--track-feature-color); border-right: 2px solid var(--color-ink); color: var(--color-ink); }
 .track-visual-stage { width: min(100%, 320px); aspect-ratio: 1; animation: visual-arrive 240ms ease-out both; }
 .track-illustration { display: block; width: 100%; height: 100%; overflow: visible; }
 /* At the narrowest panel the stage is 192px. The atom's 134px diameter

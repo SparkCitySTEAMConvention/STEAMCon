@@ -35,3 +35,6 @@
 @media (max-width: 900px) { .events-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); } .events-plan-grid { grid-template-columns: 1fr; } }
 @media (max-width: 760px) { .events-experience .events-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 420px) { .events-navigation { grid-template-columns: 1fr; } }
+
+.events-plan-grid article { padding: var(--space-card); }
+.events-navigation { padding-block: 0.75rem; }

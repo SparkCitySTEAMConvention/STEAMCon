@@ -43,7 +43,7 @@ export default function SpeakerDirectory() {
           {visibleSpeakers.map(speaker => <li key={speaker.id}>
             <article className="directory-card" aria-labelledby={speaker.id}>
               <h3 id={speaker.id}>{speaker.name}</h3>
-              <p>{speaker.bio}</p>
+              <details><summary>Biography</summary><p>{speaker.bio}</p></details>
               {speaker.organization && speaker.role && <p className="portal-muted">{speaker.role}, {speaker.organization}</p>}
               <dl className="directory-tracks">
                 <div><dt>Primary track</dt><dd><TrackBadge trackId={speaker.trackIds[0]} /></dd></div>
@@ -60,8 +60,7 @@ export default function SpeakerDirectory() {
           <button className="button button-paper" type="button" onClick={clearFilters}>Show all speakers</button>
         </div>}
       </section>
-      <section className="directory-panels" aria-labelledby="panels-heading">
-        <h2 id="panels-heading">Proposed crossover panels</h2>
+      <details className="directory-panels"><summary id="panels-heading">Proposed crossover panels</summary>
         <p>All five placeholder panel concepts, independent of the speaker filters.</p>
         <ul className="directory-grid">
           {panels.map(panel => <li key={panel.id}>
@@ -73,7 +72,7 @@ export default function SpeakerDirectory() {
             </article>
           </li>)}
         </ul>
-      </section>
+      </details>
     </main>
     <Footer />
   </>

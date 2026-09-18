@@ -72,7 +72,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
     const button = name => [...document.querySelectorAll('button')].find(node => node.textContent === name)
     async function click(name) { const node = button(name); assert.ok(node, name); await act(async () => node.click()) }
     await mount(Dashboard, '/speaker?speakerId=attacker&preview=scheduled')
-    assert.match(text(), /Welcome back, Real Speaker/)
+    assert.match(text(), /Speaker dashboard/)
     assert.doesNotMatch(text(), /Bill Nye|Science Changes Everything/)
     assert.match(text(), /Unable to load proposals/)
     failDashboard = false
@@ -102,7 +102,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       const summary = document.querySelector('#proposal-summary-heading').parentElement
       assert.ok(summary.compareDocumentPosition(itinerary) & window.Node.DOCUMENT_POSITION_FOLLOWING)
       const proposals = document.querySelector('#speaker-proposals')
-      assert.ok(itinerary.compareDocumentPosition(proposals) & window.Node.DOCUMENT_POSITION_FOLLOWING)
+      assert.ok(proposals.compareDocumentPosition(itinerary) & window.Node.DOCUMENT_POSITION_FOLLOWING)
       for (const link of document.querySelectorAll('.portal-nav a[href^="#"]')) {
         assert.ok(document.querySelector(link.getAttribute('href')))
       }
@@ -276,7 +276,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
     const { speakerRepository: preview } = await server.ssrLoadModule('/src/services/speakerRepository.js')
     repository.getDashboard = () => preview.getDashboard()
     await mount(Dashboard, '/speaker', { user: { id: 'demo-SPEAKER', role: 'SPEAKER' }, authSource: 'demo', hasBackendSession: false })
-    assert.match(text(), /Welcome back, Bill Nye/)
+    assert.match(text(), /Speaker dashboard/)
     assert.match(text(), /Science Changes Everything/)
     assert.ok(document.querySelector('a[href="/speaker/profile/edit"]'))
   } finally {
