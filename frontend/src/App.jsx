@@ -8,6 +8,7 @@ import AccessDenied from './pages/AccessDenied.jsx'
 import HomePage from './pages/HomePage.jsx'
 import TracksPage from './pages/TracksPage.jsx'
 import EventsPage from './pages/EventsPage.jsx'
+import CalendarPage from './pages/CalendarPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegistrationPage from './pages/RegistrationPage.jsx'
 import RegistrationQrSamples from './pages/RegistrationQrSamples.jsx'
@@ -31,6 +32,7 @@ export default function App() {
       '/': 'STEAM Con',
       '/tracks': 'Tracks | STEAM Con',
       '/events': 'Events | STEAM Con',
+      '/calendar': 'Calendar | STEAM Con',
       '/login': 'Log in | STEAM Con',
       '/access-denied': 'Access denied | STEAM Con',
       '/register': 'Register | STEAM Con',
@@ -66,6 +68,7 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/tracks" element={<TracksPage />} />
       <Route path="/events" element={<EventsPage />} />
+      <Route path="/calendar" element={<CalendarPage />} />
       <Route path="/register" element={<RegistrationPage />} />
       <Route path="/travel" element={<TravelInfoPage />} />
       <Route
