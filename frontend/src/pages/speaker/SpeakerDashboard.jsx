@@ -44,9 +44,15 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const { hash } = useLocation()
   useEffect(() => {
     if (!hash) return
-    const target = document.getElementById(hash.slice(1))
-    target?.scrollIntoView?.({ behavior: 'instant', block: 'start' })
-    target?.focus({ preventScroll: true })
+    // Keep cross-page hash focus after App's route-change focus effect.
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(hash.slice(1))
+      target?.scrollIntoView?.({ behavior: 'instant', block: 'start' })
+      // A mobile drawer dismissal keeps focus on Menu, including after loading.
+      const menuFocused = document.activeElement?.getAttribute('aria-controls') === 'steam-portal-drawer'
+      if (!menuFocused) target?.focus({ preventScroll: true })
+    })
+    return () => window.cancelAnimationFrame(frame)
   }, [hash, resource.status])
   return <SpeakerDashboardView calendarSource={calendarSource} proposalSource={proposalSource} data={resource.data || { speaker: proposalSource.demo ? speakerData.speaker : liveSpeaker(user), convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
@@ -60,7 +66,7 @@ function SpeakerDashboardView({ calendarSource, proposalSource, data, resource, 
     <div className="speaker-portal">
       <a className="skip-link" href="#speaker-main">Skip to content</a>
       <SpeakerHeader speaker={speaker} />
-      <main className="container portal-main portal-dashboard-main" id="speaker-main" tabIndex={-1}>
+      <div className="container portal-main portal-dashboard-main" id="speaker-main" tabIndex={-1}>
         <details className="portal-updates-bar" id="speaker-updates" tabIndex={-1} aria-labelledby="speaker-updates-heading">
           <summary id="speaker-updates-heading">Organizer Updates <span className="portal-muted">Feedback, notifications &amp; next steps</span></summary>
           <div className="portal-updates-content">
@@ -107,7 +113,7 @@ function SpeakerDashboardView({ calendarSource, proposalSource, data, resource, 
         </>}
 
         <SpeakerItinerary source={calendarSource} compact />
-      </main>
+      </div>
       <footer className="container portal-footer"><p>STEAM Con · A place for curious minds.</p><p>Speaker Portal{proposalSource.demo ? ' / Preview' : ''}</p></footer>
     </div>
   )

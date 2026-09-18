@@ -97,23 +97,25 @@ export default function App() {
         </Route>
 
         <Route element={<RoleRoute role="SPEAKER" />}>
-          <Route
-            path="/speaker/profile/edit"
-            element={<EditSpeakerProfile />}
-          />
-          <Route
-            path="/speaker/forums"
-            element={<SpeakerForums />}
-          />
-          <Route
-            path="/speaker/proposals/new"
-            element={<ProposeSession />}
-          />
-          <Route
-            path="/speaker/proposals/:proposalId"
-            element={<ProposalDetails />}
-          />
-          <Route path="/speaker" element={<SpeakerDashboard />} />
+          <Route element={<PortalShell />}>
+            <Route
+              path="/speaker/profile/edit"
+              element={<EditSpeakerProfile />}
+            />
+            <Route
+              path="/speaker/forums"
+              element={<SpeakerForums />}
+            />
+            <Route
+              path="/speaker/proposals/new"
+              element={<ProposeSession />}
+            />
+            <Route
+              path="/speaker/proposals/:proposalId"
+              element={<ProposalDetails />}
+            />
+            <Route path="/speaker" element={<SpeakerDashboard />} />
+          </Route>
         </Route>
       </Route>
 

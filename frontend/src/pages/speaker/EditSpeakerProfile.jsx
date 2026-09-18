@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
-import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import { getSpeakerProfileSource, profileFields, profileLimits, profileUnavailable, validateProfile } from '../../services/speakerProfileSource.js'
 import { developmentDisclaimer } from '../../mocks/speakerData.js'
@@ -20,8 +19,7 @@ function ProfilePage({ source }) {
   }, [source])
   const resource = useSpeakerResource(loader, source)
   return <div className="speaker-portal">
-    <header className="container portal-header"><Link className="portal-home" to="/speaker">Speaker Portal</Link><AccountNavigation /></header>
-    <main className="container portal-main portal-proposal-main" tabIndex={-1}>
+    <div className="container portal-main portal-proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <h1>Edit Profile</h1>
       <p className="portal-demo">{developmentDisclaimer}</p>
@@ -33,7 +31,7 @@ function ProfilePage({ source }) {
           {resource.status === 'error' && <div role="alert"><p>Unable to load your profile.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
           {resource.status === 'ready' && resource.data && <ProfileForm source={source} {...resource.data} />}
         </>}
-    </main>
+    </div>
   </div>
 }
 function ProfileForm({ source, profile, tracks }) {

@@ -9,12 +9,13 @@ sections, booking links and speaker itinerary/notification components.
 | Explore | `/events` (public event discovery) | `/events` |
 | Calendar | `/attendee#schedule` (existing My schedule section) | Unavailable: no separate calendar destination; personal calendar entries appear in My itinerary |
 | My itinerary | `/attendee#itinerary` | `/speaker#speaker-itinerary` |
-| Travel | `/attendee/travel` (booking) | `/travel` (public travel planning, not booking) |
+| Travel | `/attendee/travel` (booking) | Unavailable: `/travel` is public planning information; no Speaker booking destination exists |
 | Hotel | `/attendee/hotel` | Unavailable: existing booking route requires ATTENDEE |
 | Car rental | `/attendee/car` | Unavailable: existing booking route requires ATTENDEE |
 | Forums | Unavailable: no attendee forum destination | `/speaker/forums` |
 | Notifications | Unavailable: no attendee notification destination | `/speaker#speaker-updates` (Organizer Updates disclosure) |
 | Account | `/attendee` (existing identity/admission overview; no account-edit route) | `/speaker#speaker-profile` (existing identity section) |
+| Overview | Not shown | `/speaker` |
 | My proposals | Not shown | `/speaker#speaker-proposals` |
 | Speaking schedule | Not shown | `/speaker#speaker-engagements` |
 
@@ -33,9 +34,25 @@ are reused, with speaker identity and itinerary taking precedence.
 The shell consumes the authentication context and invokes its existing logout
 callback (which clears the session and navigates home). It is intended for use
 inside ProtectedRoute; it is not a replacement for route guards. This task
-adds no routes and mounts the shell on no existing pages. All live/preview
+adds no destinations. Both guarded route families now use one persistent shell
+per portal, with page content rendered through Outlet. All live/preview
 boundaries and endpoint adapters remain untouched.
 
 Mobile navigation uses 760px, the existing attendee navigation breakpoint.
 Speaker layouts also have content breakpoints at 900px and 600px; those remain
 unchanged. New shell styles are scoped under `.steam-portal-shell`.
+
+## Complete Speaker route family
+
+Inside ProtectedRoute and RoleRoute(SPEAKER), one PortalShell wraps:
+
+- `/speaker` — overview with profile, updates, proposals, engagements and itinerary targets
+- `/speaker/proposals/new` — proposal creation
+- `/speaker/proposals/:proposalId` — details, inline editing and withdrawal
+- `/speaker/forums` — forum directory and conversations
+- `/speaker/profile/edit` — local demo profile editing; live editing stays unavailable
+
+There are no separate speaking schedule or itinerary routes. `/speakers` remains
+the public directory outside both shells and all authentication guards. Proposal
+creation/detail routes select My proposals; profile editing selects Account.
+No newly merged profile, assignment or change-request endpoints are connected.

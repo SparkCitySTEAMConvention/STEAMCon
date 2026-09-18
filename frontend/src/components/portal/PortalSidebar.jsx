@@ -14,7 +14,7 @@ export default function PortalSidebar({ user, onNavigate }) {
           <ul>{navigation.filter(item => item.group === group).map(item => (
             <li key={item.id}>
               {item.to ? (
-                <Link to={item.to} onClick={onNavigate} aria-current={isPortalDestinationActive(item.to, location) ? 'page' : undefined}>
+                <Link to={item.to} onClick={onNavigate} aria-current={isPortalDestinationActive(item.to, location, item.activePaths) ? 'page' : undefined}>
                   <span>{item.label}</span>
                   {item.description && <small>{item.description}</small>}
                 </Link>

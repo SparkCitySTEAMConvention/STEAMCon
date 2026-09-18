@@ -193,3 +193,27 @@
 .portal-updates-content > .portal-home { grid-column: 1 / -1; width: fit-content; }
 @media (max-width: 900px) { .portal-updates-content { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .portal-updates-bar > summary .portal-muted { display: block; margin-left: 0; } }
+
+/* Respond to the content width remaining beside the authenticated sidebar. */
+.steam-portal-shell .speaker-portal { container: speaker-page / inline-size; }
+.steam-portal-shell .speaker-portal .container { width: 100%; }
+.steam-portal-shell .speaker-portal .portal-main { padding-top: 0; }
+.steam-portal-shell .speaker-portal .portal-profile { margin-bottom: var(--space-gap); border-bottom: 1px solid var(--color-border); }
+.steam-portal-shell .speaker-forums { min-height: 0; }
+@container speaker-page (max-width: 900px) {
+  .speaker-portal .portal-columns, .speaker-portal .portal-updates-content { grid-template-columns: 1fr; }
+  .speaker-portal .portal-sidebar, .speaker-portal .portal-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container speaker-page (max-width: 800px) {
+  .speaker-forums .forum-layout { grid-template-columns: 1fr; }
+}
+@container speaker-page (max-width: 600px) {
+  .speaker-portal .portal-summary, .speaker-portal .portal-sidebar, .speaker-portal .portal-detail-facts { grid-template-columns: 1fr; }
+  .speaker-portal .portal-profile { flex-direction: column; align-items: flex-start; }
+  .speaker-portal .portal-header-actions { width: 100%; }
+  .speaker-portal .portal-actions { flex-direction: column; align-items: stretch; }
+  .speaker-portal .portal-actions .button { white-space: normal; text-align: center; }
+  .speaker-portal .portal-session-facts > div { grid-template-columns: 1fr; gap: 0.25rem; }
+  .speaker-portal .portal-notification-meta { flex-direction: column; align-items: flex-start; }
+  .speaker-portal .portal-updates-bar > summary .portal-muted { display: block; margin-left: 0; }
+}

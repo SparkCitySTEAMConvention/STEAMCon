@@ -29,14 +29,14 @@ export default function ProposalDetails({ repository = speakerRepository }) {
   return <div className="speaker-portal">
     <a className="skip-link" href="#proposal-main">Skip to content</a>
     <SpeakerHeader speaker={proposalSource.demo ? primary || speakerData.speaker : liveSpeaker(user)} />
-    <main className="container portal-main portal-proposal-main" id="proposal-main" tabIndex={-1}>
+    <div className="container portal-main portal-proposal-main" id="proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <p className="portal-demo">{proposalSource.demo ? developmentDisclaimer : 'Live proposal'}</p>
       {scenario && <p className="portal-demo"><strong>Isolated UI test: {scenario}.</strong> Any date, time, room or identity in this test belongs to a fictional test event, not STEAM Con.</p>}
       {resource.status === 'loading' && <><h1>Proposal details</h1><p role="status">Loading proposal…</p></>}
       {resource.status === 'error' && <><h1>Proposal unavailable</h1><p role="alert">Unable to load this proposal. Please try again.</p><button type="button" className="button button-paper" onClick={resource.retry}>Try again</button></>}
       {resource.status === 'ready' && (resource.data ? <ProposalContent key={`${proposalId}:${scenario}`} initialProposal={resource.data} repository={proposalSource} /> : <><h1>Proposal not found</h1><p>This proposal may no longer be available. Return to your dashboard to select another.</p></>)}
-    </main>
+    </div>
     <footer className="container portal-footer"><p>STEAM Con · Speaker Portal{proposalSource.demo ? ' / Preview' : ''}</p></footer>
   </div>
 }

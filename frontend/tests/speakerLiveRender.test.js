@@ -10,7 +10,7 @@ const trackId = '33333333-3333-4333-8333-333333333333'
 const user = { id, displayName: 'Real Speaker', role: 'SPEAKER' }
 const record = { id: proposalId, title: 'My live idea', description: 'Original description', status: 'SUBMITTED', trackId }
 test('speaker screens isolate preview and preserve live drafts and withdrawal on failure', async t => {
-  const dom = new JSDOM('<div id="root"></div>', { url: 'https://steamcon.test' })
+  const dom = new JSDOM('<div id="root"></div>', { url: 'https://steamcon.test', pretendToBeVisual: true })
   const globals = { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, FormData: dom.window.FormData, IS_REACT_ACT_ENVIRONMENT: true, requestAnimationFrame: callback => setTimeout(callback, 0) }
   for (const [name, value] of Object.entries(globals)) {
     const previous = Object.getOwnPropertyDescriptor(globalThis, name)
@@ -22,6 +22,8 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
   let root
   try {
     const { AuthContext } = await server.ssrLoadModule('/src/auth/useAuth.js')
+    dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} })
+    const { default: Shell } = await server.ssrLoadModule('/src/components/portal/PortalShell.jsx')
     const { default: Dashboard } = await server.ssrLoadModule('/src/pages/speaker/SpeakerDashboard.jsx')
     const { default: Details } = await server.ssrLoadModule('/src/pages/speaker/ProposalDetails.jsx')
     const { eventRepository } = await server.ssrLoadModule('/src/services/eventRepository.js')
@@ -66,7 +68,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
     async function mount(Page, route, auth = { user, authSource: 'backend', hasBackendSession: true }) {
       if (root) await act(async () => root.unmount())
       root = createRoot(document.getElementById('root'))
-      await act(async () => root.render(h(MemoryRouter, { initialEntries: [route] }, h(AuthContext.Provider, { value: auth }, h(Routes, null, h(Route, { path: '/speaker', element: h(Page, { repository }) }), h(Route, { path: '/speaker/proposals/:proposalId', element: h(Page, { repository }) }))))))
+      await act(async () => root.render(h(MemoryRouter, { initialEntries: [route] }, h(AuthContext.Provider, { value: { ...auth, isAuthenticated: true } }, h(Shell, null, h(Routes, null, h(Route, { path: '/speaker', element: h(Page, { repository }) }), h(Route, { path: '/speaker/proposals/:proposalId', element: h(Page, { repository }) })))))))
     }
     const text = () => document.body.textContent
     const button = name => [...document.querySelectorAll('button')].find(node => node.textContent === name)
@@ -90,10 +92,11 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       assert.equal(calendarCalls, 2)
       assert.equal(calls.length, proposalCalls)
       assert.match(text(), /My live idea/)
-      const navigation = document.querySelector('nav[aria-label="Speaker navigation"]')
-      assert.deepEqual([...navigation.querySelectorAll('a')].map(link => link.textContent), ['Overview', 'Proposals', 'Speaking Schedule', 'Itinerary', 'Forums', 'Profile', 'Homepage'])
+      const navigation = document.querySelector('nav[aria-label="Portal navigation"]')
+      assert.ok(navigation.querySelector('a[href="/speaker#speaker-itinerary"]'))
+      assert.ok(navigation.querySelector('a[href="/speaker#speaker-proposals"]'))
       assert.equal(document.querySelector('.portal-dashboard-navigation'), null)
-      assert.equal(document.querySelector('nav[aria-label="Account navigation"]'), null)
+      assert.equal(document.querySelectorAll('nav[aria-label="Account navigation"]').length, 1)
       const itinerary = document.querySelector('#speaker-itinerary')
       const rows = [...itinerary.querySelectorAll('li')]
       assert.deepEqual(rows.map(row => row.querySelector('h3').textContent), ['Enrolled session', 'Hotel stay'])
@@ -103,8 +106,8 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       assert.ok(summary.compareDocumentPosition(itinerary) & window.Node.DOCUMENT_POSITION_FOLLOWING)
       const proposals = document.querySelector('#speaker-proposals')
       assert.ok(proposals.compareDocumentPosition(itinerary) & window.Node.DOCUMENT_POSITION_FOLLOWING)
-      for (const link of document.querySelectorAll('.portal-nav a[href^="#"]')) {
-        assert.ok(document.querySelector(link.getAttribute('href')))
+      for (const link of document.querySelectorAll('.steam-portal-navigation a[href^="/speaker#"]')) {
+        assert.ok(document.querySelector('#' + link.getAttribute('href').split('#')[1]))
       }
     })
     await t.test('Organizer Updates is the first dashboard disclosure and retains read state across collapse', async () => {
@@ -112,12 +115,12 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       const disclosure = main.firstElementChild
       assert.equal(disclosure.tagName, 'DETAILS')
       assert.equal(disclosure.id, 'speaker-updates')
-      assert.equal(main.previousElementSibling.tagName, 'HEADER')
+      assert.equal(main.previousElementSibling.tagName, 'SECTION')
       assert.equal(disclosure.open, false)
       const summary = disclosure.querySelector('summary')
       assert.match(summary.textContent, /Organizer Updates/)
       summary.focus()
-      assert.equal(document.activeElement, summary)
+      assert.ok(document.activeElement === summary, 'updates summary receives focus')
       await act(async () => summary.click())
       assert.equal(disclosure.open, true)
       await click('Mark as read')
@@ -131,7 +134,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       assert.equal(disclosure.querySelector('.portal-notification-meta span').textContent, 'Read')
       assert.equal(button('Mark as read'), undefined)
       assert.equal(document.querySelectorAll('#speaker-updates').length, 1)
-      assert.equal(document.querySelector('.portal-nav a[aria-current="page"]').textContent, 'Overview')
+      assert.equal(document.querySelector('nav[aria-label="Speaker navigation"]'), null)
     })
     assert.equal(document.querySelector('a[href="/speaker/profile/edit"]'), null)
     await mount(Details, `/speaker/proposals/${proposalId}?speakerId=attacker&preview=scheduled`)
