@@ -8,7 +8,7 @@ import './portal.css'
 const mobileQuery = '(max-width: 760px)'
 const storageKey = 'steam-portal-sidebar-collapsed'
 
-export default function PortalShell({ children }) {
+export default function PortalShell({ children, discovery = false }) {
   const { user, isAuthenticated } = useAuth()
   const location = useLocation()
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(mobileQuery).matches)
@@ -101,6 +101,7 @@ export default function PortalShell({ children }) {
     return () => window.cancelAnimationFrame(frame)
   }, [open, mobile, location.key])
 
+  const Content = discovery ? 'div' : 'main'
   if (!isAuthenticated) return null
 
   return (
@@ -118,7 +119,7 @@ export default function PortalShell({ children }) {
       </div>}
       <div ref={content} className="steam-portal-workspace">
         <PortalTopbar mobile={mobile} menuOpen={open} onOpenMenu={() => setOpenRoute(location.key)} menuButtonRef={menuButton} />
-        <main className="steam-portal-content" tabIndex={-1}>{children ?? <Outlet />}</main>
+        <Content className={`steam-portal-content${discovery ? ' steam-portal-discovery' : ''}`} tabIndex={-1}>{children ?? <Outlet />}</Content>
       </div>
     </div>
   )

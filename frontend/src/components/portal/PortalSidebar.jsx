@@ -7,7 +7,7 @@ export default function PortalSidebar({ user, onNavigate, collapsed = false, id 
   const groups = [...new Set(navigation.map(item => item.group))]
   return (
     <nav id={id} className="steam-portal-navigation" aria-label="Portal navigation">
-      <Link className="steam-portal-brand" to="/" onClick={onNavigate}>{collapsed ? 'Home ↗' : <>STEAM Con <span>Home ↗</span></>}</Link>
+      <Link aria-current={location.pathname === '/' ? 'page' : undefined} className="steam-portal-brand" to="/" onClick={onNavigate}>{collapsed ? 'Home ↗' : <>STEAM Con <span>Home ↗</span></>}</Link>
       {groups.map(group => (
         <section key={group} aria-label={group}>
           <h2>{group}</h2>

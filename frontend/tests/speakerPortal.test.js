@@ -281,10 +281,10 @@ test('complete Speaker flow shares one shell, preserving demo/live boundaries an
       assert.ok(document.querySelector('form input:not(:disabled)'), 'proposal controls remain available')
     })
 
-    await run('public speaker directory remains outside shell and attendee navigation has no speaker actions', async () => {
+    await run('authenticated speaker directory uses shell and attendee navigation has no speaker actions', async () => {
       await mount('/speakers', demo())
-      assert.ok(document.querySelector('.steam-portal-shell') === null)
-      assert.ok(document.querySelector('nav[aria-label="Main navigation"]'))
+      assert.equal(document.querySelectorAll('.steam-portal-shell').length, 1)
+      assert.equal(document.querySelector('nav[aria-label="Main navigation"]'), null)
       await mount('/attendee', { ...demo(), user: { role: 'ATTENDEE', displayName: 'Avery' } })
       assert.match(text(), /Avery/)
       assert.equal(link('/attendee/travel').getAttribute('href'), '/attendee/travel')

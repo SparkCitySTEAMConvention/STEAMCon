@@ -36,8 +36,7 @@ test('navigation destinations match existing route declarations and section targ
 
 test('shell is isolated from pages, API adapters and fixtures', async () => {
   const app = await source('App.jsx')
-  assert.match(app, /role="ATTENDEE"[\s\S]*?<Route element=\{<PortalShell \/>\}>/)
-  assert.match(app, /role="SPEAKER"[\s\S]*?<Route element=\{<PortalShell \/>\}>/)
+  assert.match(app, /<Route element=\{<ApplicationLayout \/>\}>[\s\S]*role="ATTENDEE"[\s\S]*role="SPEAKER"/)
   const directory = new URL('../src/components/portal/', import.meta.url)
   for (const name of await readdir(directory)) {
     if (!/\.(jsx|js)$/.test(name)) continue
@@ -57,7 +56,6 @@ test('shell is isolated from pages, API adapters and fixtures', async () => {
   for (const role of ['ATTENDEE', 'SPEAKER']) {
     const block = app.split(`role="${role}"`)[1].split('</Route>\n        </Route>')[0]
     const paths = role === 'ATTENDEE' ? ['/attendee', '/attendee/travel', '/attendee/hotel', '/attendee/car'] : ['/speaker', '/speaker/profile/edit', '/speaker/forums', '/speaker/proposals/new', '/speaker/proposals/:proposalId']
-    assert.match(block, /<Route element=\{<PortalShell \/>\}>/)
     for (const path of paths) assert.ok(block.includes(`path="${path}"`), `${path} stays in PortalShell`)
   }
 })

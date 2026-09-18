@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Header from '../components/Header.jsx'
+import Header from '../components/layout/PublicPageHeader.jsx'
 import Footer from '../components/Footer.jsx'
 import TrackBadge from '../components/speaker/TrackBadge.jsx'
 import { speakers } from '../mocks/speakers.js'
