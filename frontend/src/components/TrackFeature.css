@@ -14,7 +14,7 @@
 .track-feature-engineering { --track-feature-color: var(--color-engineering); }
 .track-feature-art { --track-feature-color: var(--color-art); }
 .track-feature-mathematics { --track-feature-color: var(--color-mathematics); }
-.track-feature-copy { min-width: 0; padding: clamp(1.5rem, 4vw, 4rem); overflow-wrap: anywhere; }
+.track-feature-copy { min-width: 0; padding: var(--space-card); overflow-wrap: anywhere; }
 .track-feature-copy h2 { font-size: clamp(2.3rem, 4.5vw, 4.5rem); margin-block: 1rem; }
 .track-feature-description { color: var(--color-text-muted); }
 .track-feature-session { border-top: 2px solid var(--color-ink); margin-top: 2rem; padding-top: 1.5rem; }

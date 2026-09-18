@@ -13,7 +13,6 @@ export default function Hero() {
           <a className="button button-dark" href="#events">Explore Events <span aria-hidden="true">↗</span></a>
           <Link className="button button-paper" to="/register">Register Now <span aria-hidden="true">↗</span></Link>
         </div>
-        <div className="hero-note"><span aria-hidden="true">↓</span> Follow your curiosity. Find your people.</div>
       </div>
     </section>
   )

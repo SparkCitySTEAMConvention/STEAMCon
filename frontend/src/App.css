@@ -1,5 +1,5 @@
 .container { width: min(100% - 4rem, 1280px); margin-inline: auto; }
-.section { padding-block: clamp(3.5rem, 7vw, 7rem); }
+.section { padding-block: var(--space-section); }
 .eyebrow { font: 700 0.75rem/1.5 'Courier New', monospace; letter-spacing: 0.12em; text-transform: uppercase; }
 .skip-link { position: absolute; top: -6rem; left: 1rem; z-index: 10; padding: 0.75rem 1rem; background: var(--color-paper); font-weight: 700; }
 .skip-link:focus { top: 1rem; }
@@ -23,8 +23,8 @@
     radial-gradient(ellipse at 85% 95%, color-mix(in srgb, var(--color-art) 8%, transparent), transparent 38%),
     var(--color-paper);
 }
-.hero-inner { padding-block: clamp(2.5rem, 5vw, 4rem) 2rem; text-align: center; }
-.steamcon-logo { width: min(100%, 980px); height: auto; margin: 1.75rem auto 2rem; }
+.hero-inner { padding-block: var(--space-section) 2rem; text-align: center; }
+.steamcon-logo { width: min(100%, 520px); height: auto; margin: 0.75rem auto 1rem; }
 .hero h1 { font-size: clamp(2rem, 4vw, 3.5rem); max-width: 900px; margin-inline: auto; }
 .hero-description { max-width: 580px; margin: 1rem auto 0; color: var(--color-text-muted); font-size: 1.05rem; }
 .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.75rem; }
@@ -94,12 +94,12 @@
 .track-mathematics { background: var(--color-mathematics); }
 .track-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font: 700 0.65rem/1.5 'Courier New', monospace; }
 .track-symbol { font-size: 1.8rem; letter-spacing: -0.1em; }
-.track-card h3 { margin-top: 2.5rem; font-size: clamp(1rem, 1.65vw, 1.4rem); letter-spacing: -0.04em; }
+.track-card h3 { margin-top: 1rem; font-size: clamp(1rem, 1.65vw, 1.4rem); letter-spacing: -0.04em; }
 .track-card p { margin-top: 0.75rem; font-size: 0.85rem; line-height: 1.5; }
 .sessions-section { padding-top: 1rem; }
 .status-label { flex-shrink: 0; border: 1px solid var(--color-border); padding: 0.35rem 0.75rem; border-radius: 99px; font-size: 0.75rem; color: var(--color-text-muted); }
 .sessions-placeholder { display: grid; grid-template-columns: 1fr 1.15fr; border: 2px solid var(--color-ink); border-radius: var(--radius-large); box-shadow: var(--shadow-large); background: var(--color-surface); overflow: hidden; }
-.session-art { position: relative; display: grid; place-items: center; min-height: 320px; overflow: hidden; background: var(--color-ice); border-right: 2px solid var(--color-ink); }
+.session-art { position: relative; display: grid; place-items: center; min-height: 220px; overflow: hidden; background: var(--color-ice); border-right: 2px solid var(--color-ink); }
 .session-art .orbit {
   position: absolute;
   width: 75%;
@@ -166,7 +166,7 @@
   /* Leave room for the electrons throughout a full turn in the desktop panel. */
   .session-art .orbit { max-width: calc(100cqh - 16px); }
 }
-.session-copy { padding: clamp(1.5rem, 4vw, 4rem); }
+.session-copy { padding: var(--space-card); }
 .session-copy h3 { margin-top: 1rem; font-size: clamp(1.8rem, 3vw, 2.75rem); letter-spacing: -0.04em; }
 .session-copy > p:not(.eyebrow) { margin-top: 1.25rem; color: var(--color-text-muted); max-width: 430px; }
 .placeholder-note { display: block; margin-top: 1.75rem; font: 700 0.75rem/1.5 'Courier New', monospace; }
@@ -203,7 +203,7 @@
 .schedule-location { display: grid; gap: 0.25rem; justify-items: start; }
 .schedule-location strong { font-size: 0.85rem; }
 .schedule-location a { margin-top: 0.55rem; color: var(--color-text-muted); font-size: 0.7rem; font-weight: 800; }
-.schedule-empty { padding: clamp(2rem, 5vw, 4rem); text-align: center; }
+.schedule-empty { padding: var(--space-section); text-align: center; }
 .schedule-empty h3 { margin-block: 0.5rem 1.25rem; font-size: 2rem; }
 .schedule-empty button { min-height: 44px; padding: 0.5rem 0.9rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-paper); font-weight: 800; cursor: pointer; }
 .schedule-footer { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem 2rem; padding: 1.3rem 1.5rem; border-top: 2px solid var(--color-ink); background: var(--color-paper); }
@@ -237,8 +237,8 @@
 .speaker-copy > p { max-width: 440px; }
 .speaker-copy .button { margin-top: 1.5rem; }
 .speaker-copy .speaker-note { margin-top: 1rem; font-size: 0.8rem; color: var(--color-border); }
-.site-footer { padding-top: 3.5rem; }
-.footer-grid { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 2rem; padding-bottom: 3rem; }
+.site-footer { padding-top: var(--space-section); }
+.footer-grid { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 2rem; padding-bottom: var(--space-gap); }
 .footer-grid h2 { font-size: 1rem; line-height: 1.5; letter-spacing: 0; }
 .footer-grid p { font-size: 0.875rem; color: var(--color-text-muted); margin-top: 0.75rem; max-width: 310px; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--color-border); padding-block: 1.25rem; font-size: 0.75rem; }

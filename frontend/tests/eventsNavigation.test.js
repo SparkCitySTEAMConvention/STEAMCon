@@ -69,7 +69,7 @@ test('mounted public Events page reacts to query navigation, collection changes,
       assert.equal(active.length, 1)
       assert.equal(active[0].textContent, experience.label)
       const collection = [...section.querySelectorAll('.events-collection article')].map(card => card.dataset.eventId)
-      assert.deepEqual(collection, eventsForExperience(key).map(event => event.id))
+      assert.deepEqual(collection, eventsForExperience(key).filter(event => !event.featured).map(event => event.id))
       if (key === 'schedule') {
         assert.equal(section.querySelector('.events-featured'), null)
         assert.ok(document.querySelector('#schedule-by-day'))

@@ -44,7 +44,7 @@ export default function EventsPage() {
           <div>
             <p className="eyebrow">STEAM Con / Events</p>
             <h1 id="events-heading">Make room for discovery.</h1>
-            <p className="events-intro">Explore the ideas, people, and disciplines that bring STEAM Con together. Find your spark, browse the program, and plan your experience.</p>
+            <p className="events-intro">Choose an experience and explore the program.</p>
           </div>
         </div>
       </section>
@@ -68,7 +68,7 @@ export default function EventsPage() {
           <p>Proposed event · Date, room, and speaker to be announced.</p>
         </article>}
         {!scheduleSelected && <div className="events-plan-grid events-collection" aria-label={`${experience.label} events`}>
-          {events.map(event => <article key={event.id} data-event-id={event.id}>
+          {events.filter(event => event.id !== featuredEvent?.id).map(event => <article key={event.id} data-event-id={event.id}>
             <p className="eyebrow">Proposed event · Programming preview</p>
             <h3>{event.title}</h3>
             <p>{event.description}</p>
@@ -89,24 +89,15 @@ export default function EventsPage() {
         <Link to="/speakers">Meet the speakers <span aria-hidden="true">↗</span></Link>
         <a href="#plan-your-experience">Plan your experience <span aria-hidden="true">↓</span></a>
       </nav>
-      <section id="plan-your-experience" className="container section" aria-labelledby="events-plan-heading">
-        <div className="section-heading"><div><p className="eyebrow">Your next steps</p><h2 id="events-plan-heading">Build your STEAM Con experience.</h2></div><p>From your first session to your arrival in New York, start planning here.</p></div>
-        <aside className="events-overview" aria-labelledby="events-overview-heading">
-          <p className="eyebrow">Stay curious. Come together.</p>
-          <h2 id="events-overview-heading">One convention.<br />Five ways to explore.</h2>
-          <p>Science · Technology · Engineering · Art · Mathematics</p>
-          <dl>
-            <div><dt>Destination</dt><dd>New York</dd></div>
-            <div><dt>Dates & venue</dt><dd>{conventionDayLabel(conventionConfig.startsOn)} – {conventionDayLabel(conventionConfig.endsOn)}, {conventionConfig.startsOn.slice(0, 4)}. {locationLabel()}.</dd></div>
-          </dl>
-          <Link to="/travel">Plan your New York visit <span aria-hidden="true">↗</span></Link>
-        </aside>
-        <div className="events-plan-grid">
-          <article><p className="eyebrow">01 / The program</p><h3>Follow your curiosity.</h3><p>Explore session descriptions and find the track that speaks to you.</p><Link to="/tracks">Explore all tracks <span aria-hidden="true">↗</span></Link></article>
-          <article><p className="eyebrow">02 / Your pass</p><h3>Be part of it.</h3><p>Choose your pass and register to join the STEAM Con community.</p><Link to="/register?role=attendee">Register as an attendee <span aria-hidden="true">↗</span></Link></article>
-          <article><p className="eyebrow">03 / Your visit</p><h3>Find your way here.</h3><p>Explore transportation, neighborhoods, and practical tips for New York.</p><Link to="/travel">Plan your travel <span aria-hidden="true">↗</span></Link></article>
-        </div>
-      </section>
+      <details id="plan-your-experience" className="container section events-planning">
+        <summary>Plan your experience</summary>
+        <p>{conventionDayLabel(conventionConfig.startsOn)} – {conventionDayLabel(conventionConfig.endsOn)}, {conventionConfig.startsOn.slice(0, 4)} · New York · {locationLabel()}.</p>
+        <nav className="events-navigation" aria-label="Planning links">
+          <Link to="/tracks">Explore all tracks</Link>
+          <Link to="/register?role=attendee">Register as an attendee</Link>
+          <Link to="/travel">Plan your travel</Link>
+        </nav>
+      </details>
     </main>
     <Footer />
   </>

@@ -40,14 +40,14 @@ export default function TracksPage() {
       <div className="track-page-heading">
         <div><p className="eyebrow">01 / EXPLORE THE PROGRAM</p><h1>Five disciplines.<br />One shared future.</h1></div>
         <div className="track-page-introduction">
-          <p>Explore Science, Technology, Engineering, Art, and Mathematics programming. Follow a familiar interest or discover a new perspective on the ideas shaping our shared future.</p>
+          <p>Choose a discipline, browse its sessions, and filter the three-day calendar.</p>
           {resource.status === 'ready' && <div className="track-program-summary" aria-label="Program summary">
-            <p>{summary.status}</p>
+            <p>{summary.status} · {source.mode === 'preview' ? 'Program preview · Development demonstration data' : 'Live program'}</p>
             <dl><div><dt>Tracks</dt><dd>{summary.trackCount}</dd></div><div><dt>Sessions</dt><dd>{summary.sessionCount}</dd></div></dl>
           </div>}
         </div>
       </div>
-      <p>{source.mode === 'preview' ? 'Program preview · Development demonstration data' : source.mode === 'live' ? 'Live program' : 'Live program unavailable · Sign in with a valid backend session'}</p>
+      {resource.status !== 'ready' && <p>{source.mode === 'preview' ? 'Program preview · Development demonstration data' : source.mode === 'live' ? 'Live program' : 'Live program unavailable · Sign in with a valid backend session'}</p>}
       {resource.status === 'loading' && <p role="status">Loading tracks…</p>}
       {resource.status === 'error' && <div role="alert"><p>Unable to load tracks. Please retry.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry tracks</button></div>}
       {resource.status === 'ready' && <>
@@ -56,9 +56,12 @@ export default function TracksPage() {
           {tracks.map(item => <button type="button" key={item.id || item.name} className={`track-${trackTreatment(item)}`} aria-pressed={track === item} onClick={() => changeTrack(trackQuery(item))}>{item.name}</button>)}
         </div>
         {allTracks ? <section className="track-all-summary" aria-labelledby="all-tracks-heading"><p className="eyebrow">Explore together</p><h2 id="all-tracks-heading">All tracks</h2><p>Browse published occurrences across every discipline in the three-day program.</p></section> : <TrackFeature track={track} sessions={resource.data.sessions} />}
+
+        {!allTracks && <div className="track-program-layout">
+          <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />
+        </div>}
         <ScheduleByDay sessions={allTracks ? resource.data.schedule || [] : sessionsForTrack(track, resource.data.schedule || [])} tracks={resource.data.trackNames} live={source.mode === 'live'} publicOnly date={date} selectedTrack={allTracks ? 'All tracks' : track?.name || 'All tracks'} onDateChange={changeDate} onTrackChange={name => changeTrack(name === 'All tracks' ? 'all' : trackQuery({ name }))} />
         {!allTracks && <div className="track-program-layout">
-          {!allTracks && <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />}
           {track && <aside className="track-pass-section" aria-labelledby="track-pass-heading">
             <p className="eyebrow">Plan your visit</p>
             <h2 id="track-pass-heading">Choose your pass</h2>

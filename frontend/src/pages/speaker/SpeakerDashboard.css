@@ -15,13 +15,13 @@
 .portal-propose p { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.65rem; }
 .speaker-portal .button[aria-disabled="true"] { cursor: not-allowed; transform: none; }
 .speaker-portal button:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 4px; box-shadow: 0 0 0 7px var(--color-focus); }
-.portal-main { padding-block: clamp(2rem, 5vw, 4rem); }
+.portal-main { padding-block: var(--space-section); }
 .portal-welcome { max-width: 760px; }
 .portal-welcome h1 { font-size: clamp(2.25rem, 4.5vw, 4rem); margin-block: 0.75rem 1rem; }
 .portal-welcome > p:last-child { max-width: 620px; color: var(--color-text-muted); }
-.portal-demo { margin-block: 1.75rem 2rem; padding: 0.75rem 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-small); font-size: 0.8rem; background: var(--color-surface); }
+.portal-demo { margin-block: var(--space-gap); padding: 0.75rem 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-small); font-size: 0.8rem; background: var(--color-surface); }
 .portal-small-heading { font-size: 1rem; letter-spacing: 0; }
-.portal-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0 3rem; }
+.portal-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0 var(--space-gap); }
 .portal-summary-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem; border: 2px solid var(--color-ink); border-radius: var(--radius-medium); box-shadow: var(--shadow-small); }
 .portal-summary dt { font-weight: 700; }
 .portal-summary dd { margin: 0; font-size: 2.5rem; line-height: 1; font-weight: 700; }
@@ -48,7 +48,7 @@
 .portal-details { margin-top: 1rem; border-top: 1px solid var(--color-border); padding-top: 0.5rem; }
 .portal-details summary { min-height: 44px; align-content: center; width: fit-content; max-width: 100%; padding: 0.5rem 0; cursor: pointer; font-size: 0.875rem; font-weight: 700; text-decoration: underline; text-underline-offset: 0.25em; }
 .portal-details p { font-size: 0.875rem; color: var(--color-text-muted); margin-top: 0.5rem; }
-.portal-sidebar { display: grid; gap: 2.5rem; }
+.portal-sidebar { display: grid; gap: var(--space-gap); }
 .portal-session { background: var(--color-ice); border: 2px solid var(--color-ink); border-radius: var(--radius-medium); padding: 1.5rem; }
 .portal-session h3 { font-size: 1.25rem; line-height: 1.25; margin-top: 1rem; }
 .portal-session-facts { margin-block: 1.5rem; display: grid; gap: 0.6rem; font-size: 0.8rem; }
@@ -100,7 +100,7 @@
 .portal-editor input, .portal-editor textarea, .portal-editor select { width: 100%; padding: 0.65rem; border: 1px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); }
 .portal-proposal-main { max-width: 960px; overflow-wrap: anywhere; }
 .portal-proposal-main h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
-.portal-detail-section { margin-block: 2rem; }
+.portal-detail-section { margin-block: var(--space-gap); }
 .portal-detail-section h2, .portal-editor h2 { font-size: 1.5rem; margin-bottom: 1rem; }
 .portal-detail-section h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
 .portal-detail-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; padding: 1.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-medium); background: var(--color-surface); }
@@ -108,7 +108,7 @@
 .portal-detail-facts dd { margin: 0.5rem 0 0; }
 .portal-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
 .portal-actions button { cursor: pointer; }
-.portal-editor { display: grid; gap: 1.25rem; margin-block: 2rem; }
+.portal-editor { display: grid; gap: 1.25rem; margin-block: var(--space-gap); }
 .portal-editor label { display: grid; gap: 0.5rem; font-weight: 700; }
 .portal-editor textarea { resize: vertical; }
 .portal-action-status { margin-top: 1rem; }
@@ -151,7 +151,7 @@
 .portal-profile-name, .portal-profile .portal-muted { overflow-wrap: anywhere; }
 .portal-welcome h1, .portal-detail-section p { overflow-wrap: anywhere; }
 
-.portal-itinerary { background: var(--color-surface); border: 2px solid var(--color-ink); border-radius: var(--radius-medium); padding: clamp(1rem, 3vw, 2rem); margin-bottom: 3rem; }
+.portal-itinerary { background: var(--color-surface); border: 2px solid var(--color-ink); border-radius: var(--radius-medium); padding: clamp(1rem, 3vw, 2rem); margin-bottom: var(--space-gap); }
 .portal-itinerary h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
 .portal-itinerary-list { padding-left: 1.5rem; margin-top: 1.5rem; }
 .portal-itinerary-list li { border-top: 1px solid var(--color-border); padding-block: 1rem; overflow-wrap: anywhere; }
@@ -182,7 +182,7 @@
 }
 
 .portal-dashboard-main { padding-top: 0; }
-.portal-updates-bar { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); border-bottom: 1px solid var(--color-ink); background: var(--color-surface); }
+.portal-updates-bar { margin-bottom: var(--space-card); border-bottom: 1px solid var(--color-ink); background: var(--color-surface); }
 .portal-updates-bar > summary { min-height: 44px; padding: 0.65rem 1rem; cursor: pointer; font-weight: 700; }
 .portal-updates-bar > summary .portal-muted { margin-left: 0.75rem; font-weight: 400; }
 .portal-updates-bar > summary:focus:not(:focus-visible) { outline: none; box-shadow: none; }

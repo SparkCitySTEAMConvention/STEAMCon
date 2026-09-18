@@ -11,12 +11,12 @@
 .registration-header-label { padding: 0.3rem 0.8rem; border: 1px solid var(--color-ink); border-radius: 99px; font: 700 0.7rem/1.5 'Courier New', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
 .registration-back-link { justify-self: end; min-height: 44px; display: inline-flex; align-items: center; font-size: 0.82rem; font-weight: 800; text-decoration: none; }
 .registration-back-link:hover { text-decoration: underline; }
-.registration-main { padding-block: clamp(2.75rem, 6vw, 6rem); }
-.registration-intro { max-width: 830px; margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
+.registration-main { padding-block: var(--space-section); }
+.registration-intro { max-width: 830px; margin-bottom: var(--space-section); }
 .registration-intro h1 { margin-block: 0.75rem 1rem; font-size: clamp(2.8rem, 6vw, 5.75rem); }
 .registration-intro > p:last-child { max-width: 650px; color: var(--color-text-muted); font-size: 1.05rem; }
-.registration-layout { display: grid; grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.45fr); align-items: start; gap: clamp(1.5rem, 4vw, 3.5rem); }
-.registration-track-panel { position: sticky; top: 1.5rem; padding: clamp(1.5rem, 3vw, 2.5rem); border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ink); color: var(--color-paper); box-shadow: 10px 12px 0 var(--color-art); }
+.registration-layout { display: grid; grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.45fr); align-items: start; gap: var(--space-card); }
+.registration-track-panel { position: sticky; top: 1.5rem; padding: var(--space-card); border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ink); color: var(--color-paper); box-shadow: 10px 12px 0 var(--color-art); }
 .registration-track-panel > .eyebrow { color: var(--color-ice); }
 .registration-track-panel h2 { margin-block: 0.8rem 1rem; font-size: clamp(2rem, 3.5vw, 3.4rem); }
 .registration-track-panel > p:not(.eyebrow) { color: var(--color-border); font-size: 0.88rem; }
@@ -38,7 +38,7 @@
 .role-switcher button span, .role-switcher button strong { display: block; }
 .role-switcher button span { margin-bottom: 0.25rem; font: 700 0.68rem/1.5 'Courier New', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
 .role-switcher button strong { font-size: 1.15rem; }
-.registration-form, .registration-success, .registration-checkout { padding: clamp(1.5rem, 4vw, 3.5rem); }
+.registration-form, .registration-success, .registration-checkout { padding: var(--space-card); }
 .registration-form-heading { margin-bottom: 2.25rem; }
 .registration-form-heading h2, .registration-success h2 { margin-block: 0.65rem 0.8rem; font-size: clamp(2rem, 4vw, 3.4rem); }
 .registration-form-heading > p:not(.eyebrow), .registration-success > p:not(.eyebrow) { max-width: 620px; color: var(--color-text-muted); }
@@ -76,7 +76,7 @@
 .registration-checkout-back { margin-top: 1rem; }
 .registration-portal-link { margin-top: 1.25rem; color: var(--color-text-muted); font-size: 0.78rem; text-align: center; }
 .registration-portal-link a { color: var(--color-ink); font-weight: 800; }
-.registration-success { min-height: 620px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.registration-success { min-height: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
 .registration-success-mark { display: grid; width: 72px; height: 72px; margin-bottom: 1.5rem; place-items: center; border: 2px solid var(--color-ink); border-radius: 50%; background: var(--color-mathematics); font-size: 2rem; font-weight: 900; box-shadow: var(--shadow-small); }
 .registration-success-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-top: 2rem; }
 .registration-text-button { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-ink); font-weight: 800; text-decoration: underline; text-underline-offset: 0.25em; cursor: pointer; }
@@ -95,5 +95,5 @@
   .registration-track-panel ol, .registration-field-grid { grid-template-columns: 1fr; }
   .registration-field-wide { grid-column: auto; }
   .role-switcher button { min-height: 88px; padding: 0.9rem; }
-  .registration-success { min-height: 500px; }
+  .registration-success { min-height: 0; }
 }

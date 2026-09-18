@@ -1,4 +1,4 @@
-.track-program { margin-top: 4rem; }
+.track-program { margin-top: var(--space-section); }
 .track-program h2 { font-size: clamp(1.8rem, 3vw, 3rem); margin-block: 1rem; }
 .track-program-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 1.5rem; margin-block: 1.5rem; }
 .track-program-controls > div { flex: 1 1 260px; }

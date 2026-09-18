@@ -61,7 +61,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
         <section className="attendee-welcome" aria-labelledby="attendee-welcome-heading">
           <div>
             <p className="eyebrow">Your curiosity has a schedule</p>
-            <h1 id="attendee-welcome-heading">Welcome back, {data.attendee.firstName}.</h1>
+            <h1 id="attendee-welcome-heading">Attendee dashboard</h1>
             <p>Build your STEAM Con experience, handle the trip, and see every plan in one place.</p>
           </div>
           <a className="button button-dark" href="#discover">Find a session <span aria-hidden="true">↓</span></a>
@@ -91,9 +91,11 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
             <div><p className="eyebrow">02 / One clear plan</p><h2 id="itinerary-heading">Your itinerary.</h2></div>
             <p>Sessions and confirmed bookings appear together in chronological order.</p>
           </div>
+          <details><summary>View itinerary · {itinerary.length} entries</summary>
           <ol className="attendee-itinerary-list">
             {itinerary.map((item, index) => <ItineraryItem key={item.id} item={item} index={index} />)}
           </ol>
+          </details>
         </section>
 
         <div className="attendee-primary-grid">

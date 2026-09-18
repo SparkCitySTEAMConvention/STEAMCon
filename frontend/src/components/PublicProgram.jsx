@@ -1,7 +1,6 @@
 import usePublicProgram from '../hooks/usePublicProgram.js'
 import TrackGrid from './TrackGrid.jsx'
 import FeaturedSessions from './FeaturedSessions.jsx'
-import ScheduleByDay from './ScheduleByDay.jsx'
 
 export default function PublicProgram() {
   const { source, resource } = usePublicProgram()
@@ -12,9 +11,8 @@ export default function PublicProgram() {
       {resource.status === 'error' && <div role="alert"><p>Unable to load the program. Please retry.</p><button className="button button-paper" type="button" onClick={resource.retry}>Retry program</button></div>}
     </div>
     {resource.status === 'ready' && <>
-      <TrackGrid tracks={resource.data.tracks} />
-      <FeaturedSessions sessions={resource.data.sessions} live={source.mode === 'live'} />
-      <ScheduleByDay key={source.mode} sessions={resource.data.schedule || resource.data.sessions} tracks={resource.data.trackNames} live={source.mode === 'live'} />
+      <FeaturedSessions sessions={resource.data.sessions.slice(0, 1)} live={source.mode === 'live'} />
+      <TrackGrid tracks={resource.data.tracks} compact />
     </>}
   </>
 }

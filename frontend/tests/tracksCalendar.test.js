@@ -88,6 +88,15 @@ test('Tracks calendar URL filters, history, empty states and live Backend B boun
     const titles = () => [...calendar().querySelectorAll('.schedule-row h3')].map(node => node.textContent)
     const selectedDate = () => calendar().querySelector('.schedule-days [aria-pressed="true"]').textContent
     async function navigate(url) { await act(async () => router.navigate(url)) }
+    await mount('/', anonymous, Home)
+    assert.equal(calendar(), null, 'homepage delegates the full calendar to tracks')
+    for (const selector of ['.convention-countdown', '.hero', '#events', '#tracks', '#speaker-registration']) assert.ok(document.querySelector(selector), selector)
+    assert.equal(document.querySelectorAll('h1').length, 1)
+    assert.equal(document.querySelectorAll('#tracks .track-card').length, 5)
+    assert.equal(document.querySelector('#tracks .track-card p'), null, 'full track descriptions stay on tracks')
+    assert.ok(document.querySelector('#events').compareDocumentPosition(document.querySelector('#tracks')) & window.Node.DOCUMENT_POSITION_FOLLOWING)
+    assert.ok(document.querySelector('#speaker-registration a[href="/register?role=attendee"]'))
+    assert.ok(document.querySelector('#speaker-registration a[href="/register?role=speaker"]'))
     await mount('/tracks?track=science')
     assert.match(selectedDate(), /April 6/)
     assert.match(document.querySelector('.track-feature').className, /science/)

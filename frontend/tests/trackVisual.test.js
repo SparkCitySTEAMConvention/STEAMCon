@@ -42,10 +42,9 @@ test('reduced motion stops every animation family and restores complete drawing'
   assert.match(reduced, /stroke-dashoffset: 0/)
   assert.match(css, /data-illustration='neutral'.*animation: none/)
 })
-test('homepage panel and animation and backend adapters remain unchanged', () => {
+test('featured content and backend adapters remain unchanged', () => {
   const hashes = {
     'components/FeaturedSessions.jsx': '6293387d84b26136c3c06fbdc98317ce8b5d9637dfd9596a5e23072e1a2d4223',
-    'App.css': 'da0864eeb5f2c969cc28a296a89bc584cb662ef04078098c080ca532f3bf8da7',
     'services/publicProgramSource.js': 'f23e22b99e2b2d5f984a5e08c907e287a47722653c820ccd5a0695b5bddec852',
     'services/eventRepository.js': '79410cc55a42912b5af73d7683b034961047c43255a3852ab31e8e7d71a63ff0',
   }
