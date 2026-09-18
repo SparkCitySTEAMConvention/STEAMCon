@@ -44,7 +44,7 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const resource = useSpeakerResource(loader, resourceKey)
   const { hash } = useLocation()
   useEffect(() => {
-    if (!hash || resource.status !== 'ready') return
+    if (!hash) return
     const target = document.getElementById(hash.slice(1))
     target?.scrollIntoView?.({ behavior: 'instant', block: 'start' })
     target?.focus({ preventScroll: true })
@@ -62,7 +62,7 @@ function SpeakerDashboardView({ calendarSource, proposalSource, data, resource, 
       <a className="skip-link" href="#speaker-main">Skip to content</a>
       <SpeakerHeader speaker={speaker} />
       <main className="container portal-main portal-dashboard-main" id="speaker-main" tabIndex={-1}>
-        <details className="portal-updates-bar" id="speaker-updates" aria-labelledby="speaker-updates-heading">
+        <details className="portal-updates-bar" id="speaker-updates" tabIndex={-1} aria-labelledby="speaker-updates-heading">
           <summary id="speaker-updates-heading">Organizer Updates <span className="portal-muted">Feedback, notifications &amp; next steps</span></summary>
           <div className="portal-updates-content">
             <div>
