@@ -21,6 +21,8 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
   const server = await createServer({ server: { middlewareMode: true, watch: null, ws: false }, appType: 'custom' })
   let root
   try {
+    const { speakerRepository: profiles } = await server.ssrLoadModule('/src/services/speakerRepository.js')
+    t.mock.method(profiles, 'getMyProfile', async () => ({ displayName: 'Real Speaker', title: 'Scientist', organization: 'Lab', biography: 'Experience' }))
     const { AuthContext } = await server.ssrLoadModule('/src/auth/useAuth.js')
     dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} })
     const { default: Shell } = await server.ssrLoadModule('/src/components/portal/PortalShell.jsx')
@@ -136,7 +138,7 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       assert.equal(document.querySelectorAll('#speaker-updates').length, 1)
       assert.equal(document.querySelector('nav[aria-label="Speaker navigation"]'), null)
     })
-    assert.equal(document.querySelector('a[href="/speaker/profile/edit"]'), null)
+    assert.ok(document.querySelector('a[href="/speaker/profile/edit"]'))
     await mount(Details, `/speaker/proposals/${proposalId}?speakerId=attacker&preview=scheduled`)
     assert.match(text(), /My live idea/); assert.doesNotMatch(text(), /Bill Nye|Fictional schedule/)
     holdTracks = true

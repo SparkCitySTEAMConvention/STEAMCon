@@ -6,12 +6,22 @@ import PortalTopbar from './PortalTopbar.jsx'
 import './portal.css'
 
 const mobileQuery = '(max-width: 760px)'
+const storageKey = 'steam-portal-sidebar-collapsed'
 
 export default function PortalShell({ children }) {
   const { user, isAuthenticated } = useAuth()
   const location = useLocation()
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(mobileQuery).matches)
-  const [open, setOpen] = useState(false)
+  const [openRoute, setOpenRoute] = useState(null)
+  const open = openRoute === location.key
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return window.sessionStorage.getItem(storageKey) === 'true' } catch { return false }
+  })
+  const toggleCollapsed = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    try { window.sessionStorage.setItem(storageKey, String(next)) } catch { /* Storage may be disabled. */ }
+  }
   const menuButton = useRef(null)
   const drawer = useRef(null)
   const content = useRef(null)
@@ -19,29 +29,45 @@ export default function PortalShell({ children }) {
   const returnFocus = useRef(false)
 
   const dismiss = () => {
-    setOpen(false)
+    setOpenRoute(null)
   }
 
   useEffect(() => {
     const media = window.matchMedia(mobileQuery)
-    const update = () => { setMobile(media.matches); setOpen(false) }
+    const update = () => { setMobile(media.matches); setOpenRoute(null) }
     media.addEventListener('change', update)
     return () => media.removeEventListener('change', update)
   }, [])
 
   useEffect(() => {
     if (!isAuthenticated || !mobile || !open) return
-    const previousOverflow = document.body.style.overflow
+    const body = document.body
+    const savedStyles = Object.fromEntries(['overflow', 'position', 'top', 'left', 'width'].map(name => [name, body.style[name]]))
+    const scrollX = window.scrollX
+    const scrollY = window.scrollY
     const mainContent = content.current
     const trigger = menuButton.current
     mainContent.inert = true
-    document.body.style.overflow = 'hidden'
+    Object.assign(body.style, { overflow: 'hidden', position: 'fixed', top: `-${scrollY}px`, left: `-${scrollX}px`, width: '100%' })
+    let touchY = null
+    const blockBackground = event => {
+      const nav = drawer.current?.querySelector('.steam-portal-navigation')
+      if (!nav?.contains(event.target)) { event.preventDefault(); return }
+      const delta = event.type === 'wheel' ? event.deltaY : touchY === null ? 0 : touchY - event.touches[0].clientY
+      if (event.type === 'touchmove') touchY = event.touches[0].clientY
+      if (nav.scrollHeight <= nav.clientHeight || (delta < 0 && nav.scrollTop <= 0) || (delta > 0 && nav.scrollTop + nav.clientHeight >= nav.scrollHeight)) event.preventDefault()
+    }
+    const onTouchStart = event => { touchY = event.touches[0].clientY }
+    document.addEventListener('wheel', blockBackground, { passive: false })
+    document.addEventListener('touchmove', blockBackground, { passive: false })
+    document.addEventListener('touchstart', onTouchStart, { passive: true })
     closeButton.current?.focus()
     const onKeyDown = event => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        setOpen(false)
+        setOpenRoute(null)
       }
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key) || (event.key === ' ' && !event.target.closest?.('button'))) event.preventDefault()
       if (event.key === 'Tab') {
         const controls = [...drawer.current.querySelectorAll('a[href], button:not([disabled])')]
         const first = controls[0]
@@ -53,9 +79,13 @@ export default function PortalShell({ children }) {
     document.addEventListener('keydown', onKeyDown)
     return () => {
       mainContent.inert = false
-      document.body.style.overflow = previousOverflow
+      Object.assign(body.style, savedStyles)
+      window.scrollTo(scrollX, scrollY)
+      document.removeEventListener('wheel', blockBackground)
+      document.removeEventListener('touchmove', blockBackground)
+      document.removeEventListener('touchstart', onTouchStart)
       document.removeEventListener('keydown', onKeyDown)
-      trigger?.focus()
+      trigger?.focus({ preventScroll: true })
       returnFocus.current = true
     }
   }, [isAuthenticated, mobile, open])
@@ -74,8 +104,11 @@ export default function PortalShell({ children }) {
   if (!isAuthenticated) return null
 
   return (
-    <div className="steam-portal-shell">
-      {!mobile && <aside className="steam-portal-sidebar"><PortalSidebar user={user} /></aside>}
+    <div className={`steam-portal-shell${collapsed ? ' steam-portal-collapsed' : ''}`}>
+      {!mobile && <aside className="steam-portal-sidebar">
+        <button className="steam-portal-toggle" type="button" onClick={toggleCollapsed} aria-expanded={!collapsed} aria-controls="steam-portal-desktop-navigation" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{collapsed ? 'Expand →' : '← Collapse'}</button>
+        <PortalSidebar user={user} collapsed={collapsed} id="steam-portal-desktop-navigation" />
+      </aside>}
       {mobile && <div className="steam-portal-drawer-layer" hidden={!open}>
         <div className="steam-portal-backdrop" onClick={dismiss} />
         <div ref={drawer} id="steam-portal-drawer" className="steam-portal-drawer" role="dialog" aria-modal="true" aria-label="Portal menu">
@@ -84,7 +117,7 @@ export default function PortalShell({ children }) {
         </div>
       </div>}
       <div ref={content} className="steam-portal-workspace">
-        <PortalTopbar mobile={mobile} menuOpen={open} onOpenMenu={() => setOpen(true)} menuButtonRef={menuButton} />
+        <PortalTopbar mobile={mobile} menuOpen={open} onOpenMenu={() => setOpenRoute(location.key)} menuButtonRef={menuButton} />
         <main className="steam-portal-content" tabIndex={-1}>{children ?? <Outlet />}</main>
       </div>
     </div>

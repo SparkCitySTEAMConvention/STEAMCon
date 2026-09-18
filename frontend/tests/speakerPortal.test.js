@@ -66,6 +66,8 @@ test('complete Speaker flow shares one shell, preserving demo/live boundaries an
   }
   try {
     server = await createServer({ server: { middlewareMode: true, watch: null, ws: false }, appType: 'custom' })
+    const { speakerRepository: profileRepository } = await server.ssrLoadModule('/src/services/speakerRepository.js')
+    t.mock.method(profileRepository, 'getMyProfile', async () => { throw new Error('Profile offline') })
     const { default: App } = await server.ssrLoadModule('/src/App.jsx')
     const { AuthContext } = await server.ssrLoadModule('/src/auth/useAuth.js')
     const { speakerRepository } = await server.ssrLoadModule('/src/services/speakerRepository.js')
@@ -243,7 +245,7 @@ test('complete Speaker flow shares one shell, preserving demo/live boundaries an
       assert.match(text(), /Proposal withdrawn successfully/)
       assert.ok(document.querySelector('.steam-portal-shell') === shell)
       await navigate('/speaker/profile/edit')
-      assert.match(text(), /Profile editing awaits backend support/)
+      assert.match(text(), /Unable to load your profile/)
       assert.ok(document.querySelector('.portal-profile-form') === null)
     })
 

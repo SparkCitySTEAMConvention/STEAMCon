@@ -14,7 +14,17 @@ async function request(path, currentUserId, options = {}) {
   return response.status === 204 ? null : response.json()
 }
 const edits = new Map()
+async function profileRequest(options = {}) {
+  const response = await authenticatedFetch('/api/speaker/profile/me', { method: 'GET', ...options })
+  if (!response.ok) throw new Error(`Speaker profile request failed (${response.status}). Please retry.`)
+  return response.status === 204 ? null : response.json()
+}
 export const speakerRepository = {
+  getMyProfile() { return profileRequest() },
+  updateMyProfile(input) {
+    const body = Object.fromEntries(['displayName', 'title', 'organization', 'biography'].map(field => [field, input[field].trim()]))
+    return profileRequest({ method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  },
   getSpeakerDashboard(currentUserId) { return request('/api/speaker/dashboard', currentUserId) },
   getMyProposals(currentUserId) { return request('/api/proposals/me', currentUserId) },
   async updateProposal(id, currentUserId, changes) {
