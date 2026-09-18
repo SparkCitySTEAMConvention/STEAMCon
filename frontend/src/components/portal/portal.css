@@ -39,3 +39,5 @@
 .steam-portal-collapsed .steam-portal-sidebar small, .steam-portal-collapsed .steam-portal-sidebar h2, .steam-portal-collapsed .steam-portal-sidebar .steam-portal-unavailable { display: none; }
 .steam-portal-collapsed .steam-portal-toggle { margin: 0.5rem; padding: 0.4rem; font-size: 0.75rem; }
 .steam-portal-drawer > button { flex-shrink: 0; align-self: flex-start; }
+
+.steam-portal-shell .steam-portal-discovery { padding: 0; }

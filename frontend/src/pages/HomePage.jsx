@@ -1,5 +1,5 @@
 import ConventionCountdown from '../components/ConventionCountdown.jsx'
-import Header from '../components/Header.jsx'
+import Header from '../components/layout/PublicPageHeader.jsx'
 import Hero from '../components/Hero.jsx'
 import PublicProgram from '../components/PublicProgram.jsx'
 import SpeakerCallout from '../components/SpeakerCallout.jsx'

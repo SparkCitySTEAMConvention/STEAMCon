@@ -3,7 +3,7 @@ import { conventionDateRange } from '../utils/conventionCalendar.js'
 import { locationLabel } from '../utils/proposalPresentation.js'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer.jsx'
-import Header from '../components/Header.jsx'
+import Header from '../components/layout/PublicPageHeader.jsx'
 import './TravelInfoPage.css'
 
 const airports = [

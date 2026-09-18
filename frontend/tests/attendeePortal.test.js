@@ -97,9 +97,17 @@ test('existing attendee routes use the shell while preserving identity, content,
         await frame()
         return
       }
-      router = createMemoryRouter([{ path: '*', element: h(AuthContext.Provider, { value: { ...auth, logout: () => { logoutCalls++; return router.navigate('/') } } }, Page === App ? h(Page, props) : h(Shell, null, h(Page, props))) }], { initialEntries: [route] })
+      let value = { ...auth, logout: () => {
+        logoutCalls++
+        return router.navigate('/').then(() => {
+          value = { user: null, isAuthenticated: false, isLoading: false }
+          render()
+        })
+      } }
+      router = createMemoryRouter([{ path: '*', element: Page === App ? h(Page, props) : h(Shell, null, h(Page, props)) }], { initialEntries: [route] })
       root = createRoot(document.getElementById('root'))
-      await act(async () => root.render(h(RouterProvider, { router })))
+      const render = () => root.render(h(AuthContext.Provider, { value }, h(RouterProvider, { router })))
+      await act(async () => render())
       await frame()
     }
     async function frame() {
@@ -136,7 +144,7 @@ test('existing attendee routes use the shell while preserving identity, content,
       assert.equal(document.querySelectorAll('nav[aria-label="Portal navigation"]').length, 1)
       assert.equal([...document.querySelectorAll('button')].filter(node => node.textContent === 'Log out').length, 1)
       assert.equal(document.querySelector('.attendee-header, .booking-page-header'), null)
-      assert.doesNotMatch(nav().textContent, /My proposals|Speaking schedule|Speaker/)
+      assert.doesNotMatch(nav().textContent, /My proposals|Speaking schedule|Speaker Portal/)
       const unavailable = [...nav().querySelectorAll('.steam-portal-unavailable')]
       assert.equal(unavailable.length, 2)
       assert.ok(unavailable.every(node => node.tabIndex === -1 && !node.querySelector('a, button, input')))
@@ -283,8 +291,8 @@ test('existing attendee routes use the shell while preserving identity, content,
       assert.ok(document.querySelector('h1'))
       assert.equal(document.querySelector('.steam-portal-shell'), null)
       await mount('/events')
-      assert.ok(document.querySelector('nav[aria-label="Main navigation"]'))
-      assert.equal(document.querySelector('.steam-portal-shell'), null)
+      assert.equal(document.querySelector('nav[aria-label="Main navigation"]'), null)
+      assert.equal(document.querySelectorAll('.steam-portal-shell').length, 1)
       await mount('/speaker', { user: { role: 'SPEAKER', displayName: 'Bill Nye' }, authSource: 'demo', isAuthenticated: true, isLoading: false })
       assert.ok(document.querySelector('.steam-portal-topbar'))
       assert.match(text(), /Bill Nye/)
