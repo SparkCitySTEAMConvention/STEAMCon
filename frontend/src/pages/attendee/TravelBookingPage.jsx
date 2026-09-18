@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import BookingPageHeader from '../../components/attendee/BookingPageHeader.jsx'
 import TravelBookingNav from '../../components/attendee/TravelBookingNav.jsx'
 import {
   formatBookingDate,
@@ -68,15 +67,13 @@ export default function TravelBookingPage({ kind }) {
     setShowConfirmation(false)
   }
 
-  const pageLabel = isCar ? 'Ground Travel' : 'Travel Booking'
   const heading = isCar ? 'Reserve your ride.' : 'Book your way there and back.'
 
   return (
     <div className="travel-booking-page">
       <a className="skip-link" href="#travel-booking-main">Skip to booking</a>
-      <BookingPageHeader label={pageLabel} />
 
-      <main className="container travel-booking-main" id="travel-booking-main" tabIndex={-1}>
+      <div className="container travel-booking-main" id="travel-booking-main" tabIndex={-1}>
         <TravelBookingNav active={kind} />
 
         {showConfirmation && booking ? (
@@ -178,7 +175,7 @@ export default function TravelBookingPage({ kind }) {
             </form>
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

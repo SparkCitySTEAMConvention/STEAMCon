@@ -4,6 +4,7 @@ import './App.css'
 
 import ProtectedRoute from './auth/ProtectedRoute.jsx'
 import RoleRoute from './auth/RoleRoute.jsx'
+import PortalShell from './components/portal/PortalShell.jsx'
 import AccessDenied from './pages/AccessDenied.jsx'
 import HomePage from './pages/HomePage.jsx'
 import TracksPage from './pages/TracksPage.jsx'
@@ -78,19 +79,21 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<RoleRoute role="ATTENDEE" />}>
-          <Route path="/attendee" element={<AttendeeDashboard />} />
-          <Route
-            path="/attendee/travel"
-            element={<TravelBookingPage kind="travel" />}
-          />
-          <Route
-            path="/attendee/hotel"
-            element={<HotelBookingPage />}
-          />
-          <Route
-            path="/attendee/car"
-            element={<TravelBookingPage kind="car" />}
-          />
+          <Route element={<PortalShell />}>
+            <Route path="/attendee" element={<AttendeeDashboard />} />
+            <Route
+              path="/attendee/travel"
+              element={<TravelBookingPage key="travel" kind="travel" />}
+            />
+            <Route
+              path="/attendee/hotel"
+              element={<HotelBookingPage />}
+            />
+            <Route
+              path="/attendee/car"
+              element={<TravelBookingPage key="car" kind="car" />}
+            />
+          </Route>
         </Route>
 
         <Route element={<RoleRoute role="SPEAKER" />}>

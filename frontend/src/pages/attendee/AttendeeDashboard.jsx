@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
-import AttendeeHeader from '../../components/attendee/AttendeeHeader.jsx'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useAuth } from '../../auth/useAuth.js'
 import AttendeeSummary from '../../components/attendee/AttendeeSummary.jsx'
 import BookingCard from '../../components/attendee/BookingCard.jsx'
 import ItineraryItem from '../../components/attendee/ItineraryItem.jsx'
@@ -11,6 +12,21 @@ import './AttendeeDashboard.css'
 const attendeePreview = attendeeRepository.getPreview()
 
 export default function AttendeeDashboard({ data = attendeePreview }) {
+  const { user, authSource } = useAuth()
+  const { hash } = useLocation()
+  const passHolder = authSource === 'backend' ? user?.displayName || user?.email || 'Attendee' : data.attendee.name
+
+  useEffect(() => {
+    if (!hash) return
+    // Run after App's route-change focus so cross-page hash links retain focus.
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(hash.slice(1))
+      target?.scrollIntoView?.({ behavior: 'instant', block: 'start' })
+      target?.focus({ preventScroll: true })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [hash])
+
   const [selectedSessionIds, setSelectedSessionIds] = useState(
     () => data.sessions.filter(session => session.enrolled).map(session => session.id),
   )
@@ -55,9 +71,8 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
   return (
     <div className="attendee-portal">
       <a className="skip-link" href="#attendee-main">Skip to content</a>
-      <AttendeeHeader attendee={data.attendee} admission={data.admission} />
 
-      <main className="container attendee-main" id="attendee-main" tabIndex={-1}>
+      <div className="container attendee-main" id="attendee-main" tabIndex={-1}>
         <section className="attendee-welcome" aria-labelledby="attendee-welcome-heading">
           <div>
             <p className="eyebrow">Your curiosity has a schedule</p>
@@ -86,7 +101,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
           </ul>
         </section>
 
-        <section className="attendee-section attendee-itinerary" id="itinerary" aria-labelledby="itinerary-heading">
+        <section className="attendee-section attendee-itinerary" id="itinerary" tabIndex={-1} aria-labelledby="itinerary-heading">
           <div className="attendee-section-heading">
             <div><p className="eyebrow">02 / One clear plan</p><h2 id="itinerary-heading">Your itinerary.</h2></div>
             <p>Sessions and confirmed bookings appear together in chronological order.</p>
@@ -99,7 +114,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
         </section>
 
         <div className="attendee-primary-grid">
-          <section id="schedule" aria-labelledby="schedule-heading">
+          <section id="schedule" tabIndex={-1} aria-labelledby="schedule-heading">
             <div className="attendee-section-heading">
               <div><p className="eyebrow">03 / My schedule</p><h2 id="schedule-heading">What you’re showing up for.</h2></div>
               <span>{selectedSessions.length} sessions</span>
@@ -116,7 +131,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
             <h2 id="admission-heading">{data.admission.type}</h2>
             <p className="attendee-admission-status"><span aria-hidden="true">✓</span> {data.admission.status}</p>
             <dl>
-              <div><dt>Pass holder</dt><dd>{data.attendee.name}</dd></div>
+              <div><dt>Pass holder</dt><dd>{passHolder}</dd></div>
               <div><dt>Confirmation</dt><dd>{data.admission.confirmationCode}</dd></div>
               <div><dt>Access</dt><dd>All five STEAM tracks</dd></div>
             </dl>
@@ -154,7 +169,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
           </ul>
         </section>
 
-      </main>
+      </div>
 
       <footer className="container attendee-footer">
         <p>STEAM Con · A place for curious minds.</p>

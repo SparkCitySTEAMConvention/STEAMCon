@@ -120,3 +120,32 @@
   .travel-mode-picker { grid-template-columns: 1fr; }
   .booking-confirmation-art span { width: 130px; height: 130px; font-size: 4.5rem; }
 }
+
+/* Booking forms respond to usable shell width as well as viewport width. */
+.steam-portal-shell .travel-booking-page { min-height: 0; container: attendee-booking / inline-size; }
+.steam-portal-shell .travel-booking-page * { min-width: 0; }
+.steam-portal-shell .travel-booking-page .container { width: 100%; max-width: none; }
+.steam-portal-shell .travel-booking-main { padding-top: 0; }
+.steam-portal-shell .travel-booking-page [tabindex='-1']:focus { outline: none; box-shadow: none; }
+@container attendee-booking (max-width: 1000px) {
+  .travel-booking-layout, .booking-confirmation { grid-template-columns: 1fr; }
+  .travel-booking-intro { position: static; }
+  .booking-confirmation-art { min-height: 280px; border-right: 0; border-bottom: 2px solid var(--color-ink); }
+  .hotel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hotel-booking-summary { grid-template-columns: 1fr auto; }
+  .hotel-booking-summary .button { grid-column: 1 / -1; }
+}
+@container attendee-booking (max-width: 760px) {
+  .travel-booking-nav { grid-template-columns: 1fr; }
+  .travel-booking-nav a + a { border-top: 1px solid var(--color-border); border-left: 0; }
+  .travel-field-grid, .booking-confirmation-details, .hotel-search-bar, .hotel-grid { grid-template-columns: 1fr; }
+  .travel-field-wide { grid-column: auto; }
+  .hotel-search-heading, .hotel-results-heading { align-items: flex-start; flex-direction: column; }
+  .hotel-booking-summary { grid-template-columns: 1fr; }
+  .hotel-summary-total { text-align: left; }
+  .hotel-booking-summary .button { grid-column: auto; width: 100%; }
+}
+@container attendee-booking (max-width: 430px) {
+  .travel-mode-picker { grid-template-columns: 1fr; }
+  .booking-confirmation-art span { width: 130px; height: 130px; font-size: 4.5rem; }
+}

@@ -15,7 +15,7 @@
 .steam-portal-shell .steam-portal-topbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--color-border); background: var(--color-white); }
 .steam-portal-shell .steam-portal-title { font-size: 0.875rem; font-weight: 700; }
 .steam-portal-shell .auth-account-navigation { margin: 0 0 0 auto; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
-.steam-portal-shell button { min-height: 44px; cursor: pointer; border: 1px solid currentColor; border-radius: var(--radius-small); padding: 0.4rem 0.75rem; background: var(--color-paper); color: var(--color-ink); }
+.steam-portal-shell .steam-portal-topbar button, .steam-portal-shell .steam-portal-drawer > button { min-height: 44px; cursor: pointer; border: 1px solid currentColor; border-radius: var(--radius-small); padding: 0.4rem 0.75rem; background: var(--color-paper); color: var(--color-ink); }
 .steam-portal-shell .steam-portal-content { padding: clamp(1rem, 3vw, 2rem); min-width: 0; overflow-wrap: anywhere; }
 .steam-portal-shell .steam-portal-drawer-layer[hidden] { display: none; }
 .steam-portal-shell .steam-portal-drawer-layer { position: fixed; inset: 0; z-index: 100; }

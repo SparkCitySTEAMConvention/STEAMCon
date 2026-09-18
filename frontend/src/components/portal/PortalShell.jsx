@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
 import PortalSidebar from './PortalSidebar.jsx'
 import PortalTopbar from './PortalTopbar.jsx'
@@ -9,12 +9,14 @@ const mobileQuery = '(max-width: 760px)'
 
 export default function PortalShell({ children }) {
   const { user, isAuthenticated } = useAuth()
+  const location = useLocation()
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(mobileQuery).matches)
   const [open, setOpen] = useState(false)
   const menuButton = useRef(null)
   const drawer = useRef(null)
   const content = useRef(null)
   const closeButton = useRef(null)
+  const returnFocus = useRef(false)
 
   const dismiss = () => {
     setOpen(false)
@@ -54,8 +56,20 @@ export default function PortalShell({ children }) {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', onKeyDown)
       trigger?.focus()
+      returnFocus.current = true
     }
   }, [isAuthenticated, mobile, open])
+
+  useEffect(() => {
+    if (open || !mobile || !returnFocus.current) return
+    const trigger = menuButton.current
+    // App and destination hash effects also move focus after navigation.
+    const frame = window.requestAnimationFrame(() => {
+      returnFocus.current = false
+      if (trigger?.isConnected) trigger.focus()
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [open, mobile, location.key])
 
   if (!isAuthenticated) return null
 

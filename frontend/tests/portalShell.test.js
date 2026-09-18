@@ -36,7 +36,8 @@ test('navigation destinations match existing route declarations and section targ
 
 test('shell is isolated from pages, API adapters and fixtures', async () => {
   const app = await source('App.jsx')
-  assert.doesNotMatch(app, /PortalShell|components\/portal/)
+  assert.match(app, /role="ATTENDEE"[\s\S]*?<Route element=\{<PortalShell \/>\}>/)
+  assert.doesNotMatch(app.slice(app.indexOf('role="SPEAKER"')), /PortalShell/)
   const directory = new URL('../src/components/portal/', import.meta.url)
   for (const name of await readdir(directory)) {
     if (!/\.(jsx|js)$/.test(name)) continue
@@ -53,7 +54,7 @@ test('shell is isolated from pages, API adapters and fixtures', async () => {
 })
 
 test('rendered shell navigation, content, authentication and mobile keyboard behavior', async t => {
-  const dom = new JSDOM('<div id="root"></div>', { url: 'https://steamcon.test' })
+  const dom = new JSDOM('<div id="root"></div>', { url: 'https://steamcon.test', pretendToBeVisual: true })
   let mobile = false
   const listeners = new Set()
   const media = { get matches() { return mobile }, addEventListener: (_, listener) => listeners.add(listener), removeEventListener: (_, listener) => listeners.delete(listener) }
