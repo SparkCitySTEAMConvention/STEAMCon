@@ -9,6 +9,7 @@ export function trackDestination(track) {
 }
 
 export function selectedTrack(tracks, query) {
+  if (query === 'all') return undefined
   return tracks.find(track => trackQuery(track) === query) || tracks[0]
 }
 

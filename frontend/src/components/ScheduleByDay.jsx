@@ -1,19 +1,24 @@
+import { locationLabel } from '../utils/proposalPresentation.js'
 import { conventionConfig } from '../mocks/conventionConfig.js'
 import { conventionDayLabel, programCalendar } from '../utils/conventionCalendar.js'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { attendeeData } from '../mocks/attendeeData.js'
+import { publicProgramPreview } from '../mocks/publicProgram.js'
 
 function trackSlug(track) {
   return (track || 'unknown').toLowerCase().replaceAll(' ', '-')
 }
 
-export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks = attendeeData.tracks, live = false }) {
+export default function ScheduleByDay({ sessions = publicProgramPreview.schedule, tracks = publicProgramPreview.trackNames, live = false, date, selectedTrack, onDateChange, onTrackChange, publicOnly = false }) {
   const days = conventionConfig.dates
-  const calendar = programCalendar(sessions, live)
+  const calendar = programCalendar(sessions)
   const unplaced = calendar.filter(session => !days.includes(session.calendarDate)).length
-  const [activeDay, setActiveDay] = useState(days[0] ?? '')
-  const [activeTrack, setActiveTrack] = useState('All tracks')
+  const [localDay, setLocalDay] = useState(days[0] ?? '')
+  const [localTrack, setLocalTrack] = useState('All tracks')
+  const activeDay = date ?? localDay
+  const activeTrack = selectedTrack ?? localTrack
+  const setActiveDay = onDateChange ?? setLocalDay
+  const setActiveTrack = onTrackChange ?? setLocalTrack
 
   const visibleSessions = calendar.filter(session => (
     session.calendarDate === activeDay && (activeTrack === 'All tracks' || session.track === activeTrack)
@@ -38,6 +43,7 @@ export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks
                   className={activeDay === day ? 'is-active' : ''}
                   type="button"
                   aria-pressed={activeDay === day}
+                  aria-current={activeDay === day ? 'date' : undefined}
                   onClick={() => setActiveDay(day)}
                   key={day}
                 >
@@ -72,15 +78,15 @@ export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks
                     <div className="schedule-session-copy">
                       <div className="schedule-tags">
                         <span className="schedule-track-tag">{session.track || 'Track to be announced'}</span>
-                        <span>{session.format || 'Session'}</span>
-                        {session.mandatory && <span>All attendees</span>}
+                        {!publicOnly && <span>{session.format || 'Session'}</span>}
+                        {!publicOnly && session.mandatory && <span>All attendees</span>}
                       </div>
                       <h3>{session.title}</h3>
-                      <p>{session.speaker || 'Speaker to be announced'}</p>
+                      {!publicOnly && <p>{session.speaker || 'Speaker to be announced'}</p>}
                     </div>
                     <div className="schedule-location">
                       <span>Location</span>
-                      <strong>{session.location || 'Room to be announced'}</strong>
+                      <strong>{'Room to be announced'}</strong>
 
                     </div>
                   </article>
@@ -96,8 +102,9 @@ export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks
           )}
 
           <div className="schedule-footer">
+            <p>Convention venue: {locationLabel()}</p>
             {unplaced > 0 && <p>{unplaced} {unplaced === 1 ? 'occurrence is' : 'occurrences are'} awaiting a convention date or scheduled outside the three convention days.</p>}
-            <p>{live ? 'Live program · Only published relationships are shown. Speaker identities and rooms are not supplied by the event API.' : 'Program preview · Times, rooms, and speakers are demonstration data while the team finalizes the event.'}</p>
+            <p>{live ? 'Live program · Only published relationships are shown. Speaker identities and rooms are not supplied by the event API.' : 'Program preview · Session times are demonstration data. Exact opening times and rooms remain unconfirmed.'}</p>
             <Link className="button button-dark" to="/register?role=attendee">Register to build your schedule <span aria-hidden="true">↗</span></Link>
           </div>
         </div>

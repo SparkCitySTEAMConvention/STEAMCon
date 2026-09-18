@@ -78,7 +78,7 @@ function ProposalContent({ initialProposal, repository }) {
         <div><dt>Duration</dt><dd>{proposal.durationMinutes ? `${proposal.durationMinutes} minutes` : 'Duration to be announced'}</dd></div>
         <div><dt>Schedule</dt><dd>{scheduleLabel(proposal)}</dd></div>
         <div><dt>Room</dt><dd>{roomLabel(proposal)}</dd></div>
-        <div><dt>Convention location</dt><dd>{repository.demo ? locationLabel() : 'Location to be announced'}</dd></div>
+        <div><dt>Convention location</dt><dd>{locationLabel()}</dd></div>
       </dl>
       <section className="portal-detail-section" aria-labelledby="primary-heading"><h2 id="primary-heading">Primary speaker</h2><h3>{primary?.name || 'Speaker to be announced'}</h3><p>{primary?.bio}</p></section>
       <section className="portal-detail-section" aria-labelledby="others-heading"><h2 id="others-heading">{proposal.format === 'Panel' ? 'Co-panelists' : 'Co-speakers'}</h2>{others.length ? <ul className="portal-list" aria-label="Co-speakers" role="list">{others.map(person => <li key={person.id}><h3>{person.name}</h3><p>{person.bio}</p></li>)}</ul> : <p>{repository.demo ? 'No co-speakers listed.' : 'Speaker relationships unavailable.'}</p>}</section>

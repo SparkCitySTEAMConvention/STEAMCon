@@ -10,3 +10,20 @@
 @media (min-width: 1200px) {
   .track-program-layout { grid-template-columns: minmax(0, 1fr) 300px; }
 }
+
+.track-all-summary { margin-block: 2rem; padding: 1.5rem; border: 2px solid var(--color-ink); border-radius: var(--radius-medium); background: var(--color-surface); }
+.track-all-summary h2 { margin-block: 0.75rem; }
+.tracks-page .schedule-section > .container { width: 100%; }
+.tracks-page .schedule-section { min-width: 0; overflow-wrap: anywhere; }
+.tracks-page .schedule-toolbar { flex-wrap: wrap; }
+.tracks-page .schedule-days { flex: 1; min-width: 0; }
+.tracks-page .schedule-days button { flex: 1; min-width: 0; }
+.tracks-page .schedule-days button.is-active { text-decoration: underline; text-underline-offset: 0.25em; }
+@media (max-width: 600px) {
+  .tracks-page .schedule-days { flex-direction: column; }
+  .tracks-page .schedule-days button { border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .tracks-page .schedule-row article { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 1rem; }
+  .tracks-page .schedule-location { grid-column: auto; }
+}
+
+.tracks-page .schedule-days button:focus-visible { outline: 3px solid var(--color-ink); outline-offset: -5px; }

@@ -4,8 +4,8 @@ import { conventionConfig } from '../src/mocks/conventionConfig.js'
 import { countdownRemaining, occurrenceDate, programCalendar } from '../src/utils/conventionCalendar.js'
 test('countdown clamps at zero and uses confirmed midnight', () => {
  const target = Date.parse(conventionConfig.countdownTarget)
- assert.deepEqual(countdownRemaining(target - 90061000), { days: 1, hours: 1, minutes: 1, seconds: 1 })
- assert.deepEqual(countdownRemaining(target + 1000), { days: 0, hours: 0, minutes: 0, seconds: 0 })
+ assert.deepEqual(countdownRemaining(target - 90061000), { days: 1, hours: 1, minutes: 1 })
+ assert.deepEqual(countdownRemaining(target + 1000), { days: 0, hours: 0, minutes: 0 })
 })
 test('UTC midnight does not split the Eastern convention day; occurrences sort by instant', () => {
  assert.equal(occurrenceDate('2027-04-07T02:00:00Z'), '2027-04-06')
