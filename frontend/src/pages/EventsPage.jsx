@@ -1,4 +1,6 @@
-import ConventionCountdown from '../components/ConventionCountdown.jsx'
+import { locationLabel } from '../utils/proposalPresentation.js'
+import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionDayLabel } from '../utils/conventionCalendar.js'
 import { useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Header from '../components/Header.jsx'
@@ -37,7 +39,6 @@ export default function EventsPage() {
     <a className="skip-link" href="#main">Skip to content</a>
     <Header />
     <main id="main" tabIndex={-1} className="events-page">
-      <ConventionCountdown />
       <section className="events-hero" aria-labelledby="events-heading">
         <div className="container events-hero-inner">
           <div>
@@ -56,7 +57,7 @@ export default function EventsPage() {
         <p>{experience.description}</p>
         {!scheduleSelected && <p role="status">Programming preview · Proposed experience. Experience programming is not confirmed. Dates, rooms, and speakers are to be announced. These proposed concepts are separate from published session records.</p>}
         {scheduleSelected && <div className="events-program-status">
-          <p role="status">{live ? 'Live program · Published session times are displayed in Eastern Time.' : source.mode === 'preview' ? 'Program preview · Times, rooms, and speakers are demonstration data. Convention dates are confirmed; opening times and venue are to be announced.' : 'Live program unavailable · Sign in with a valid backend session.'}</p>
+          <p role="status">{live ? 'Live program · Published session times are displayed in Eastern Time.' : source.mode === 'preview' ? 'Program preview · Times, rooms, and speakers are demonstration data. Convention dates are confirmed; opening times and rooms are to be announced.' : 'Live program unavailable · Sign in with a valid backend session.'}</p>
           {resource.status === 'loading' && <p role="status">Loading events…</p>}
           {resource.status === 'error' && <div role="alert"><p>Unable to load events. Please retry.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry events</button></div>}
         </div>}
@@ -96,7 +97,7 @@ export default function EventsPage() {
           <p>Science · Technology · Engineering · Art · Mathematics</p>
           <dl>
             <div><dt>Destination</dt><dd>New York</dd></div>
-            <div><dt>Dates & venue</dt><dd>See the convention dates above. Venue to be announced.</dd></div>
+            <div><dt>Dates & venue</dt><dd>{conventionDayLabel(conventionConfig.startsOn)} – {conventionDayLabel(conventionConfig.endsOn)}, {conventionConfig.startsOn.slice(0, 4)}. {locationLabel()}.</dd></div>
           </dl>
           <Link to="/travel">Plan your New York visit <span aria-hidden="true">↗</span></Link>
         </aside>

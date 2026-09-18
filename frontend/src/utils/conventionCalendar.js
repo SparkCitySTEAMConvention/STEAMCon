@@ -15,12 +15,17 @@ export function occurrenceDate(value) {
   return `${get('year')}-${get('month')}-${get('day')}`
 }
 
-export function programCalendar(sessions, live) {
+export function selectedConventionDate(query) {
+  return conventionConfig.dates.includes(query) ? query : conventionConfig.dates[0]
+}
+
+export function conventionState(now) {
+  if (now < Date.parse(conventionConfig.countdownTarget)) return 'countdown'
+  return occurrenceDate(new Date(now).toISOString()) > conventionConfig.endsOn ? 'ended' : 'underway'
+}
+
+export function programCalendar(sessions) {
   return sessions.map(session => {
-    if (!live) {
-      const index = /^Day (\d+)$/.exec(session.day)?.[1]
-      return { ...session, calendarDate: conventionConfig.dates[Number(index) - 1] ?? null }
-    }
     const date = occurrenceDate(session.scheduledAt)
     const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone: conventionConfig.timezone, hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
@@ -34,5 +39,11 @@ export function programCalendar(sessions, live) {
 export function countdownRemaining(now) {
   const seconds = Math.max(0, Math.floor((Date.parse(conventionConfig.countdownTarget) - now) / 1000))
   return { days: Math.floor(seconds / 86400), hours: Math.floor(seconds / 3600) % 24,
-    minutes: Math.floor(seconds / 60) % 60, seconds: seconds % 60 }
+    minutes: Math.floor(seconds / 60) % 60 }
+}
+
+export function conventionDateRange() {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC', month: 'long', day: 'numeric', year: 'numeric',
+  }).formatRange(new Date(`${conventionConfig.startsOn}T12:00:00Z`), new Date(`${conventionConfig.endsOn}T12:00:00Z`))
 }
