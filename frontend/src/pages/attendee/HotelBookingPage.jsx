@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import BookingPageHeader from '../../components/attendee/BookingPageHeader.jsx'
 import TravelBookingNav from '../../components/attendee/TravelBookingNav.jsx'
 import {
   formatBookingDate,
@@ -98,9 +97,8 @@ export default function HotelBookingPage() {
   return (
     <div className="travel-booking-page hotel-booking-page">
       <a className="skip-link" href="#hotel-booking-main">Skip to hotels</a>
-      <BookingPageHeader label="Hotel Booking" />
 
-      <main className="container travel-booking-main" id="hotel-booking-main" tabIndex={-1}>
+      <div className="container travel-booking-main" id="hotel-booking-main" tabIndex={-1}>
         <TravelBookingNav active="hotel" />
 
         {showConfirmation && booking ? (
@@ -186,7 +184,7 @@ export default function HotelBookingPage() {
             </section>
           </form>
         )}
-      </main>
+      </div>
     </div>
   )
 }

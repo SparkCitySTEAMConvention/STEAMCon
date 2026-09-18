@@ -149,3 +149,27 @@
 .attendee-itinerary summary { min-height: 44px; padding-block: 0.65rem; cursor: pointer; font-weight: 700; }
 .attendee-profile { padding-block: 0.75rem; }
 .attendee-booking-card h3 { margin-top: 0.75rem; }
+
+/* Preserve the attendee layout at the width left available by the portal shell. */
+.steam-portal-shell .attendee-portal { min-height: 0; container: attendee-page / inline-size; }
+.steam-portal-shell .attendee-portal .container { width: 100%; max-width: none; }
+.steam-portal-shell .attendee-main { padding-top: 0; }
+.steam-portal-shell .attendee-portal [tabindex='-1']:focus { outline: none; box-shadow: none; }
+@container attendee-page (max-width: 1000px) {
+  .attendee-discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .attendee-primary-grid { grid-template-columns: 1fr; }
+  .attendee-admission { position: static; }
+}
+@container attendee-page (max-width: 760px) {
+  .attendee-welcome, .attendee-section-heading { align-items: flex-start; flex-direction: column; }
+  .attendee-summary, .attendee-booking-grid { grid-template-columns: 1fr; }
+  .attendee-session.is-compact article { grid-template-columns: 1fr; }
+  .attendee-session.is-compact .attendee-session-action { grid-column: 1; grid-row: auto; width: 100%; margin-top: 1rem; }
+  .attendee-itinerary { margin-inline: 0; padding: 1.5rem; }
+  .attendee-itinerary-item { grid-template-columns: 2rem minmax(0, 1fr); }
+  .attendee-itinerary-location { grid-column: 2; text-align: left; }
+}
+@container attendee-page (max-width: 560px) {
+  .attendee-discover-grid { grid-template-columns: 1fr; }
+  .attendee-welcome .button { width: 100%; }
+}
