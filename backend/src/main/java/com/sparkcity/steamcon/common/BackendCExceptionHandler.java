@@ -1,6 +1,5 @@
 package com.sparkcity.steamcon.common;
 
-import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,23 +25,54 @@ public class BackendCExceptionHandler {
                 new LinkedHashMap<>();
 
         response.put(
-                "timestamp",
-                Instant.now());
-
-        response.put(
                 "status",
                 HttpStatus.BAD_REQUEST.value());
 
         response.put(
-                "error",
-                "Bad Request");
+                "code",
+                "VALIDATION_ERROR");
 
         response.put(
                 "message",
                 exception.getMessage());
 
+        response.put(
+                "fieldErrors",
+                Map.of());
+
         return ResponseEntity
                 .badRequest()
+                .body(response);
+    }
+
+    @ExceptionHandler(
+            IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>>
+            handleIllegalState(
+                    IllegalStateException exception) {
+
+        Map<String, Object> response =
+                new LinkedHashMap<>();
+
+        response.put(
+                "status",
+                HttpStatus.UNAUTHORIZED.value());
+
+        response.put(
+                "code",
+                "AUTHENTICATION_REQUIRED");
+
+        response.put(
+                "message",
+                exception.getMessage());
+
+        response.put(
+                "fieldErrors",
+                Map.of());
+
+        return ResponseEntity
+                .status(
+                        HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
 }

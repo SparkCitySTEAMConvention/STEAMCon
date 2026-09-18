@@ -13,238 +13,232 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
 public class SpeakerController {
 
-    private final SpeakerService speakerService;
+        private final SpeakerService speakerService;
 
-    public SpeakerController(
-            SpeakerService speakerService) {
+        public SpeakerController(
+                        SpeakerService speakerService) {
 
-        this.speakerService =
-                speakerService;
-    }
+                this.speakerService = speakerService;
+        }
 
-    // ---------------------------------------------------------
-    // CREATE
-    // ---------------------------------------------------------
+        // ---------------------------------------------------------
+        // CREATE
+        // ---------------------------------------------------------
 
-    @PostMapping("/proposals")
-    public ResponseEntity<SessionProposal>
-            createProposal(
-                    @RequestBody
-                    CreateProposalRequest request,
-                    Authentication authentication) {
+        @PostMapping("/proposals")
+        public ResponseEntity<SessionProposal> createProposal(
+                        @RequestBody CreateProposalRequest request,
+                        Authentication authentication) {
 
-        UUID authenticatedUserId = getAuthenticatedUserId(authentication);
+                UUID authenticatedUserId = getAuthenticatedUserId(authentication);
 
-        SessionProposal proposal =
-                speakerService.createProposal(
-                        authenticatedUserId,
-                        request.title(),
-                        request.description(),
-                        request.trackId(),
-                        request.status());
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(proposal);
-    }
-
-    // ---------------------------------------------------------
-    // SPEAKER DASHBOARD
-    // Temporary speakerId until Backend A auth is integrated.
-    // ---------------------------------------------------------
-
-    @GetMapping("/speaker/dashboard")
-    public ResponseEntity<SpeakerDashboardResponse>
-            getDashboard(
-                    @RequestParam UUID speakerId) {
-
-        return ResponseEntity.ok(
-                speakerService.getDashboard(
-                        speakerId));
-    }
-
-    // ---------------------------------------------------------
-    // MY PROPOSALS
-    // ---------------------------------------------------------
-
-    @GetMapping("/proposals/me")
-    public ResponseEntity<List<SessionProposal>>
-            getMyProposals(
-                    @RequestParam UUID speakerId) {
-
-        return ResponseEntity.ok(
-                speakerService
-                        .getProposalsForSpeaker(
-                                speakerId));
-    }
-
-    // ---------------------------------------------------------
-    // PROPOSAL DETAIL
-    // ---------------------------------------------------------
-
-    @GetMapping("/proposals/{id}")
-    public ResponseEntity<SessionProposal>
-            getProposal(
-                    @PathVariable UUID id,
-                    @RequestParam UUID speakerId) {
-
-        return ResponseEntity.ok(
-                speakerService
-                        .getProposalForSpeaker(
-                                id,
-                                speakerId));
-    }
-
-    // ---------------------------------------------------------
-    // EDIT
-    // ---------------------------------------------------------
-
-    @PatchMapping("/proposals/{id}")
-    public ResponseEntity<SessionProposal>
-            updateProposal(
-                    @PathVariable UUID id,
-                    @RequestParam UUID speakerId,
-                    @RequestBody
-                    UpdateProposalRequest request) {
-
-        return ResponseEntity.ok(
-                speakerService.updateProposal(
-                        id,
-                        speakerId,
-                        request.title(),
-                        request.description(),
-                        request.trackId()));
-    }
-
-    // ---------------------------------------------------------
-    // WITHDRAW
-    // ---------------------------------------------------------
-
-    @DeleteMapping("/proposals/{id}")
-    public ResponseEntity<Void>
-            withdrawProposal(
-                    @PathVariable UUID id,
-                    @RequestParam UUID speakerId) {
-
-        speakerService.withdrawProposal(
-                id,
-                speakerId);
-
-        return ResponseEntity.noContent()
-                .build();
-    }
-
-    // ---------------------------------------------------------
-    // ORGANIZER DECISION
-    // ---------------------------------------------------------
-
-    @PostMapping("/proposals/{id}/decision")
-    public ResponseEntity<ApprovalDecision> decideProposal(
-            @PathVariable UUID id,
-            @RequestBody ProposalDecisionRequest request,
-            Authentication authentication) {
-
-        UUID authenticatedUserId =
-                getAuthenticatedUserId(authentication);
-
-        return ResponseEntity.ok(
-                speakerService
-                        .makeProposalDecision(
-                                id,
+                SessionProposal proposal = speakerService.createProposal(
                                 authenticatedUserId,
-                                request.decision(),
-                                request.comment()));
-    }
+                                request.title(),
+                                request.description(),
+                                request.trackId(),
+                                request.status());
 
-    // ---------------------------------------------------------
-    // SPEAKER APPLICATION
-    // ---------------------------------------------------------
-
-    @PostMapping("/speaker-applications")
-    public ResponseEntity<SpeakerApplication>
-            createSpeakerApplication(
-                    @RequestBody
-                    CreateSpeakerApplicationRequest request,
-                    Authentication authentication) {
-
-        SpeakerApplication application =
-                speakerService
-                        .createSpeakerApplication(
-                                getAuthenticatedUserId(authentication),
-                                request.sessionId());
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(application);
-    }
-
-    @PostMapping(
-            "/speaker-applications/{id}/status")
-    public ResponseEntity<SpeakerApplication>
-            updateApplicationStatus(
-                    @PathVariable UUID id,
-                    @RequestBody
-                    SpeakerApplicationStatusRequest request) {
-
-        return ResponseEntity.ok(
-                speakerService.updateSpeakerApplicationStatus(
-                        id,
-                        request.status()));
-    }
-
-    private UUID getAuthenticatedUserId(
-            Authentication authentication) {
-
-        if (authentication == null
-                || authentication.getPrincipal() == null) {
-
-            throw new IllegalStateException(
-                    "Authenticated user is required");
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(proposal);
         }
 
-        Object principal =
-                authentication.getPrincipal();
+        // ---------------------------------------------------------
+        // SPEAKER DASHBOARD
+        // ---------------------------------------------------------
 
-        if (principal instanceof UUID userId) {
-            return userId;
+        @GetMapping("/speaker/dashboard/me")
+        public ResponseEntity<SpeakerDashboardResponse> getDashboard(
+                        Authentication authentication) {
+
+                UUID speakerId = getAuthenticatedUserId(
+                                authentication);
+
+                return ResponseEntity.ok(
+                                speakerService.getDashboard(
+                                                speakerId));
         }
 
-        try {
-            return UUID.fromString(principal.toString());
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException(
-                    "Invalid authenticated user ID");
+        // ---------------------------------------------------------
+        // MY PROPOSALS
+        // ---------------------------------------------------------
+
+        @GetMapping("/proposals/me")
+        public ResponseEntity<List<SessionProposal>> getMyProposals(
+                        Authentication authentication) {
+
+                UUID speakerId = getAuthenticatedUserId(
+                                authentication);
+
+                return ResponseEntity.ok(
+                                speakerService
+                                                .getProposalsForSpeaker(
+                                                                speakerId));
         }
-    }
 
-    // ---------------------------------------------------------
-    // PUBLIC DIRECTORY
-    // ---------------------------------------------------------
+        // ---------------------------------------------------------
+        // PROPOSAL DETAIL
+        // ---------------------------------------------------------
 
-    @GetMapping("/speakers")
-    public ResponseEntity<List<SpeakerDirectoryEntry>>
-            getPublicSpeakerDirectory() {
+        @GetMapping("/proposals/{id}")
+        public ResponseEntity<SessionProposal> getProposal(
+                        @PathVariable UUID id,
+                        Authentication authentication) {
 
-        return ResponseEntity.ok(
-                speakerService
-                        .getPublicSpeakerDirectory());
-    }
+                UUID speakerId = getAuthenticatedUserId(
+                                authentication);
 
-    @GetMapping("/speakers/{speakerId}")
-    public ResponseEntity<SpeakerPublicProfileResponse>
-            getPublicSpeakerProfile(
-                    @PathVariable UUID speakerId) {
+                return ResponseEntity.ok(
+                                speakerService
+                                                .getProposalForSpeaker(
+                                                                id,
+                                                                speakerId));
+        }
 
-        return ResponseEntity.ok(
-                speakerService
-                        .getPublicSpeakerProfile(
-                                speakerId));
-    }
+        // ---------------------------------------------------------
+        // EDIT
+        // ---------------------------------------------------------
+
+        @PatchMapping("/proposals/{id}")
+        public ResponseEntity<SessionProposal> updateProposal(
+                        @PathVariable UUID id,
+                        @RequestBody UpdateProposalRequest request,
+                        Authentication authentication) {
+
+                UUID speakerId = getAuthenticatedUserId(
+                                authentication);
+
+                return ResponseEntity.ok(
+                                speakerService.updateProposal(
+                                                id,
+                                                speakerId,
+                                                request.title(),
+                                                request.description(),
+                                                request.trackId()));
+        }
+
+        // ---------------------------------------------------------
+        // WITHDRAW
+        // ---------------------------------------------------------
+
+        @DeleteMapping("/proposals/{id}")
+        public ResponseEntity<Void> withdrawProposal(
+                        @PathVariable UUID id,
+                        Authentication authentication) {
+
+                UUID speakerId = getAuthenticatedUserId(
+                                authentication);
+
+                speakerService.withdrawProposal(
+                                id,
+                                speakerId);
+
+                return ResponseEntity
+                                .noContent()
+                                .build();
+        }
+
+        // ---------------------------------------------------------
+        // ORGANIZER DECISION
+        // ---------------------------------------------------------
+
+        @PostMapping("/proposals/{id}/decision")
+        public ResponseEntity<ApprovalDecision> decideProposal(
+                        @PathVariable UUID id,
+                        @RequestBody ProposalDecisionRequest request,
+                        Authentication authentication) {
+
+                UUID authenticatedUserId = getAuthenticatedUserId(authentication);
+
+                return ResponseEntity.ok(
+                                speakerService
+                                                .makeProposalDecision(
+                                                                id,
+                                                                authenticatedUserId,
+                                                                request.decision(),
+                                                                request.comment()));
+        }
+
+        // ---------------------------------------------------------
+        // SPEAKER APPLICATION
+        // ---------------------------------------------------------
+
+        @PostMapping("/speaker-applications")
+        public ResponseEntity<SpeakerApplication> createSpeakerApplication(
+                        @RequestBody CreateSpeakerApplicationRequest request,
+                        Authentication authentication) {
+
+                SpeakerApplication application = speakerService
+                                .createSpeakerApplication(
+                                                getAuthenticatedUserId(authentication),
+                                                request.sessionId());
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(application);
+        }
+
+        @PostMapping("/speaker-applications/{id}/status")
+        public ResponseEntity<SpeakerApplication> updateApplicationStatus(
+                        @PathVariable UUID id,
+                        @RequestBody SpeakerApplicationStatusRequest request) {
+
+                return ResponseEntity.ok(
+                                speakerService.updateSpeakerApplicationStatus(
+                                                id,
+                                                request.status()));
+        }
+
+        private UUID getAuthenticatedUserId(
+                        Authentication authentication) {
+
+                if (authentication == null
+                                || authentication.getPrincipal() == null) {
+
+                        throw new IllegalStateException(
+                                        "Authenticated user is required");
+                }
+
+                Object principal = authentication.getPrincipal();
+
+                if (principal instanceof UUID userId) {
+                        return userId;
+                }
+
+                try {
+                        return UUID.fromString(principal.toString());
+                } catch (IllegalArgumentException exception) {
+                        throw new IllegalStateException(
+                                        "Invalid authenticated user ID");
+                }
+        }
+
+        // ---------------------------------------------------------
+        // PUBLIC DIRECTORY
+        // ---------------------------------------------------------
+
+        @GetMapping("/speakers")
+        public ResponseEntity<List<SpeakerDirectoryEntry>> getPublicSpeakerDirectory() {
+
+                return ResponseEntity.ok(
+                                speakerService
+                                                .getPublicSpeakerDirectory());
+        }
+
+        @GetMapping("/speakers/{speakerId}")
+        public ResponseEntity<SpeakerPublicProfileResponse> getPublicSpeakerProfile(
+                        @PathVariable UUID speakerId) {
+
+                return ResponseEntity.ok(
+                                speakerService
+                                                .getPublicSpeakerProfile(
+                                                                speakerId));
+        }
 }

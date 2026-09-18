@@ -26,10 +26,15 @@ public class CommunicationService {
             SpeakerFlairRepository
                     speakerFlairRepository) {
 
-        this.forumRepository = forumRepository;
-        this.messageRepository = messageRepository;
+        this.forumRepository =
+                forumRepository;
+
+        this.messageRepository =
+                messageRepository;
+
         this.forumAccessPolicyRepository =
                 forumAccessPolicyRepository;
+
         this.speakerFlairRepository =
                 speakerFlairRepository;
     }
@@ -41,10 +46,12 @@ public class CommunicationService {
     public List<Forum> getForumsByScope(
             ForumScope scope) {
 
-        return forumRepository.findAll()
+        return forumRepository
+                .findAll()
                 .stream()
                 .filter(forum ->
-                        forum.getScope() == scope)
+                        forum.getScope()
+                                == scope)
                 .toList();
     }
 
@@ -57,19 +64,25 @@ public class CommunicationService {
                                 "Forum not found"));
     }
 
+    // =====================================================
+    // NEW AUTH-AWARE METHODS
+    // =====================================================
+
     public List<Message> getMessagesForForum(
             UUID forumId,
-            Role userRole,
+            List<Role> userRoles,
             ForumPermission permission) {
 
-        Forum forum = getForum(forumId);
+        Forum forum =
+                getForum(forumId);
 
         validateForumAccess(
                 forum,
-                userRole,
+                userRoles,
                 permission);
 
-        return messageRepository.findAll()
+        return messageRepository
+                .findAll()
                 .stream()
                 .filter(message ->
                         Objects.equals(
@@ -85,46 +98,51 @@ public class CommunicationService {
             UUID forumId,
             UUID authorId,
             String body,
-            Role userRole,
-            ForumPermission permission) {
+            List<Role> userRoles) {
 
         if (authorId == null) {
             throw new IllegalArgumentException(
                     "Author ID is required");
         }
 
-        if (body == null || body.isBlank()) {
+        if (body == null
+                || body.isBlank()) {
+
             throw new IllegalArgumentException(
                     "Message body cannot be empty");
         }
 
-        Forum forum = getForum(forumId);
+        Forum forum =
+                getForum(forumId);
 
         validateForumAccess(
                 forum,
-                userRole,
-                permission);
+                userRoles,
+                ForumPermission.POST);
 
-        Message message = new Message();
+        Message message =
+                new Message();
 
         message.setForumId(forumId);
         message.setAuthorId(authorId);
         message.setBody(body);
 
         SpeakerFlair flair =
-                findSpeakerFlair(authorId);
+                findSpeakerFlair(
+                        authorId);
 
         if (flair != null) {
             message.setSpeakerFlairId(
                     flair.getId());
         }
 
-        return messageRepository.save(message);
+        return messageRepository.save(
+                message);
     }
 
     public void validateForumAccess(
             Forum forum,
-            Role userRole,
+            List<Role> userRoles,
             ForumPermission permission) {
 
         if (forum == null) {
@@ -132,7 +150,9 @@ public class CommunicationService {
                     "Forum is required");
         }
 
-        if (userRole == null) {
+        if (userRoles == null
+                || userRoles.isEmpty()) {
+
             throw new IllegalArgumentException(
                     "User role is required");
         }
@@ -142,13 +162,13 @@ public class CommunicationService {
                     "Forum permission is required");
         }
 
-        // Concierge is available to authenticated users.
         if (forum.getScope()
                 == ForumScope.CONCIERGE) {
+
             return;
         }
 
-        List<ForumAccessPolicy> policies =
+        boolean allowed =
                 forumAccessPolicyRepository
                         .findAll()
                         .stream()
@@ -156,14 +176,11 @@ public class CommunicationService {
                                 Objects.equals(
                                         forum.getId(),
                                         policy.getForumId()))
-                        .toList();
-
-        boolean allowed =
-                policies.stream()
                         .anyMatch(policy ->
-                                policy.getRole()
-                                        == userRole
-                                && policy.getPermission()
+                                userRoles.contains(
+                                        policy.getRole())
+                                        &&
+                                policy.getPermission()
                                         == permission);
 
         if (!allowed) {
@@ -172,10 +189,84 @@ public class CommunicationService {
         }
     }
 
+    // =====================================================
+    // OLD METHODS KEPT FOR EXISTING TESTS
+    // =====================================================
+
+    public List<Message> getMessagesForForum(
+            UUID forumId,
+            Role userRole,
+            ForumPermission permission) {
+
+        return getMessagesForForum(
+                forumId,
+                List.of(userRole),
+                permission);
+    }
+
+    public Message createMessage(
+            UUID forumId,
+            UUID authorId,
+            String body,
+            Role userRole,
+            ForumPermission permission) {
+
+        Forum forum =
+                getForum(forumId);
+
+        validateForumAccess(
+                forum,
+                userRole,
+                permission);
+
+        if (authorId == null) {
+            throw new IllegalArgumentException(
+                    "Author ID is required");
+        }
+
+        if (body == null
+                || body.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Message body cannot be empty");
+        }
+
+        Message message =
+                new Message();
+
+        message.setForumId(forumId);
+        message.setAuthorId(authorId);
+        message.setBody(body);
+
+        SpeakerFlair flair =
+                findSpeakerFlair(
+                        authorId);
+
+        if (flair != null) {
+            message.setSpeakerFlairId(
+                    flair.getId());
+        }
+
+        return messageRepository.save(
+                message);
+    }
+
+    public void validateForumAccess(
+            Forum forum,
+            Role userRole,
+            ForumPermission permission) {
+
+        validateForumAccess(
+                forum,
+                List.of(userRole),
+                permission);
+    }
+
     private SpeakerFlair findSpeakerFlair(
             UUID userId) {
 
-        return speakerFlairRepository.findAll()
+        return speakerFlairRepository
+                .findAll()
                 .stream()
                 .filter(flair ->
                         Objects.equals(
