@@ -1,10 +1,11 @@
-import { authenticatedFetch } from './authService.js'
+import { authenticatedFetch, authService } from './authService.js'
 
 function requireValue(value, name) {
   if (typeof value !== 'string' || !value.trim()) throw new Error(`${name} is required.`)
 }
 
 async function request(url, options) {
+  if (!authService.hasValidBackendSession()) throw new Error('Forum requests require an authenticated backend user and active session.')
   const response = await authenticatedFetch(url, options)
   if (!response.ok) {
     throw new Error(`Forum request failed (${response.status}).`)
@@ -17,27 +18,21 @@ export function getForums(scope) {
   return request(`/api/forums${query}`, { method: 'GET' })
 }
 
-export async function getMessages(forumId, role, permission) {
+export async function getMessages(forumId) {
   requireValue(forumId, 'Forum ID')
-  requireValue(role, 'Role')
-  requireValue(permission, 'Permission')
-  const query = new URLSearchParams({ role, permission })
-  return request(`/api/forums/${encodeURIComponent(forumId)}/messages?${query}`, {
+  return request(`/api/forums/${encodeURIComponent(forumId)}/messages`, {
     method: 'GET',
   })
 }
 
 export async function createMessage(forumId, message = {}) {
-  const { authorId, body, role, permission } = message ?? {}
+  const { body } = message ?? {}
   requireValue(forumId, 'Forum ID')
-  requireValue(authorId, 'Author ID')
   requireValue(body, 'Message body')
-  requireValue(role, 'Role')
-  requireValue(permission, 'Permission')
   return request(`/api/forums/${encodeURIComponent(forumId)}/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ authorId, body: body.trim(), role, permission }),
+    body: JSON.stringify({ body: body.trim() }),
   })
 }
 

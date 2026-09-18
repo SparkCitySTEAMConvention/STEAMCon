@@ -63,8 +63,8 @@ Profile editing remains an isolated Bill Nye preview. Saved fields and dashboard
 
 Verified backend roles unlock the speaker dashboard, proposal, forum and notification sources. Demos continue to use isolated local data, without backend requests.
 
-- notificationRepository uses GET `/api/notifications/me?userId=…` and POST `/api/notifications/{id}/read`. Live reads require a backend user UUID and active session; failed updates preserve unread state.
-- forumRepository uses GET `/api/forums` with optional scope, GET `/api/forums/{id}/messages` with role/permission, and POST to that messages path with `{ authorId, body, role, permission }`. Speaker sources use READ for reads and POST for submissions, preserve failed drafts and provide retry states. Forum policies remain backend-enforced.
+- notificationRepository uses GET `/api/notifications/me` and POST `/api/notifications/{id}/read`. Live reads require a backend user UUID and active session; failed updates preserve unread state.
+- forumRepository uses GET `/api/forums` with optional scope, GET `/api/forums/{id}/messages` without identity/role queries, and POST to that messages path with only `{ body: "trimmed message" }`. The backend derives identity and roles from `X-Session-Id`. Speaker sources require an authenticated speaker and active backend session, preserve failed drafts and provide retry states. Forum policies remain backend-enforced.
 - eventRepository reads `/api/tracks`, `/api/sessions`, `/api/session-occurrences` and their `/{id}` details through authenticatedFetch, returning backend records unchanged. These routes require authentication under current SecurityConfig.
 
 ## Still unavailable in the live frontend
@@ -126,3 +126,5 @@ relationships remain unavailable and receive neutral presentation.
 Demo SPEAKER sessions retain Bill Nye fixtures, local proposal creation/deletion,
 profile edits, notifications and forums. Development preview scenarios apply
 only to demo sessions and cannot replace live results.
+
+Notification mark-read sends no body. Repository methods return backend JSON unchanged; an empty successful mark-read response returns no record, and the UI reloads the authoritative notification list. Demo forum and notification state stays with the current login identity, with zero API requests and no live fallback.

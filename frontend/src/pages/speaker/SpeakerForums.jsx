@@ -2,15 +2,19 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
 import { forumRepository } from '../../services/forumRepository.js'
-import { createSpeakerForumSource } from '../../services/speakerForumSource.js'
+import { getSpeakerForumSource } from '../../services/speakerForumSource.js'
 import './SpeakerDashboard.css'
 import './SpeakerForums.css'
 
 const scopes = { TRACK: 'Track', ADMIN: 'Admin', CONCIERGE: 'Concierge' }
 
 export default function SpeakerForums({ repository = forumRepository }) {
-  const { user, authSource } = useAuth()
-  const source = useMemo(() => createSpeakerForumSource(repository, user, authSource), [repository, user, authSource])
+  const { user, authSource, hasBackendSession } = useAuth()
+  const source = useMemo(() => getSpeakerForumSource(repository, user, authSource, hasBackendSession), [repository, user, authSource, hasBackendSession])
+  return <ForumPage key={source.sessionKey} source={source} user={user} authSource={authSource} />
+}
+
+function ForumPage({ source, user, authSource }) {
   const [scope, setScope] = useState('')
   const [forums, setForums] = useState([])
   const [status, setStatus] = useState('loading')
@@ -20,7 +24,7 @@ export default function SpeakerForums({ repository = forumRepository }) {
     let current = true
     source.getForums(scope || undefined).then(data => {
       if (!current) return
-      if (!Array.isArray(data)) throw new Error('Invalid forum response.')
+      if (!Array.isArray(data) || data.some(forum => !forum || typeof forum.id !== 'string' || typeof forum.name !== 'string')) throw new Error('Invalid forum response.')
       setForums(data)
       setStatus('ready')
     }).catch(() => { if (current) setStatus('error') })
@@ -39,8 +43,8 @@ export default function SpeakerForums({ repository = forumRepository }) {
     <div id="forums-main" className="container portal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to speaker dashboard</Link>
       <div className="portal-welcome"><p className="eyebrow">Keep the conversation going</p><h1>Speaker Forum &amp; Messaging</h1><p>Exchange ideas in track forums, connect with organizers, or ask the concierge for help.</p></div>
-      {source.demo && <p className="portal-demo">Demo forum examples. Messages stay in memory until you leave this page. No forum requests are sent to the backend.</p>}
-      {!source.available && <p role="alert">Forum access requires a backend-authenticated speaker with a valid user ID. The current backend login does not supply speaker roles.</p>}
+      {source.demo && <p className="portal-demo">Demo forum examples. Messages stay in memory for this application session. No forum requests are sent to the backend.</p>}
+      {!source.available && <p role="alert">Forum access requires a backend-authenticated speaker and active session. Sign in again or use the speaker preview.</p>}
       <fieldset className="portal-filters forum-scopes"><legend>Forum scope</legend>
         {[['', 'All forums'], ...Object.entries(scopes)].map(([value, label]) => <button key={value} type="button" aria-pressed={scope === value} onClick={() => reload(value)}>{label}</button>)}
       </fieldset>
@@ -71,6 +75,7 @@ function ForumConversation({ forum, user, repository }) {
     let current = true
     repository.getMessages(forum.id).then(data => {
       if (!current) return
+      if (!Array.isArray(data) || data.some(message => !message || typeof message.id !== 'string' || typeof message.body !== 'string')) throw new Error('Invalid message response.')
       setMessages(data.filter(message => message.status === 'ACTIVE').sort((a, b) => Date.parse(a.postedAt) - Date.parse(b.postedAt)))
       setStatus('ready')
     }).catch(() => { if (current) setStatus('error') })
@@ -95,7 +100,7 @@ function ForumConversation({ forum, user, repository }) {
   return <section className="forum-conversation" aria-labelledby="conversation-heading">
     <p className="eyebrow">{scopes[forum.scope] || forum.scope} forum</p><h2 id="conversation-heading">{forum.name}</h2>
     {status === 'loading' && <p role="status">Loading messages…</p>}
-    {status === 'error' && <div role="alert"><p>Unable to load messages. This forum may require READ access, or the service may be unavailable.</p><button className="button button-paper" onClick={() => { setStatus('loading'); setAttempt(value => value + 1) }}>Try again</button></div>}
+    {status === 'error' && <div role="alert"><p>Unable to load messages. Access to this forum may be restricted, or the service may be unavailable.</p><button className="button button-paper" onClick={() => { setStatus('loading'); setAttempt(value => value + 1) }}>Try again</button></div>}
     {status === 'ready' && <>
       {messages.length ? <ol className="portal-list forum-messages">{messages.filter(message => message.status === 'ACTIVE').map(message => {
         const date = new Date(message.postedAt)
@@ -103,7 +108,7 @@ function ForumConversation({ forum, user, repository }) {
       })}</ol> : <div className="portal-empty"><h3>Start the conversation.</h3><p>There are no active messages in this forum yet.</p></div>}
       <form className="portal-editor" onSubmit={post} aria-busy={sending}>
         <label htmlFor="forum-message">Your message<textarea id="forum-message" rows={5} value={body} onChange={event => { setBody(event.target.value); setNotice('') }} required disabled={sending || !canPost} aria-describedby="forum-post-help" /></label>
-        <p id="forum-post-help" className="portal-muted">{repository.demo ? 'This message will be added to the local demo conversation.' : canPost ? 'Posting requires POST permission for this forum.' : 'Posting requires a verified backend speaker account with a valid author ID.'}</p>
+        <p id="forum-post-help" className="portal-muted">{repository.demo ? 'This message will be added to the local demo conversation.' : canPost ? 'Posting access is verified by the backend for this forum.' : 'Posting requires a verified backend speaker account and active session.'}</p>
         <div><button className="button button-dark" type="submit" disabled={sending || !canPost || !body.trim()}>{sending ? 'Posting…' : 'Post message'}</button></div>
         <p role="status">{notice}</p>{error && <p role="alert">{error}</p>}
       </form>

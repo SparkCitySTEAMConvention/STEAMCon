@@ -43,15 +43,15 @@ test('navigation retains preview state for current login only', async () => {
   assert.equal(getSpeakerNotificationSource(forbidden, identity, 'demo'), source)
   assert.equal((await getSpeakerNotificationSource(forbidden, { ...identity }, 'demo').getNotifications())[0].read, false)
 })
-test('live dispatch preserves exact user/notification IDs and backend JSON', async () => {
+test('live dispatch preserves exact notification IDs without caller identity and backend JSON', async () => {
   const calls = [], list = [], updated = { id: 'exact-id', read: true }
   const source = createSpeakerNotificationSource({
-    async getNotifications(id) { calls.push(['get', id]); return list },
+    async getNotifications(...args) { calls.push(['get', ...args]); return list },
     async markAsRead(id) { calls.push(['read', id]); return updated },
   }, user, 'backend', true)
   assert.equal(await source.getNotifications(), list)
   assert.equal(await source.markAsRead('exact-id'), updated)
-  assert.deepEqual(calls, [['get', user.id], ['read', 'exact-id']])
+  assert.deepEqual(calls, [['get'], ['read', 'exact-id']])
 })
 test('missing backend identity prevents every request', async () => {
   for (const identity of [null, {}, { ...user, id: '' }, { ...user, id: 'demo-SPEAKER' }]) {

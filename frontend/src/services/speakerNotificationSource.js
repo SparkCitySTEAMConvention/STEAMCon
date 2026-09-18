@@ -2,6 +2,8 @@ import { demoNotifications } from '../mocks/notificationData.js'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+let nextSourceId = 0
+
 export function createSpeakerNotificationSource(repository, user, authSource, hasBackendSession = false) {
   const demo = authSource === 'demo' && user?.role === 'SPEAKER'
   const available = demo || (authSource === 'backend' && hasBackendSession === true && uuid.test(user?.id || ''))
@@ -10,10 +12,10 @@ export function createSpeakerNotificationSource(repository, user, authSource, ha
     if (!available) throw new Error('Notifications require a verified backend user and active session. Sign in again or use the speaker preview.')
   }
   return {
-    demo, available,
+    demo, available, sessionKey: ++nextSourceId,
     async getNotifications() {
       requireIdentity()
-      return demo ? notifications.map(item => ({ ...item })) : repository.getNotifications(user.id)
+      return demo ? notifications.map(item => ({ ...item })) : repository.getNotifications()
     },
     async markAsRead(notificationId) {
       requireIdentity()

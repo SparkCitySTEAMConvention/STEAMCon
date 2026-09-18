@@ -1,17 +1,20 @@
-import { authenticatedFetch } from './authService.js'
+import { authenticatedFetch, authService } from './authService.js'
 
 async function request(url, options) {
+  if (!authService.hasValidBackendSession()) throw new Error('Notification requests require an authenticated backend user and active session.')
   const response = await authenticatedFetch(url, options)
   if (!response.ok) {
     throw new Error(`Notification request failed (${response.status}).`)
   }
+  if (options.method === 'POST') {
+    const text = await response.text()
+    return text ? JSON.parse(text) : undefined
+  }
   return response.json()
 }
 
-export async function getNotifications(userId) {
-  if (typeof userId !== 'string' || !userId.trim()) throw new Error('A user ID is required.')
-  const query = new URLSearchParams({ userId })
-  return request(`/api/notifications/me?${query}`, { method: 'GET' })
+export async function getNotifications() {
+  return request('/api/notifications/me', { method: 'GET' })
 }
 
 export async function markAsRead(notificationId) {

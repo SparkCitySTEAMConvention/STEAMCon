@@ -17,7 +17,7 @@ export default function SpeakerNotifications({ source }) {
     let current = true
     source.getNotifications().then(data => {
       if (!current) return
-      if (!Array.isArray(data)) throw new Error('Invalid notification response.')
+      if (!Array.isArray(data) || data.some(item => !item || typeof item.id !== 'string' || typeof item.message !== 'string' || typeof item.read !== 'boolean')) throw new Error('Invalid notification response.')
       setNotifications(data)
       setStatus('ready')
     }).catch(() => { if (current) setStatus('error') })
@@ -31,9 +31,16 @@ export default function SpeakerNotifications({ source }) {
     setNotice('')
     try {
       const updated = await source.markAsRead(id)
-      if (updated?.id !== id || updated.read !== true) throw new Error('Invalid notification response.')
       if (!active.current) return
-      setNotifications(previous => previous.map(item => item.id === id ? updated : item))
+      if (updated?.id === id && typeof updated.read === 'boolean' && typeof updated.message === 'string') {
+        setNotifications(previous => previous.map(item => item.id === id ? updated : item))
+      } else {
+        // A successful acknowledgment need not contain a notification record.
+        const data = await source.getNotifications()
+        if (!Array.isArray(data) || data.some(item => !item || typeof item.id !== 'string' || typeof item.message !== 'string' || typeof item.read !== 'boolean')) throw new Error('Invalid notification response.')
+        if (!active.current) return
+        setNotifications(data)
+      }
       setNotice('Notification marked as read.')
     } catch {
       if (active.current) setErrors(previous => ({ ...previous, [id]: 'Unable to mark this notification as read. It remains unread. Try Mark as read again.' }))

@@ -56,7 +56,7 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
     })
     return () => window.cancelAnimationFrame(frame)
   }, [hash, resource.status])
-  return <SpeakerDashboardView profileResource={profileResource} profileSource={profileSource} calendarSource={calendarSource} proposalSource={proposalSource} data={resource.data || { convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView profileResource={profileResource} profileSource={profileSource} calendarSource={calendarSource} proposalSource={proposalSource} data={resource.data || { convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={notifications.sessionKey} />
 }
 
 function SpeakerDashboardView({ profileResource, profileSource, calendarSource, proposalSource, data, resource, notifications, notificationKey }) {
