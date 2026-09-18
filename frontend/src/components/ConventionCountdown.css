@@ -1,0 +1,4 @@
+.convention-countdown { padding-block: 2rem; }
+.convention-countdown h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); }
+.convention-countdown [role="timer"] { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-block: 1rem; }
+.convention-countdown [role="timer"] strong { font-size: 2rem; font-variant-numeric: tabular-nums; }
