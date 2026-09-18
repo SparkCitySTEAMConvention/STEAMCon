@@ -80,3 +80,62 @@
 @media (max-width: 850px) { .travel-map-layout { grid-template-columns: 1fr; } .travel-map { min-height: 440px; } }
 @media (max-width: 560px) { .travel-map { min-height: 360px; } .map-pin small { display: none; } .map-location-list li { padding: 1rem; } .map-scale { font-size: 0.62rem; } }
 @media (prefers-reduced-motion: reduce) { .map-traveler { animation: none; } .map-walking-route { opacity: 0.65; } }
+
+.departures-section { border-top: 2px solid var(--color-ink); }
+.departures-board { overflow: hidden; border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ink); color: var(--color-paper); box-shadow: var(--shadow-large); }
+.departures-board-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.35rem; border-bottom: 1px solid color-mix(in srgb, var(--color-paper) 28%, transparent); }
+.departures-board-header > div { display: flex; align-items: center; gap: 0.65rem; }
+.departures-board-header > span { color: var(--color-border); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.status-light { width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--color-mathematics); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-mathematics) 22%, transparent); }
+.departures-columns, .departures-list li { display: grid; grid-template-columns: 0.65fr 2fr 1.2fr 0.8fr; gap: 1rem; align-items: center; }
+.departures-columns { padding: 0.75rem 1.35rem; background: color-mix(in srgb, var(--color-paper) 8%, transparent); color: var(--color-border); font-size: 0.7rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; }
+.departures-list { padding: 0; margin: 0; list-style: none; }
+.departures-list li { min-height: 5rem; padding: 1rem 1.35rem; border-top: 1px solid color-mix(in srgb, var(--color-paper) 18%, transparent); }
+.departures-list time { color: var(--color-technology); font-family: monospace; font-size: 1.05rem; font-weight: 900; }
+.departures-list li > div { display: grid; gap: 0.2rem; }
+.departures-list li > div span { color: var(--color-border); font-size: 0.86rem; }
+.terminal-label { color: var(--color-paper); font-size: 0.86rem; }
+.departure-status { justify-self: start; padding: 0.35rem 0.55rem; border: 1px solid var(--color-mathematics); border-radius: 999px; color: var(--color-mathematics); font-size: 0.72rem; font-weight: 900; white-space: nowrap; }
+.departure-status.is-boarding { border-color: var(--color-technology); background: var(--color-technology); color: var(--color-ink); }
+.departures-note { margin-top: 1rem; color: var(--color-text-muted); font-size: 0.9rem; }
+@media (max-width: 700px) {
+  .departures-columns { display: none; }
+  .departures-list li { grid-template-columns: 0.75fr 2fr auto; }
+  .terminal-label { grid-column: 2; }
+  .departure-status { grid-column: 3; grid-row: 1 / span 2; }
+}
+@media (max-width: 480px) {
+  .departures-board-header { align-items: flex-start; flex-direction: column; }
+  .departures-list li { grid-template-columns: 1fr auto; gap: 0.55rem 1rem; }
+  .departures-list time, .departures-list li > div, .terminal-label { grid-column: 1; }
+  .departure-status { grid-column: 2; grid-row: 1; }
+}
+
+.transit-departures { padding-top: clamp(3rem, 6vw, 5rem); margin-top: clamp(3rem, 6vw, 5rem); border-top: 1px solid color-mix(in srgb, var(--color-paper) 28%, transparent); }
+.transit-departures-heading { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; align-items: end; margin-bottom: 2rem; }
+.transit-departures-heading h3 { margin-top: 0.5rem; color: var(--color-paper); font-size: clamp(2rem, 4vw, 3.8rem); }
+.transit-departures-heading > p { color: var(--color-border); }
+.travel-guide-transit .departures-board { border-color: color-mix(in srgb, var(--color-paper) 35%, transparent); background: color-mix(in srgb, var(--color-paper) 4%, var(--color-ink)); }
+.travel-guide-transit .departures-note { color: var(--color-border); }
+@media (max-width: 850px) { .transit-departures-heading { grid-template-columns: 1fr; } }
+
+.flight-booking-callout { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(1.5rem, 5vw, 4rem); align-items: center; padding: clamp(1.5rem, 4vw, 2.5rem); margin-top: 2rem; border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-technology); box-shadow: var(--shadow-large); }
+.flight-booking-callout > div:first-child { display: grid; gap: 0.55rem; max-width: 680px; }
+.flight-booking-callout h3 { font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.flight-booking-callout p:not(.eyebrow) { color: color-mix(in srgb, var(--color-ink) 72%, transparent); }
+.flight-booking-actions { display: grid; gap: 0.9rem; justify-items: stretch; min-width: min(100%, 290px); text-align: center; }
+.flight-booking-link { color: var(--color-ink); font-weight: 850; text-decoration-thickness: 2px; text-underline-offset: 0.25rem; }
+.flight-booking-link:hover { text-decoration-thickness: 4px; }
+@media (max-width: 800px) { .flight-booking-callout { grid-template-columns: 1fr; } .flight-booking-actions { min-width: 0; } }
+@media (max-width: 560px) { .flight-booking-actions .button { width: 100%; } }
+
+.travel-guide-hero .button-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; width: min(100%, 480px); }
+.travel-guide-hero .button-group .button { display: inline-flex; align-items: center; justify-content: space-between; width: 100%; min-height: 3.15rem; margin: 0; padding-inline: 1rem; }
+@media (max-width: 560px) { .travel-guide-hero .button-group { grid-template-columns: 1fr; width: 100%; } }
+
+.travel-guide-hero .button-group { grid-template-columns: max-content max-content; width: max-content; max-width: 100%; }
+.travel-guide-hero .button-group .button { width: auto; white-space: nowrap; }
+@media (max-width: 560px) {
+  .travel-guide-hero .button-group { grid-template-columns: 1fr; width: 100%; }
+  .travel-guide-hero .button-group .button { width: 100%; white-space: normal; }
+}

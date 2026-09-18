@@ -9,6 +9,15 @@ const airports = [
   { code: 'EWR', name: 'Newark Liberty International', note: 'Serves the region from New Jersey with rail connections toward Manhattan.' },
 ]
 
+const sampleDepartures = [
+  { time: '8:05 AM', service: 'NJ Transit Bus 126', destination: 'Hoboken', terminal: 'Port Authority', status: 'On time' },
+  { time: '8:20 AM', service: 'Coach USA', destination: 'Newark Airport', terminal: 'Port Authority', status: 'Boarding' },
+  { time: '8:35 AM', service: 'NJ Transit Rail', destination: 'Secaucus Junction', terminal: 'Penn Station', status: 'On time' },
+  { time: '8:48 AM', service: 'LIRR', destination: 'Jamaica / JFK connection', terminal: 'Penn Station', status: 'On time' },
+  { time: '9:00 AM', service: 'Metro-North', destination: 'Harlem–125th Street', terminal: 'Grand Central', status: 'On time' },
+  { time: '9:12 AM', service: 'Metro-North', destination: 'Yankee Stadium', terminal: 'Grand Central', status: 'Sample trip' },
+]
+
 const mapLocations = [
   { id: 'venue', marker: 'C', name: 'STEAM Con Conference Center', distance: 'Event venue', note: 'Final address to be announced.' },
   { id: 'hotel-one', marker: '1', name: 'Hotel One', distance: 'About a 4-minute walk', note: 'Closest example hotel.' },
@@ -90,16 +99,56 @@ export default function TravelInfoPage() {
               </article>
             ))}
           </div>
+          <div className="flight-booking-callout">
+            <div>
+              <p className="eyebrow">Pass first. Travel second.</p>
+              <h3>Ready to plan your flight?</h3>
+              <p>Choose your STEAM Con pass before adding flight or train details. Once registered, your travel plans stay with your attendee itinerary.</p>
+            </div>
+            <div className="flight-booking-actions">
+              <Link className="button button-dark" to="/register?role=attendee">Choose a conference pass <span aria-hidden="true">→</span></Link>
+              <Link className="flight-booking-link" to="/attendee/travel">Already registered? Book travel <span aria-hidden="true">↗</span></Link>
+            </div>
+          </div>
         </section>
 
-        <section className="travel-guide-transit" aria-labelledby="transit-heading">
-          <div className="container travel-guide-transit-grid">
-            <div><p className="eyebrow">03 / Moving around</p><h2 id="transit-heading">The subway keeps the city close.</h2></div>
-            <ul>
-              <li><strong>Subway and bus</strong><span>Best for flexible, lower-cost trips throughout the city.</span></li>
-              <li><strong>Rail connections</strong><span>Useful for airport transfers and travel from the wider region.</span></li>
-              <li><strong>Walking and rideshare</strong><span>Good for shorter trips; allow extra time during peak traffic.</span></li>
-            </ul>
+        <section className="travel-guide-transit" id="departures" aria-labelledby="transit-heading">
+          <div className="container">
+            <div className="travel-guide-transit-grid">
+              <div><p className="eyebrow">03 / Moving around</p><h2 id="transit-heading">The subway keeps the city close.</h2></div>
+              <ul>
+                <li><strong>Subway and bus</strong><span>Best for flexible, lower-cost trips throughout the city.</span></li>
+                <li><strong>Rail connections</strong><span>Useful for airport transfers and travel from the wider region.</span></li>
+                <li><strong>Walking and rideshare</strong><span>Good for shorter trips; allow extra time during peak traffic.</span></li>
+              </ul>
+            </div>
+
+            <div className="transit-departures" aria-labelledby="departures-heading">
+              <div className="transit-departures-heading">
+                <div><p className="eyebrow">Departures preview</p><h3 id="departures-heading">Know where to catch your ride.</h3></div>
+                <p>Preview common New York transit hubs before you travel. These demonstration times show how a future live departures board could work.</p>
+              </div>
+              <div className="departures-board">
+                <div className="departures-board-header">
+                  <div><span className="status-light" aria-hidden="true" /><strong>NYC departures preview</strong></div>
+                  <span>Demo data · Not live</span>
+                </div>
+                <div className="departures-columns" aria-hidden="true">
+                  <span>Time</span><span>Service and destination</span><span>Terminal</span><span>Status</span>
+                </div>
+                <ol className="departures-list">
+                  {sampleDepartures.map((departure, index) => (
+                    <li key={`${departure.time}-${departure.service}`}>
+                      <time>{departure.time}</time>
+                      <div><strong>{departure.service}</strong><span>{departure.destination}</span></div>
+                      <span className="terminal-label">{departure.terminal}</span>
+                      <span className={`departure-status ${index === 1 ? 'is-boarding' : ''}`}>{departure.status}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <p className="departures-note"><strong>Travel note:</strong> Port Authority is primarily a bus terminal. Penn Station and Grand Central are the major Manhattan rail hubs shown here.</p>
+            </div>
           </div>
         </section>
 
