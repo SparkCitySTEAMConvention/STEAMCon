@@ -23,7 +23,7 @@ test('public Events route renders anonymously and preserves existing route desti
     assert.doesNotMatch(html, /Signing in…|That page isn’t here/)
     const source = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8')
     assert.ok(source.indexOf('path="/events"') < source.indexOf('<Route element={<ProtectedRoute />}'))
-    for (const [route, page] of [['/', 'HomePage'], ['/tracks', 'TracksPage'], ['/register', 'RegistrationPage'], ['/attendee', 'AttendeeDashboard'], ['/speaker', 'SpeakerDashboard']]) {
+    for (const [route, page] of [['/', 'HomePage'], ['/tracks', 'TracksPage'], ['/calendar', 'CalendarPage'], ['/register', 'RegistrationPage'], ['/attendee', 'AttendeeDashboard'], ['/speaker', 'SpeakerDashboard']]) {
       assert.ok(source.includes(`path="${route}" element={<${page} />}`))
     }
     assert.match(source, /<Route element={<RoleRoute role="ATTENDEE" \/>}>([\s\S]*?)path="\/attendee"/)
@@ -47,7 +47,7 @@ test('header exposes a direct Events link and unchanged account and login naviga
       assert.equal((html.match(/href="\/events"/g) || []).length, 1)
       assert.match(html, /<a href="\/events"[^>]*>Events<\/a>/)
       assert.doesNotMatch(html, /events-disclosure|<summary[^>]*>Events|All events|experience=/)
-      for (const [route, label] of [['tracks', 'Tracks'], ['speakers', 'Speakers'], ['travel', 'Travel']]) assert.match(html, new RegExp(`href="/${route}"[^>]*>${label}`))
+      for (const [route, label] of [['calendar', 'Calendar'], ['tracks', 'Tracks'], ['speakers', 'Speakers'], ['travel', 'Travel']]) assert.match(html, new RegExp(`href="/${route}"[^>]*>${label}`))
       if (role) {
         assert.match(html, /<summary aria-expanded="false" aria-controls="account-disclosure">Account<\/summary>/)
         assert.match(html, new RegExp(`href="/${role === 'SPEAKER' ? 'speaker' : 'attendee'}"[^>]*>${role === 'SPEAKER' ? 'Speaker' : 'Attendee'} Portal`))
