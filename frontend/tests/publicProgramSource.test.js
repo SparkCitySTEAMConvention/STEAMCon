@@ -23,7 +23,7 @@ test('null scheduling and missing event timezone do not enable calendar', () => 
  const model = adaptOccurrence({ id: 'o', sessionId: 's' })
  assert.deepEqual(model, { id: 'o', sessionId: 's', scheduledAt: null, endsAt: null, timezone: null, room: null })
  assert.equal(canAddToCalendar(model), false)
- assert.equal(canAddToCalendar(adaptOccurrence(occurrence)), false)
+ assert.equal(canAddToCalendar(adaptOccurrence(occurrence), { timezone: null }), false)
 })
 test('anonymous and demo preview never contact backend', async () => {
  const repository = new Proxy({}, { get() { throw new Error('Backend contacted') } })
