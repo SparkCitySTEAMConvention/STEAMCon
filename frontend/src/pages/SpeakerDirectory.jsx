@@ -42,16 +42,24 @@ export default function SpeakerDirectory() {
         {visibleSpeakers.length ? <ul className="directory-grid">
           {visibleSpeakers.map(speaker => <li key={speaker.id}>
             <article className="directory-card" aria-labelledby={speaker.id}>
-              <h3 id={speaker.id}>{speaker.name}</h3>
-              <p>{speaker.bio}</p>
-              {speaker.organization && speaker.role && <p className="portal-muted">{speaker.role}, {speaker.organization}</p>}
-              <dl className="directory-tracks">
-                <div><dt>Primary track</dt><dd><TrackBadge trackId={speaker.trackIds[0]} /></dd></div>
-                {speaker.trackIds.length > 1 && <div><dt>Additional tracks</dt><dd>{speaker.trackIds.slice(1).map(id => <TrackBadge key={id} trackId={id} />)}</dd></div>}
-              </dl>
-              <h4>Proposed sessions and panels</h4>
-              <ul>{proposals.filter(proposal => proposal.speakerIds.includes(speaker.id)).map(proposal =>
-                <li key={proposal.id}>{proposal.title} <span className="portal-muted">({proposal.format})</span></li>)}</ul>
+              <figure className="directory-photo">
+                <img src={speaker.portrait.url} alt={`Portrait of ${speaker.name}`} loading="lazy" />
+              </figure>
+              <div className="directory-card-content">
+                <h3 id={speaker.id}>{speaker.name}</h3>
+                <p>{speaker.bio}</p>
+                {speaker.organization && speaker.role && <p className="portal-muted">{speaker.role}, {speaker.organization}</p>}
+                <dl className="directory-tracks">
+                  <div><dt>Primary track</dt><dd><TrackBadge trackId={speaker.trackIds[0]} /></dd></div>
+                  {speaker.trackIds.length > 1 && <div><dt>Additional tracks</dt><dd>{speaker.trackIds.slice(1).map(id => <TrackBadge key={id} trackId={id} />)}</dd></div>}
+                </dl>
+                <h4>Proposed sessions and panels</h4>
+                <ul>{proposals.filter(proposal => proposal.speakerIds.includes(speaker.id)).map(proposal =>
+                  <li key={proposal.id}>{proposal.title} <span className="portal-muted">({proposal.format})</span></li>)}</ul>
+                <a className="directory-photo-credit" href={speaker.portrait.source} target="_blank" rel="noreferrer">
+                  Photo: {speaker.portrait.credit} · {speaker.portrait.license}
+                </a>
+              </div>
             </article>
           </li>)}
         </ul> : <div className="portal-empty">
@@ -65,11 +73,13 @@ export default function SpeakerDirectory() {
         <p>All five placeholder panel concepts, independent of the speaker filters.</p>
         <ul className="directory-grid">
           {panels.map(panel => <li key={panel.id}>
-            <article className="directory-card" aria-labelledby={panel.id}>
-              <h3 id={panel.id}>{panel.title}</h3>
-              <div className="directory-panel-tracks">{panel.trackIds.map(id => <TrackBadge key={id} trackId={id} />)}</div>
-              <p>Proposed placeholder participants:</p>
-              <ul>{panel.speakerIds.map(id => <li key={id}>{speakers.find(speaker => speaker.id === id)?.name}</li>)}</ul>
+            <article className="directory-card directory-panel-card" aria-labelledby={panel.id}>
+              <div className="directory-card-content">
+                <h3 id={panel.id}>{panel.title}</h3>
+                <div className="directory-panel-tracks">{panel.trackIds.map(id => <TrackBadge key={id} trackId={id} />)}</div>
+                <p>Proposed placeholder participants:</p>
+                <ul>{panel.speakerIds.map(id => <li key={id}>{speakers.find(speaker => speaker.id === id)?.name}</li>)}</ul>
+              </div>
             </article>
           </li>)}
         </ul>
