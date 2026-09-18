@@ -1,3 +1,6 @@
+import { sessionsForTrack } from '../utils/trackProgram.js'
+import ScheduleByDay from '../components/ScheduleByDay.jsx'
+import { selectedConventionDate } from '../utils/conventionCalendar.js'
 import { Link, useSearchParams } from 'react-router-dom'
 import { passRegistrationDestination } from '../utils/registrationQuery.js'
 import { passes } from '../config/passes.js'
@@ -15,11 +18,25 @@ export default function TracksPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const tracks = resource.data?.tracks || []
   const track = selectedTrack(tracks, searchParams.get('track'))
+  const allTracks = searchParams.get('track') === 'all'
+  const date = selectedConventionDate(searchParams.get('date'))
+  function changeDate(value) {
+    const next = new URLSearchParams(searchParams)
+    next.set('date', value)
+    next.set('track', allTracks ? 'all' : trackQuery(track || {}))
+    setSearchParams(next)
+  }
+  function changeTrack(value) {
+    const next = new URLSearchParams(searchParams)
+    next.set('track', value)
+    next.set('date', date)
+    setSearchParams(next)
+  }
   const summary = programSummary(resource.data, source.mode === 'preview')
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main id="main" tabIndex={-1} className="container section">
+    <main id="main" tabIndex={-1} className="container section tracks-page">
       <div className="track-page-heading">
         <div><p className="eyebrow">01 / EXPLORE THE PROGRAM</p><h1>Five disciplines.<br />One shared future.</h1></div>
         <div className="track-page-introduction">
@@ -35,15 +52,13 @@ export default function TracksPage() {
       {resource.status === 'error' && <div role="alert"><p>Unable to load tracks. Please retry.</p><button type="button" className="button button-paper" onClick={resource.retry}>Retry tracks</button></div>}
       {resource.status === 'ready' && <>
         <div className="track-page-filters" role="group" aria-label="Choose a track">
-          {tracks.map(item => <button type="button" key={item.id || item.name} className={`track-${trackTreatment(item)}`} aria-pressed={track === item} onClick={() => {
-            const next = new URLSearchParams(searchParams)
-            next.set('track', trackQuery(item))
-            setSearchParams(next)
-          }}>{item.name}</button>)}
+          <button type="button" aria-pressed={allTracks} onClick={() => changeTrack('all')}>All tracks</button>
+          {tracks.map(item => <button type="button" key={item.id || item.name} className={`track-${trackTreatment(item)}`} aria-pressed={track === item} onClick={() => changeTrack(trackQuery(item))}>{item.name}</button>)}
         </div>
-        <TrackFeature track={track} sessions={resource.data.sessions} />
-        <div className="track-program-layout">
-          <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />
+        {allTracks ? <section className="track-all-summary" aria-labelledby="all-tracks-heading"><p className="eyebrow">Explore together</p><h2 id="all-tracks-heading">All tracks</h2><p>Browse published occurrences across every discipline in the three-day program.</p></section> : <TrackFeature track={track} sessions={resource.data.sessions} />}
+        <ScheduleByDay sessions={allTracks ? resource.data.schedule || [] : sessionsForTrack(track, resource.data.schedule || [])} tracks={resource.data.trackNames} live={source.mode === 'live'} publicOnly date={date} selectedTrack={allTracks ? 'All tracks' : track?.name || 'All tracks'} onDateChange={changeDate} onTrackChange={name => changeTrack(name === 'All tracks' ? 'all' : trackQuery({ name }))} />
+        {!allTracks && <div className="track-program-layout">
+          {!allTracks && <TrackProgram key={track?.id ?? track?.name ?? 'empty'} track={track} sessions={resource.data.sessions} />}
           {track && <aside className="track-pass-section" aria-labelledby="track-pass-heading">
             <p className="eyebrow">Plan your visit</p>
             <h2 id="track-pass-heading">Choose your pass</h2>
@@ -57,7 +72,7 @@ export default function TracksPage() {
               </article>)}
             </div>
           </aside>}
-        </div>
+        </div>}
       </>}
     </main>
     <Footer />

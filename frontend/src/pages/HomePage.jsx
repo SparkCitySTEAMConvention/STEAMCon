@@ -1,3 +1,4 @@
+import ConventionCountdown from '../components/ConventionCountdown.jsx'
 import AnnouncementBar from '../components/AnnouncementBar.jsx'
 import Header from '../components/Header.jsx'
 import Hero from '../components/Hero.jsx'
@@ -13,6 +14,7 @@ export default function HomePage() {
       <AnnouncementBar />
       <Header />
       <main id="main" tabIndex={-1}>
+        <ConventionCountdown />
         <Hero />
         <PublicProgram />
         <SpeakerSpotlight />

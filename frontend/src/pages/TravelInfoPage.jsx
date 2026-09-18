@@ -1,3 +1,6 @@
+import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionDateRange } from '../utils/conventionCalendar.js'
+import { locationLabel } from '../utils/proposalPresentation.js'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer.jsx'
 import Header from '../components/Header.jsx'
@@ -19,7 +22,7 @@ const sampleDepartures = [
 ]
 
 const mapLocations = [
-  { id: 'venue', marker: 'C', name: 'STEAM Con Conference Center', distance: 'Event venue', note: 'Final address to be announced.' },
+  { id: 'venue', marker: 'C', name: conventionConfig.venueName, distance: 'Event venue', note: 'Street address to be announced.' },
   { id: 'hotel-one', marker: '1', name: 'Hotel One', distance: 'About a 4-minute walk', note: 'Closest example hotel.' },
   { id: 'hotel-two', marker: '2', name: 'Hotel Two', distance: 'About a 9-minute walk', note: 'Near subway connections.' },
   { id: 'hotel-three', marker: '3', name: 'Hotel Three', distance: 'About a 14-minute walk', note: 'Example lower-cost option.' },
@@ -36,7 +39,7 @@ export default function TravelInfoPage() {
             <div>
               <p className="eyebrow">Plan your New York visit</p>
               <h1>Come curious.<br />Arrive prepared.</h1>
-              <p className="travel-guide-lede">STEAM Con is planned for New York City. Use this preview guide to compare arrival options and prepare for the neighborhood; the exact venue and event dates will be published after confirmation.</p>
+              <p className="travel-guide-lede">STEAM Con takes place at {locationLabel()} on {conventionDateRange()}. Use this preview guide to compare arrival options. Street address, rooms, and exact opening times remain to be announced.</p>
               <div className="button-group">
                 <Link className="button button-dark" to="/register?role=attendee">Register for STEAM Con <span aria-hidden="true">→</span></Link>
                 <a className="button button-paper" href="#stay-nearby">View venue map</a>
@@ -56,10 +59,10 @@ export default function TravelInfoPage() {
         <section className="container travel-guide-section travel-map-section" id="stay-nearby" aria-labelledby="stay-nearby-heading">
           <div className="travel-guide-heading">
             <div><p className="eyebrow">01 / Stay nearby</p><h2 id="stay-nearby-heading">See what is within walking distance.</h2></div>
-            <p>This planning map uses placeholder locations and estimated walking times. We will replace them with confirmed hotel names, addresses, and distances when the venue is announced.</p>
+            <p>This illustrative planning map uses placeholder hotel locations and estimated walking times. Hotel names, street addresses, and distances remain unconfirmed.</p>
           </div>
           <div className="travel-map-layout">
-            <div className="travel-map" role="img" tabIndex={0} aria-label="Illustrative neighborhood map showing the STEAM Con Conference Center and three nearby hotels. Hover over or focus the map to watch a person walk the route.">
+            <div className="travel-map" role="img" tabIndex={0} aria-label={`Illustrative planning map for ${conventionConfig.venueName} and three example hotels; locations and walking times are placeholders. Hover over or focus the map to watch a person walk the route.`}>
               <span className="map-water" aria-hidden="true" />
               <span className="map-park" aria-hidden="true">CITY PARK</span>
               <span className="map-road map-road-one" aria-hidden="true" />
@@ -158,7 +161,7 @@ export default function TravelInfoPage() {
             <p>Register first. Your attendee portal keeps travel, hotel, car-rental, sessions, and the combined itinerary in one place.</p>
           </div>
           <div className="travel-guide-callout">
-            <div><strong>Venue update</strong><span>The exact New York venue, recommended hotel area, and dates are still to be announced.</span></div>
+            <div><strong>Venue update</strong><span>{locationLabel()} · {conventionDateRange()}. Street address and recommended hotels remain to be announced.</span></div>
             <Link className="button button-dark" to="/register?role=attendee">Choose a pass <span aria-hidden="true">→</span></Link>
           </div>
         </section>

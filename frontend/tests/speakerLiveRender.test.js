@@ -25,6 +25,17 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
     const { default: Dashboard } = await server.ssrLoadModule('/src/pages/speaker/SpeakerDashboard.jsx')
     const { default: Details } = await server.ssrLoadModule('/src/pages/speaker/ProposalDetails.jsx')
     const { eventRepository } = await server.ssrLoadModule('/src/services/eventRepository.js')
+    const { calendarRepository } = await server.ssrLoadModule('/src/services/calendarRepository.js')
+    let failCalendar = true
+    let calendarCalls = 0
+    t.mock.method(calendarRepository, 'getMyCalendar', async () => {
+      calendarCalls++
+      if (failCalendar) throw new Error('Calendar unavailable')
+      return [
+        { sourceId: 'hotel', entryType: 'HOTEL', startsAt: '2027-04-06T20:00:00Z', endsAt: '2027-04-08T14:00:00Z' },
+        { sourceId: 'occurrence', entryType: 'SESSION', startsAt: '2027-04-06T14:00:00Z', endsAt: '2027-04-06T15:00:00Z' },
+      ]
+    })
     const { notificationRepository } = await server.ssrLoadModule('/src/services/notificationRepository.js')
     const otherTrack = { id: '44444444-4444-4444-8444-444444444444', name: 'Another track' }
     let loadedTracks = [otherTrack, { id: trackId, name: 'Live science' }]
@@ -34,7 +45,12 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       if (holdTracks) await new Promise(resolve => { releaseTracks = resolve })
       return loadedTracks
     })
-    t.mock.method(notificationRepository, 'getNotifications', async () => [])
+    let notificationLoads = 0
+    t.mock.method(notificationRepository, 'getNotifications', async () => {
+      notificationLoads++
+      return [{ id: 'notice', type: 'PROPOSAL_UPDATE', message: 'Check your proposal feedback', read: false }]
+    })
+    t.mock.method(notificationRepository, 'markAsRead', async id => ({ id, type: 'PROPOSAL_UPDATE', message: 'Check your proposal feedback', read: true }))
     const calls = []
     let failDashboard = true, failSave = true, failWithdraw = true, failDetails = false, missingDetails = false, emptyDashboard = false
     let holdDashboard = false, releaseDashboard, failList = false
@@ -66,6 +82,57 @@ test('speaker screens isolate preview and preserve live drafts and withdrawal on
       assert.ok(calls.some(call => call[0] === kind))
       assert.ok(calls.filter(call => call[0] === kind).every(call => call[1] === id))
     }
+    await t.test('calendar retry preserves proposals and keeps enrolled sessions separate from speaking assignments', async () => {
+      assert.match(text(), /Unable to load your itinerary/)
+      const proposalCalls = calls.length
+      failCalendar = false
+      await click('Retry itinerary')
+      assert.equal(calendarCalls, 2)
+      assert.equal(calls.length, proposalCalls)
+      assert.match(text(), /My live idea/)
+      const navigation = document.querySelector('nav[aria-label="Speaker navigation"]')
+      assert.deepEqual([...navigation.querySelectorAll('a')].map(link => link.textContent), ['Overview', 'Proposals', 'Speaking Schedule', 'Itinerary', 'Forums', 'Profile', 'Homepage'])
+      assert.equal(document.querySelector('.portal-dashboard-navigation'), null)
+      assert.equal(document.querySelector('nav[aria-label="Account navigation"]'), null)
+      const itinerary = document.querySelector('#speaker-itinerary')
+      const rows = [...itinerary.querySelectorAll('li')]
+      assert.deepEqual(rows.map(row => row.querySelector('h3').textContent), ['Enrolled session', 'Hotel stay'])
+      assert.match(rows[0].textContent, /10:00 AM EDT/)
+      assert.equal(document.querySelector('#speaker-engagements .portal-session'), null)
+      const summary = document.querySelector('#proposal-summary-heading').parentElement
+      assert.ok(summary.compareDocumentPosition(itinerary) & window.Node.DOCUMENT_POSITION_FOLLOWING)
+      const proposals = document.querySelector('#speaker-proposals')
+      assert.ok(itinerary.compareDocumentPosition(proposals) & window.Node.DOCUMENT_POSITION_FOLLOWING)
+      for (const link of document.querySelectorAll('.portal-nav a[href^="#"]')) {
+        assert.ok(document.querySelector(link.getAttribute('href')))
+      }
+    })
+    await t.test('Organizer Updates is the first dashboard disclosure and retains read state across collapse', async () => {
+      const main = document.querySelector('#speaker-main')
+      const disclosure = main.firstElementChild
+      assert.equal(disclosure.tagName, 'DETAILS')
+      assert.equal(disclosure.id, 'speaker-updates')
+      assert.equal(main.previousElementSibling.tagName, 'HEADER')
+      assert.equal(disclosure.open, false)
+      const summary = disclosure.querySelector('summary')
+      assert.match(summary.textContent, /Organizer Updates/)
+      summary.focus()
+      assert.equal(document.activeElement, summary)
+      await act(async () => summary.click())
+      assert.equal(disclosure.open, true)
+      await click('Mark as read')
+      assert.match(disclosure.textContent, /Notification marked as read/)
+      const loads = notificationLoads
+      await act(async () => summary.click())
+      assert.equal(disclosure.open, false)
+      await act(async () => summary.click())
+      assert.equal(disclosure.open, true)
+      assert.equal(notificationLoads, loads)
+      assert.equal(disclosure.querySelector('.portal-notification-meta span').textContent, 'Read')
+      assert.equal(button('Mark as read'), undefined)
+      assert.equal(document.querySelectorAll('#speaker-updates').length, 1)
+      assert.equal(document.querySelector('.portal-nav a[aria-current="page"]').textContent, 'Overview')
+    })
     assert.equal(document.querySelector('a[href="/speaker/profile/edit"]'), null)
     await mount(Details, `/speaker/proposals/${proposalId}?speakerId=attacker&preview=scheduled`)
     assert.match(text(), /My live idea/); assert.doesNotMatch(text(), /Bill Nye|Fictional schedule/)
