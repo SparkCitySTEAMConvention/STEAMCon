@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.sparkcity.steamcon.booking.CarRental;
 import com.sparkcity.steamcon.booking.HotelReservation;
 import com.sparkcity.steamcon.booking.TravelLeg;
+import com.sparkcity.steamcon.events.SessionOccurrence;
 
 public record ItineraryEntryResponse(
         UUID sourceId,
@@ -41,5 +42,15 @@ public record ItineraryEntryResponse(
                 ItineraryEntryType.HOTEL,
                 hotelReservation.getCheckin(),
                 hotelReservation.getCheckOut());
+    }
+
+    public static ItineraryEntryResponse fromSessionOccurrence(
+            SessionOccurrence sessionOccurrence) {
+
+        return new ItineraryEntryResponse(
+                sessionOccurrence.getId(),
+                ItineraryEntryType.SESSION,
+                sessionOccurrence.getStartsAt(),
+                sessionOccurrence.getEndsAt());
     }
 }
