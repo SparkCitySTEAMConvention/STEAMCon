@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import steamConLogo from '../assets/steamcon-logo.png'
 
 export default function Hero() {
@@ -10,9 +11,8 @@ export default function Hero() {
         <p className="hero-description">A meeting place for the thinkers, makers, and creative minds shaping what comes next.</p>
         <div className="button-group">
           <a className="button button-dark" href="#events">Explore Events <span aria-hidden="true">↗</span></a>
-          <a className="button button-paper" href="#register">Register Now <span aria-hidden="true">↗</span></a>
+          <Link className="button button-paper" to="/register">Register Now <span aria-hidden="true">↗</span></Link>
         </div>
-        <div className="hero-note"><span aria-hidden="true">↓</span> Follow your curiosity. Find your people.</div>
       </div>
     </section>
   )

@@ -1,0 +1,43 @@
+.steam-portal-shell { display: flex; min-height: 100dvh; width: 100%; background: var(--color-paper); }
+.steam-portal-shell .steam-portal-sidebar { flex: 0 0 248px; width: 248px; position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; background: var(--color-ink); color: var(--color-paper); }
+.steam-portal-shell .steam-portal-navigation { padding: 1rem; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.steam-portal-shell .steam-portal-brand { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-weight: 800; text-decoration: none; }
+.steam-portal-shell .steam-portal-brand span { font-size: 0.75rem; }
+.steam-portal-shell .steam-portal-navigation h2 { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 1.25rem 0 0.5rem; color: var(--color-ice); }
+.steam-portal-shell .steam-portal-navigation ul { list-style: none; padding: 0; margin: 0; }
+.steam-portal-shell .steam-portal-navigation li { margin-block: 0.2rem; }
+.steam-portal-shell .steam-portal-navigation li a, .steam-portal-shell .steam-portal-unavailable { display: block; padding: 0.65rem 0.75rem; border-left: 3px solid transparent; border-radius: var(--radius-small); text-decoration: none; overflow-wrap: anywhere; }
+.steam-portal-shell .steam-portal-navigation li a:hover { background: #263139; }
+.steam-portal-shell .steam-portal-navigation a[aria-current='page'] { background: var(--color-paper); color: var(--color-ink); border-left-color: var(--color-focus); font-weight: 800; text-decoration: underline; }
+.steam-portal-shell .steam-portal-navigation small { display: block; font-size: 0.72rem; line-height: 1.4; }
+.steam-portal-shell .steam-portal-unavailable { color: var(--color-steel); }
+.steam-portal-shell .steam-portal-workspace { flex: 1; min-width: 0; }
+.steam-portal-shell .steam-portal-topbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--color-border); background: var(--color-white); }
+.steam-portal-shell .steam-portal-title { font-size: 0.875rem; font-weight: 700; }
+.steam-portal-shell .auth-account-navigation { margin: 0 0 0 auto; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.steam-portal-shell .steam-portal-toggle, .steam-portal-shell .steam-portal-topbar button, .steam-portal-shell .steam-portal-drawer > button { min-height: 44px; cursor: pointer; border: 1px solid currentColor; border-radius: var(--radius-small); padding: 0.4rem 0.75rem; background: var(--color-paper); color: var(--color-ink); }
+.steam-portal-shell .steam-portal-content { padding: clamp(1rem, 3vw, 2rem); min-width: 0; overflow-wrap: anywhere; }
+.steam-portal-shell .steam-portal-drawer-layer[hidden] { display: none; }
+.steam-portal-shell .steam-portal-drawer-layer { position: fixed; inset: 0; z-index: 100; }
+.steam-portal-shell .steam-portal-backdrop { position: absolute; inset: 0; background: rgb(15 20 24 / 65%); }
+.steam-portal-shell .steam-portal-drawer { position: relative; width: min(300px, 90vw); height: 100%; display: flex; flex-direction: column; overflow: hidden; padding: 1rem 0; background: var(--color-ink); color: var(--color-paper); }
+.steam-portal-shell .steam-portal-drawer > button { margin-left: 1rem; }
+.steam-portal-shell :focus:not(:focus-visible) { outline: none; box-shadow: none; }
+.steam-portal-shell a:focus-visible, .steam-portal-shell button:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; box-shadow: 0 0 0 5px var(--color-ink); }
+@media (max-width: 760px) {
+  .steam-portal-shell .steam-portal-topbar { gap: 0.5rem; padding: 0.75rem; }
+  .steam-portal-shell .auth-account-navigation { width: 100%; margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .steam-portal-shell *, .steam-portal-shell *::before, .steam-portal-shell *::after { animation: none; transition: none; scroll-behavior: auto; }
+}
+
+.steam-portal-shell .steam-portal-toggle { flex-shrink: 0; margin: 1rem 1rem 0; }
+.steam-portal-collapsed .steam-portal-sidebar { flex-basis: 104px; width: 104px; }
+.steam-portal-collapsed .steam-portal-sidebar .steam-portal-navigation { padding: 0.5rem; }
+.steam-portal-collapsed .steam-portal-sidebar .steam-portal-navigation li a { padding: 0.6rem 0.25rem; font-size: 0.75rem; }
+.steam-portal-collapsed .steam-portal-sidebar small, .steam-portal-collapsed .steam-portal-sidebar h2, .steam-portal-collapsed .steam-portal-sidebar .steam-portal-unavailable { display: none; }
+.steam-portal-collapsed .steam-portal-toggle { margin: 0.5rem; padding: 0.4rem; font-size: 0.75rem; }
+.steam-portal-drawer > button { flex-shrink: 0; align-self: flex-start; }
+
+.steam-portal-shell .steam-portal-discovery { padding: 0; }
