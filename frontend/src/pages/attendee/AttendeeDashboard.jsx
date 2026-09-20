@@ -1,38 +1,32 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useAuth } from '../../auth/useAuth.js'
+import AttendeeHeader from '../../components/attendee/AttendeeHeader.jsx'
 import AttendeeSummary from '../../components/attendee/AttendeeSummary.jsx'
 import BookingCard from '../../components/attendee/BookingCard.jsx'
 import ItineraryItem from '../../components/attendee/ItineraryItem.jsx'
 import SessionCard from '../../components/attendee/SessionCard.jsx'
 import { attendeeRepository } from '../../services/attendeeRepository.js'
-import { buildTravelItinerary, getBookingCards, loadTravelBookings } from '../../utils/travelBookings.js'
 import './AttendeeDashboard.css'
 
-const attendeePreview = attendeeRepository.getPreview()
-
-export default function AttendeeDashboard({ data = attendeePreview }) {
-  const { user, authSource } = useAuth()
-  const { hash } = useLocation()
-  const passHolder = authSource === 'backend' ? user?.displayName || user?.email || 'Attendee' : data.attendee.name
+export default function AttendeeDashboard() {
+  const [data, setData] = useState(attendeeRepository.getPreview())
+  const [status, setStatus] = useState('loading')
 
   useEffect(() => {
-    if (!hash) return
-    // Run after App's route-change focus so cross-page hash links retain focus.
-    const frame = window.requestAnimationFrame(() => {
-      const target = document.getElementById(hash.slice(1))
-      target?.scrollIntoView?.({ behavior: 'instant', block: 'start' })
-      target?.focus({ preventScroll: true })
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [hash])
-
+    let active = true
+    attendeeRepository.getDashboard().then(result => {
+      if (active) { setData(result); setStatus('ready') }
+    }).catch(() => { if (active) setStatus('error') })
+    return () => { active = false }
+  }, [])
   const [selectedSessionIds, setSelectedSessionIds] = useState(
     () => data.sessions.filter(session => session.enrolled).map(session => session.id),
   )
+  useEffect(() => {
+    if (status === 'ready') setSelectedSessionIds(data.sessions.filter(session => session.enrolled).map(session => session.id))
+  }, [status, data.sessions])
+
   const [activeTrack, setActiveTrack] = useState('All')
   const [notice, setNotice] = useState('')
-  const [savedTravelBookings] = useState(() => loadTravelBookings())
 
   const selectedSessions = useMemo(
     () => data.sessions.filter(session => selectedSessionIds.includes(session.id)),
@@ -44,35 +38,35 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
     : data.sessions.filter(session => session.track === activeTrack)
 
   const itinerary = useMemo(
-    () => [...data.itinerary, ...buildTravelItinerary(savedTravelBookings), ...selectedSessions]
+    () => [...data.itinerary.filter(item => !data.sessions.some(session => session.id === item.id)), ...selectedSessions]
       .sort((first, second) => first.order - second.order),
-    [data.itinerary, savedTravelBookings, selectedSessions],
+    [data.itinerary, data.sessions, selectedSessions],
   )
 
-  const bookingCards = useMemo(
-    () => getBookingCards(data.bookings, savedTravelBookings),
-    [data.bookings, savedTravelBookings],
-  )
+  const bookingCards = data.bookings
 
   const confirmedBookings = bookingCards.filter(booking => booking.status === 'Booked').length
 
-  function toggleSession(session) {
-    if (session.mandatory) return
-
+  async function toggleSession(session) {
+    if (session.mandatory || !session.occurrenceId) return
     const isSelected = selectedSessionIds.includes(session.id)
-    setSelectedSessionIds(current => isSelected
-      ? current.filter(id => id !== session.id)
-      : [...current, session.id])
-    setNotice(isSelected
-      ? `${session.title} was removed from your schedule.`
-      : `${session.title} was added to your schedule.`)
+    try {
+      if (isSelected) await attendeeRepository.cancel(session.occurrenceId)
+      else await attendeeRepository.enroll(session.occurrenceId)
+      setSelectedSessionIds(current => isSelected ? current.filter(id => id !== session.id) : [...current, session.id])
+      setNotice(isSelected ? `${session.title} was removed from your schedule.` : `${session.title} was added to your schedule.`)
+    } catch {
+      setNotice(`Unable to update ${session.title}. Please try again.`)
+    }
   }
 
   return (
     <div className="attendee-portal">
       <a className="skip-link" href="#attendee-main">Skip to content</a>
 
-      <div className="container attendee-main" id="attendee-main" tabIndex={-1}>
+      <main className="container attendee-main" id="attendee-main" tabIndex={-1}>
+        {status === 'loading' && <p role="status">Loading your attendee workspace…</p>}
+        {status === 'error' && <p role="alert">Unable to load your attendee data from the backend.</p>}
         <section className="attendee-welcome" aria-labelledby="attendee-welcome-heading">
           <div>
             <p className="eyebrow">Your curiosity has a schedule</p>
@@ -82,7 +76,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
           <a className="button button-dark" href="#discover">Find a session <span aria-hidden="true">↓</span></a>
         </section>
 
-        <p className="attendee-demo-note"><strong>Attendee workspace preview</strong> · Names, schedules, rooms, and confirmation numbers are demonstration data.</p>
+        <p className="attendee-demo-note"><strong>Live attendee workspace</strong> · Schedule, admission, and booking data are loaded from the STEAM Con backend.</p>
         <p className="attendee-live-notice" id="attendee-notice" aria-live="polite">{notice}</p>
 
         <AttendeeSummary
@@ -142,7 +136,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
         <section className="attendee-section" id="discover" aria-labelledby="discover-heading">
           <div className="attendee-section-heading">
             <div><p className="eyebrow">04 / Follow your curiosity</p><h2 id="discover-heading">Find your next session.</h2></div>
-            <p>Choose a track or explore the full preview schedule.</p>
+            <p>Choose a track or explore the published schedule.</p>
           </div>
           <div className="attendee-filters" aria-label="Filter sessions by track">
             {['All', ...data.tracks].map(track => (
@@ -173,7 +167,7 @@ export default function AttendeeDashboard({ data = attendeePreview }) {
 
       <footer className="container attendee-footer">
         <p>STEAM Con · A place for curious minds.</p>
-        <p>Attendee Portal / Preview</p>
+        <p>Attendee Portal / Live data</p>
       </footer>
     </div>
   )

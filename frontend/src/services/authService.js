@@ -6,6 +6,8 @@ export class AuthError extends Error {
 const cleanup = () => sessionStorage.removeItem(key)
 const save = session => { sessionStorage.setItem(key, JSON.stringify(session)); return session }
 const valid = session => session?.user && Number.isFinite(Date.parse(session.expiresAt)) && Date.parse(session.expiresAt) > Date.now()
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const validBackendSession = session => valid(session) && uuid.test(session?.sessionId || '') && uuid.test(session?.user?.id || '')
 async function restore() {
  try {
   const session = JSON.parse(sessionStorage.getItem(key))
@@ -13,7 +15,7 @@ async function restore() {
    const account = demoAccounts[session.user.role]
    if (account && account.email === session.user.email) return {...session, user: identity(account)}
   }
-  if (valid(session) && session.source === 'backend' && session.sessionId) {
+  if (validBackendSession(session)) {
    const response = await fetch('/api/auth/me', {headers: {'X-Session-Id': session.sessionId}})
    if (response.ok) return save(backendSession(await response.json()))
   }
@@ -23,8 +25,7 @@ async function restore() {
 }
 const identity = account => ({id:`demo-${account.role}`,email:account.email,displayName:account.displayName,role:account.role})
 function backendSession(session) {
- const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
- if (!uuid.test(session?.sessionId || '') || !uuid.test(session?.user?.id || '') || session.status !== 'ACTIVE' || !valid(session) || !Array.isArray(session.user.roles)) throw new AuthError('The login service returned an invalid session.')
+ if (!validBackendSession(session) || session.status !== 'ACTIVE' || !Array.isArray(session.user.roles)) throw new AuthError('The login service returned an invalid session.')
  const roles = [...session.user.roles]
  const role = roles.includes('SPEAKER') ? 'SPEAKER' : roles.includes('ATTENDEE') ? 'ATTENDEE' : null
  return {...session, source:'backend', user:{...session.user, roles, role}}
@@ -63,14 +64,13 @@ export const authService = {
  hasValidBackendSession() {
   try {
    const session = JSON.parse(sessionStorage.getItem(key))
-   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-   return valid(session) && session.source === 'backend' && uuid.test(session.sessionId || '') && uuid.test(session.user.id || '')
+   return validBackendSession(session)
   } catch { return false }
  },
  headers() {
   try {
    const session = JSON.parse(sessionStorage.getItem(key))
-   return valid(session) && session.source === 'backend' ? {'X-Session-Id':session.sessionId} : {}
+   return validBackendSession(session) ? {'X-Session-Id':session.sessionId} : {}
   } catch { return {} }
  },
 }

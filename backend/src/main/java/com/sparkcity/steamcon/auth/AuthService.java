@@ -76,7 +76,8 @@ public class AuthService {
     public User register(
             String email,
             String displayName,
-            String password) {
+            String password,
+            Role requestedRole) {
 
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException(
@@ -95,12 +96,16 @@ public class AuthService {
         User savedUser =
                 userRepository.save(user);
 
-        UserRole attendeeRole =
-                new UserRole(
-                        savedUser,
-                        Role.ATTENDEE);
+        Role role = requestedRole == Role.SPEAKER
+                ? Role.SPEAKER
+                : Role.ATTENDEE;
 
-        userRoleRepository.save(attendeeRole);
+        userRoleRepository.save(new UserRole(savedUser, role));
+
+        if (role == Role.SPEAKER) {
+            userRoleRepository.save(
+                    new UserRole(savedUser, Role.ATTENDEE));
+        }
 
         return savedUser;
     }

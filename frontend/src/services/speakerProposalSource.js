@@ -1,5 +1,4 @@
 import { adaptProposal, adaptDashboard } from './speakerPresentation.js'
-import { tracks } from '../mocks/tracks.js'
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 // Validation limits match CreateProposalRequest.
@@ -31,11 +30,9 @@ export async function deleteConfirmedProposal(source, proposalId, confirmed) {
 export function createSpeakerProposalSource(repository, trackRepository, user, authSource, hasBackendSession = false) {
   const currentUserId = user?.id
   const identity = { id: currentUserId, displayName: user?.displayName }
-  const demo = authSource === 'demo' && user?.role === 'SPEAKER'
-  const available = demo || (authSource === 'backend' && user?.role === 'SPEAKER' && hasBackendSession === true && typeof currentUserId === 'string' && uuid.test(currentUserId))
-  const local = []
+  const demo = false
+  const available = authSource === 'backend' && user?.role === 'SPEAKER' && hasBackendSession === true && typeof currentUserId === 'string' && uuid.test(currentUserId)
   let loadedTracks = []
-  let nextId = 0
   function requireIdentity() {
     if (!available) throw new Error('Speaker operations require a verified backend speaker account and active session. Sign in again or use the speaker preview.')
   }
@@ -46,26 +43,46 @@ export function createSpeakerProposalSource(repository, trackRepository, user, a
     demo, available,
     async getDashboard() {
       requireIdentity()
-      if (demo) return repository.getDashboard()
-      const [dashboard, proposals] = await Promise.all([
+      const [dashboard, proposals, assignments, tracksLive, sessionsLive, occurrencesLive] = await Promise.all([
         repository.getSpeakerDashboard(currentUserId),
         repository.getMyProposals(currentUserId),
+        repository.getMyAssignments(),
+        trackRepository.getTracks(),
+        trackRepository.getSessions(),
+        trackRepository.getSessionOccurrences(),
       ])
-      return adaptDashboard(dashboard, identity, proposals)
+      const adapted = adaptDashboard(dashboard, identity, proposals)
+      const speakingSessions = assignments.map(assignment => {
+        const session = sessionsLive.find(item => item.id === assignment.sessionId)
+        const occurrence = occurrencesLive.find(item => item.sessionId === assignment.sessionId)
+        const proposal = proposals.find(item => item.id === assignment.proposalId)
+        return {
+          id: assignment.assignmentId, assignmentId: assignment.assignmentId,
+          proposalId: assignment.proposalId, sessionId: assignment.sessionId,
+          title: session?.title || proposal?.title || 'Assigned session',
+          description: session?.description || proposal?.description || '',
+          trackId: session?.trackId || proposal?.trackId || null,
+          track: tracksLive.find(item => item.id === (session?.trackId || proposal?.trackId))?.name || 'Track',
+          role: assignment.role, format: 'Session', durationMinutes: null,
+          status: 'Approved', scheduledAt: occurrence?.startsAt || null,
+          endsAt: occurrence?.endsAt || null, room: null,
+          location: 'Jacob K. Javits Convention Center',
+          speakers: [{ id: currentUserId, name: user?.displayName || 'Speaker' }],
+        }
+      })
+      return { ...adapted, sessions: speakingSessions, tracks: tracksLive }
     },
     async getMyProposals() {
       requireIdentity()
-      return demo ? (await repository.getDashboard()).proposals : (await repository.getMyProposals(currentUserId)).map(adaptProposal)
+      return (await repository.getMyProposals(currentUserId)).map(adaptProposal)
     },
     async getProposal(id) {
       requireIdentity()
-      if (demo) return repository.getProposal(id)
       requireProposalId(id)
       return adaptProposal(await repository.getProposal(id, currentUserId))
     },
     async saveDraft(id, changes) {
       requireIdentity()
-      if (demo) return repository.saveDraft(id, changes)
       requireProposalId(id)
       const record = await repository.getProposal(id, currentUserId)
       if (!canManageLiveProposal(record)) throw new Error('Only draft or submitted proposals can be edited.')
@@ -77,30 +94,19 @@ export function createSpeakerProposalSource(repository, trackRepository, user, a
     },
     async withdrawProposal(id, name) {
       requireIdentity()
-      if (demo) throw new Error('Withdrawal is available for live proposals only.')
       requireProposalId(id)
       const record = await repository.getProposal(id, currentUserId)
       if (!canManageLiveProposal(record)) throw new Error('Only draft or submitted proposals can be withdrawn.')
       if (name !== record.title) throw new Error('Enter the proposal title to confirm withdrawal.')
       return repository.withdrawProposal(id, currentUserId)
     },
-    getPreviewProposals: () => local.map(item => ({ ...item })),
-    canDeleteProposal(proposalId) {
-      return demo && isPreviewProposalDeletable(local.find(item => item.id === proposalId), user.id)
-    },
-    async deleteProposal(proposalId) {
-      requireIdentity()
-      if (!demo) throw new Error('Local deletion is available only in the preview. Use confirmed withdrawal for live proposals.')
-      if (typeof proposalId !== 'string' || !proposalId.trim()) throw new Error('A proposal ID is required.')
-      const index = local.findIndex(item => item.id === proposalId)
-      if (index < 0 || !isPreviewProposalDeletable(local[index], user.id)) throw new Error('Only your locally created, submitted and unscheduled preview proposals can be deleted.')
-      local.splice(index, 1)
-      return { deletedId: proposalId }
-    },
+    getPreviewProposals: () => [],
+    canDeleteProposal() { return false },
+    async deleteProposal() { throw new Error('Use confirmed withdrawal for live proposals.') },
     async getTracks() {
       requireIdentity()
-      const result = demo ? tracks.map(item => ({ ...item })) : await trackRepository.getTracks()
-      if (!Array.isArray(result) || result.some(item => !item || typeof item.name !== 'string' || !(demo ? tracks.some(track => track.id === item.id) : uuid.test(item.id || '')))) throw new Error('Invalid track response. Please retry loading tracks.')
+      const result = await trackRepository.getTracks()
+      if (!Array.isArray(result) || result.some(item => !item || typeof item.name !== 'string' || !uuid.test(item.id || ''))) throw new Error('Invalid track response. Please retry loading tracks.')
       loadedTracks = result.map(item => ({ ...item }))
       return result
     },
@@ -109,12 +115,9 @@ export function createSpeakerProposalSource(repository, trackRepository, user, a
       const errors = validateProposal(values)
       if (Object.keys(errors).length) throw new Error(Object.values(errors)[0])
       const { title, description, trackId } = values
-      if ((!demo && !uuid.test(trackId)) || !loadedTracks.some(track => track.id === trackId)) throw new Error('Choose an available track from the loaded list.')
+      if (!uuid.test(trackId) || !loadedTracks.some(track => track.id === trackId)) throw new Error('Choose an available track from the loaded list.')
       const payload = { title: title.trim(), description: description.trim(), trackId }
-      if (!demo) return repository.createProposal(payload)
-      const proposal = { id: `preview-proposal-${++nextId}`, ...payload, speakerId: user.id, status: 'SUBMITTED' }
-      local.push(proposal)
-      return { ...proposal }
+      return repository.createProposal(payload)
     },
   }
 }

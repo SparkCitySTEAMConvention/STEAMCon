@@ -2,8 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
-import { getSpeakerProfileSource, profileFormValues, profileFields, profileLimits, profileUnavailable, validateProfile } from '../../services/speakerProfileSource.js'
-import { developmentDisclaimer } from '../../mocks/speakerData.js'
+import { getSpeakerProfileSource, profileFields, profileLimits, profileUnavailable, validateProfile } from '../../services/speakerProfileSource.js'
 import './SpeakerDashboard.css'
 
 export default function EditSpeakerProfile() {
@@ -22,11 +21,10 @@ function ProfilePage({ source }) {
     <div className="container portal-main portal-proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <h1>Edit Profile</h1>
-      {source.demo && <p className="portal-demo">{developmentDisclaimer}</p>}
+      <p className="portal-demo">Live profile · Changes are saved to the STEAM Con backend.</p>
       {!source.identityAvailable ? <p role="alert">Profile editing requires a verified backend speaker UUID, Speaker role and active session. Sign in again or use the speaker preview.</p>
         : !source.available ? <p>{profileUnavailable}</p>
         : <>
-          {source.demo && <p className="portal-demo">Preview edits stay in memory for this login/application session and never call the API. The public speaker directory stays unchanged.</p>}
           {resource.status === 'loading' && <p role="status">Loading profile…</p>}
           {resource.status === 'error' && <div role="alert"><p>Unable to load your profile.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
           {resource.status === 'ready' && !resource.data && <div role="status"><p>No speaker profile is available.</p><button type="button" onClick={resource.retry}>Retry profile</button></div>}
@@ -83,7 +81,7 @@ function ProfileForm({ source, profile, tracks }) {
       {errors.trackId && <p id="profile-trackId-error">{errors.trackId}</p>}
     </div>}
     {failure && <p role="alert">{failure}</p>}
-    <p aria-live="polite">{saving ? 'Saving profile…' : saved ? (source.demo ? 'Preview profile saved for this session.' : 'Profile saved.') : ''}</p>
+    <p aria-live="polite">{saving ? 'Saving profile…' : saved ? 'Profile saved.' : ''}</p>
     <div className="button-group"><button className="button button-dark" type="submit" disabled={saving || saved}>Save Profile</button>
       {!saving && <Link className="button button-paper" to="/speaker">{saved ? 'Return to Speaker Portal' : 'Cancel'}</Link>}
     </div>

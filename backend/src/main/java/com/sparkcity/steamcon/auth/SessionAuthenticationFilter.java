@@ -1,42 +1,27 @@
 package com.sparkcity.steamcon.auth;
 
-import com.sparkcity.steamcon.identity.AuthSession;
-import com.sparkcity.steamcon.identity.AuthSessionRepository;
-import com.sparkcity.steamcon.identity.AuthSessionStatus;
-import com.sparkcity.steamcon.identity.UserRole;
-import com.sparkcity.steamcon.identity.UserRoleRepository;
+import java.io.IOException;
+import java.util.UUID;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
 public class SessionAuthenticationFilter
         extends OncePerRequestFilter {
 
-    private final AuthSessionRepository authSessionRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final AuthService authService;
 
     public SessionAuthenticationFilter(
-            AuthSessionRepository authSessionRepository,
-            UserRoleRepository userRoleRepository) {
+            AuthService authService) {
 
-        this.authSessionRepository =
-                authSessionRepository;
-
-        this.userRoleRepository =
-                userRoleRepository;
+        this.authService = authService;
     }
 
     @Override
@@ -49,6 +34,10 @@ public class SessionAuthenticationFilter
         String sessionId =
                 request.getHeader("X-Session-Id");
 
+        System.out.println(
+                "SESSION FILTER HEADER: "
+                        + sessionId);
+
         if (sessionId != null && !sessionId.isBlank()) {
 
             try {
@@ -56,47 +45,46 @@ public class SessionAuthenticationFilter
                 UUID id =
                         UUID.fromString(sessionId);
 
-                AuthSession session =
-                        authSessionRepository
-                                .findByIdAndStatus(
-                                        id,
-                                        AuthSessionStatus.ACTIVE)
-                                .orElse(null);
+                AuthResponse currentSession =
+                        authService.getCurrentSession(id);
 
-                if (session != null
-                        && session.getExpiresAt()
-                        .isAfter(Instant.now())) {
+                System.out.println(
+                        "SESSION FILTER USER: "
+                                + currentSession.user().id()
+                                + " roles="
+                                + currentSession.user().roles());
 
-                    List<UserRole> roles =
-                            userRoleRepository
-                                    .findByUserIdAndActiveTrue(
-                                            session.getUserId());
+                var authorities =
+                        currentSession.user()
+                                .roles()
+                                .stream()
+                                .map(role ->
+                                        new SimpleGrantedAuthority(
+                                                "ROLE_" + role.name()))
+                                .toList();
 
-                    var authorities =
-                            roles.stream()
-                                    .filter(UserRole::isActive)
-                                    .map(UserRole::getRole)
-                                    .map(role ->
-                                            new SimpleGrantedAuthority(
-                                                    "ROLE_"
-                                                            + role.name()))
-                                    .toList();
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                currentSession.user().id(),
+                                null,
+                                authorities);
 
-                    UsernamePasswordAuthenticationToken
-                            authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    session.getUserId(),
-                                    null,
-                                    authorities);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authentication);
 
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(
-                                    authentication);
-                }
+                System.out.println(
+                        "SECURITY CONTEXT AUTH: "
+                                + SecurityContextHolder
+                                        .getContext()
+                                        .getAuthentication());
 
-            } catch (IllegalArgumentException ignored) {
-                // Invalid session ID leaves the request unauthenticated.
+            } catch (IllegalArgumentException
+                    | InvalidSessionException exception) {
+
+                System.out.println(
+                        "SESSION FILTER REJECTED: "
+                                + exception.getMessage());
             }
         }
 

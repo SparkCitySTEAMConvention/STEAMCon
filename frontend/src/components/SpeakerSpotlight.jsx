@@ -1,13 +1,28 @@
+import { useEffect, useState } from 'react'
 import SpeakerPortrait from './SpeakerPortrait.jsx'
 
-const speakerHighlights = [
-  { name: 'Kris Younger', initials: 'KY', track: 'Science', session: 'Opening keynote', tone: 'science' },
-  { name: 'Jordan Lee', initials: 'JL', track: 'Technology', session: 'Creative code workshop', tone: 'technology' },
-  { name: 'Dr. Nia Brooks', initials: 'NB', track: 'Mathematics', session: 'The mathematics inside music', tone: 'mathematics' },
-  { name: 'Maya Chen', initials: 'MC', track: 'Art', session: 'Making data feel human', tone: 'art' },
-]
-
 export default function SpeakerSpotlight() {
+  const [speakers, setSpeakers] = useState([])
+
+  useEffect(() => {
+    let active = true
+    Promise.all([fetch('/api/speakers'), fetch('/api/tracks')])
+      .then(async ([speakerResponse, trackResponse]) => {
+        if (!speakerResponse.ok || !trackResponse.ok) throw new Error()
+        const [speakerRows, trackRows] = await Promise.all([speakerResponse.json(), trackResponse.json()])
+        if (!active) return
+        setSpeakers(speakerRows.slice(0, 4).map((speaker, index) => ({
+          ...speaker,
+          initials: (speaker.name || 'Speaker').split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase(),
+          track: trackRows.find(track => track.id === speaker.trackIds?.[0])?.name || 'STEAM',
+          session: speaker.approvedProposalTitles?.[0] || 'Session to be announced',
+          tone: ['science', 'technology', 'engineering', 'art'][index % 4],
+        })))
+      })
+      .catch(() => { if (active) setSpeakers([]) })
+    return () => { active = false }
+  }, [])
+
   return (
     <section className="section speaker-spotlight" id="speakers" aria-labelledby="speaker-spotlight-heading">
       <div className="container">
@@ -19,9 +34,9 @@ export default function SpeakerSpotlight() {
           <p>Meet a few of the people helping every discipline collide, connect, and become something new.</p>
         </div>
 
-        <ul className="speaker-grid">
-          {speakerHighlights.map(speaker => (
-            <li className="speaker-card" key={speaker.name}>
+        {speakers.length ? <ul className="speaker-grid">
+          {speakers.map(speaker => (
+            <li className="speaker-card" key={speaker.speakerId}>
               <SpeakerPortrait {...speaker} />
               <div className="speaker-card-copy">
                 <p>{speaker.track}</p>
@@ -30,7 +45,7 @@ export default function SpeakerSpotlight() {
               </div>
             </li>
           ))}
-        </ul>
+        </ul> : <p role="status">Speaker highlights will appear when approved speaker records are available.</p>}
 
         <p className="speaker-placeholder-note">Illustrated placeholders shown until approved speaker photography is available.</p>
       </div>

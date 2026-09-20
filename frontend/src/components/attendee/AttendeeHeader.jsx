@@ -17,6 +17,7 @@ export default function AttendeeHeader({ attendee, admission }) {
           <a href="#itinerary">Itinerary</a>
           <a href="#schedule">My schedule</a>
           <a href="#discover">Find sessions</a>
+          <Link to="/attendee/forums">Forums &amp; Messaging</Link>
           <Link to="/">Homepage <span aria-hidden="true">↗</span></Link>
         </nav>
       </div>

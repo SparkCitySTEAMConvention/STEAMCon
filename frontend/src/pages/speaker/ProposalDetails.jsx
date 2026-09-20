@@ -1,11 +1,7 @@
-import { useSearchParams } from 'react-router-dom'
-import { previewRepository } from '../../mocks/previewScenarios.js'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakerHeader from '../../components/speaker/SpeakerHeader.jsx'
 import TrackBadge from '../../components/speaker/TrackBadge.jsx'
-import { developmentDisclaimer, speakerData } from '../../mocks/speakerData.js'
-import { tracks } from '../../mocks/tracks.js'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import ScheduleActions from '../../components/speaker/ScheduleActions.jsx'
@@ -20,18 +16,17 @@ export default function ProposalDetails({ repository = speakerRepository }) {
   const { user, authSource, hasBackendSession } = useAuth()
   const proposalSource = useMemo(() => getSpeakerProposalSource(repository, eventRepository, user, authSource, hasBackendSession), [repository, user, authSource, hasBackendSession])
   const { proposalId } = useParams()
-  const [params] = useSearchParams()
-  const scenario = proposalSource.demo && import.meta.env.DEV ? params.get('preview') : null
-  const source = useMemo(() => previewRepository(proposalSource, scenario), [proposalSource, scenario])
+  const scenario = null
+  const source = proposalSource
   const loader = useCallback(() => source.getProposal(proposalId), [source, proposalId])
   const resource = useSpeakerResource(loader, loader)
   const primary = resource.data?.speakers?.find(person => person.id === resource.data.primarySpeakerId)
   return <div className="speaker-portal">
     <a className="skip-link" href="#proposal-main">Skip to content</a>
-    <SpeakerHeader speaker={proposalSource.demo ? primary || speakerData.speaker : liveSpeaker(user)} />
-    <div className="container portal-main portal-proposal-main" id="proposal-main" tabIndex={-1}>
+    <SpeakerHeader speaker={primary || liveSpeaker(user)} />
+    <main className="container portal-main portal-proposal-main" id="proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
-      <p className="portal-demo">{proposalSource.demo ? developmentDisclaimer : 'Live proposal'}</p>
+      <p className="portal-demo">Live proposal · Loaded from the STEAM Con backend.</p>
       {scenario && <p className="portal-demo"><strong>Isolated UI test: {scenario}.</strong> Any date, time, room or identity in this test belongs to a fictional test event, not STEAM Con.</p>}
       {resource.status === 'loading' && <><h1>Proposal details</h1><p role="status">Loading proposal…</p></>}
       {resource.status === 'error' && <><h1>Proposal unavailable</h1><p role="alert">Unable to load this proposal. Please try again.</p><button type="button" className="button button-paper" onClick={resource.retry}>Try again</button></>}
@@ -106,7 +101,7 @@ function DraftEditor({ proposal, repository, onSave, onCancel }) {
   const loader = useCallback(() => repository.getTracks(), [repository])
   const trackResource = useSpeakerResource(loader, repository)
   const [selectedTrack, setSelectedTrack] = useState(proposal.trackId || '')
-  const options = repository.demo ? tracks : trackResource.data || []
+  const options = trackResource.data || []
   const tracksReady = repository.demo || (trackResource.status === 'ready' && options.length > 0)
   const validTrack = options.some(track => track.id === selectedTrack)
   const [saving, setSaving] = useState(false)

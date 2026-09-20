@@ -1,13 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import TravelBookingNav from '../../components/attendee/TravelBookingNav.jsx'
-import {
-  formatBookingDate,
-  formatBookingTime,
-  loadTravelBookings,
-  makeConfirmationCode,
-  saveTravelBooking,
-} from '../../utils/travelBookings.js'
+import { formatBookingDate, formatBookingTime } from '../../utils/travelBookings.js'
+import { bookingRepository } from '../../services/bookingRepository.js'
 import './TravelBooking.css'
 
 const emptyTravel = {
@@ -32,10 +27,38 @@ const emptyCar = {
 
 export default function TravelBookingPage({ kind }) {
   const isCar = kind === 'car'
-  const initialBooking = loadTravelBookings()[kind]
-  const [booking, setBooking] = useState(initialBooking || null)
-  const [formData, setFormData] = useState(initialBooking || (isCar ? emptyCar : emptyTravel))
-  const [showConfirmation, setShowConfirmation] = useState(Boolean(initialBooking))
+  const [booking, setBooking] = useState(null)
+  const [formData, setFormData] = useState(isCar ? emptyCar : emptyTravel)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        if (isCar) {
+          const rows = await bookingRepository.getCarRentals()
+          const item = rows[0]
+          if (active && item) {
+            const pickup = new Date(item.pickupAt); const dropoff = new Date(item.dropoffAt)
+            const model = { pickupLocation: item.pickupLocation, pickupDate: pickup.toISOString().slice(0,10), pickupTime: pickup.toISOString().slice(11,16), dropoffLocation: item.dropoffLocation, dropoffDate: dropoff.toISOString().slice(0,10), dropoffTime: dropoff.toISOString().slice(11,16), vehicle: 'Rental car', confirmationCode: item.id.slice(0,8).toUpperCase() }
+            setBooking(model); setFormData(model); setShowConfirmation(true)
+          }
+        } else {
+          const rows = await bookingRepository.getTravelLegs()
+          if (active && rows.length) {
+            const out = rows[0]; const back = rows[1] || rows[0]
+            const dep = new Date(out.departureAt); const ret = new Date(back.departureAt)
+            const model = { mode: 'Travel', origin: out.origin, destination: out.destination, departureDate: dep.toISOString().slice(0,10), departureTime: dep.toISOString().slice(11,16), returnDate: ret.toISOString().slice(0,10), returnTime: ret.toISOString().slice(11,16), confirmationCode: out.id.slice(0,8).toUpperCase() }
+            setBooking(model); setFormData(model); setShowConfirmation(true)
+          }
+        }
+      } catch { /* form remains available for a new booking */ }
+      finally { if (active) setLoading(false) }
+    }
+    load()
+    return () => { active = false }
+  }, [isCar])
   const [error, setError] = useState('')
 
   function updateField(event) {
@@ -43,7 +66,7 @@ export default function TravelBookingPage({ kind }) {
     setFormData(current => ({ ...current, [name]: value }))
   }
 
-  function submitBooking(event) {
+  async function submitBooking(event) {
     event.preventDefault()
     const startDate = isCar ? formData.pickupDate : formData.departureDate
     const endDate = isCar ? formData.dropoffDate : formData.returnDate
@@ -53,14 +76,16 @@ export default function TravelBookingPage({ kind }) {
       return
     }
 
-    const confirmedBooking = {
-      ...formData,
-      confirmationCode: formData.confirmationCode || makeConfirmationCode(isCar ? 'CAR' : 'TRV'),
+    try {
+      const saved = isCar ? await bookingRepository.bookCar(formData) : await bookingRepository.bookRoundTrip(formData)
+      const id = isCar ? saved.id : saved.outbound.id
+      const confirmedBooking = { ...formData, confirmationCode: id.slice(0, 8).toUpperCase() }
+      setBooking(confirmedBooking)
+      setShowConfirmation(true)
+      setError('')
+    } catch {
+      setError('Booking could not be saved to the STEAM Con database. Please try again.')
     }
-    saveTravelBooking(kind, confirmedBooking)
-    setBooking(confirmedBooking)
-    setShowConfirmation(true)
-    setError('')
   }
 
   function changeBooking() {
@@ -75,6 +100,7 @@ export default function TravelBookingPage({ kind }) {
 
       <div className="container travel-booking-main" id="travel-booking-main" tabIndex={-1}>
         <TravelBookingNav active={kind} />
+        {loading && <p role="status">Loading saved booking…</p>}
 
         {showConfirmation && booking ? (
           <section className="booking-confirmation" aria-labelledby="booking-confirmation-heading" aria-live="polite">
@@ -171,7 +197,7 @@ export default function TravelBookingPage({ kind }) {
 
               <p className="travel-form-error" aria-live="polite">{error}</p>
               <button className="button button-dark travel-booking-submit" type="submit">Book {isCar ? 'rental car' : 'travel'} <span aria-hidden="true">→</span></button>
-              <p className="travel-demo-note">Demo booking only. No payment is collected and nothing is sent to an outside travel provider.</p>
+              <p className="travel-demo-note">Saved to your STEAM Con account. No outside airline, rail, or rental provider is contacted.</p>
             </form>
           </div>
         )}

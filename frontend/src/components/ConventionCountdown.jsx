@@ -1,7 +1,7 @@
 import { locationLabel } from '../utils/proposalPresentation.js'
 import { useEffect, useState } from 'react'
-import { conventionConfig } from '../mocks/conventionConfig.js'
-import { countdownRemaining, conventionState, conventionDateRange } from '../utils/conventionCalendar.js'
+import { conventionConfig } from '../config/conventionConfig.js'
+import { conventionDayLabel, countdownRemaining, occurrenceDate } from '../utils/conventionCalendar.js'
 import './ConventionCountdown.css'
 
 export default function ConventionCountdown() {

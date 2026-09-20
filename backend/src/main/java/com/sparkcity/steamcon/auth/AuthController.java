@@ -1,6 +1,8 @@
 package com.sparkcity.steamcon.auth;
 
+import com.sparkcity.steamcon.identity.Role;
 import com.sparkcity.steamcon.identity.User;
+import com.sparkcity.steamcon.identity.UserRole;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -59,16 +61,24 @@ public class AuthController {
     public ResponseEntity<UserResponse> register(
             @RequestBody RegisterRequest request) {
 
-        User user =
-                authService.register(
-                        request.email(),
-                        request.displayName(),
-                        request.password());
+        Role requestedRole =
+                "SPEAKER".equalsIgnoreCase(request.role())
+                        ? Role.SPEAKER
+                        : Role.ATTENDEE;
 
-        return ResponseEntity.ok(
-                UserResponse.from(
-                        user,
-                        List.of()));
+        User user = authService.register(
+                request.email(),
+                request.displayName(),
+                request.password(),
+                requestedRole);
+
+        List<UserRole> roles = requestedRole == Role.SPEAKER
+                ? List.of(
+                        new UserRole(user, Role.SPEAKER),
+                        new UserRole(user, Role.ATTENDEE))
+                : List.of(new UserRole(user, Role.ATTENDEE));
+
+        return ResponseEntity.ok(UserResponse.from(user, roles));
     }
 
     private UUID parseSessionId(
@@ -96,6 +106,7 @@ public class AuthController {
     public record RegisterRequest(
             String email,
             String displayName,
-            String password
+            String password,
+            String role
     ) {}
 }

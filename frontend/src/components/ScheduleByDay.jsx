@@ -1,17 +1,16 @@
-import { locationLabel } from '../utils/proposalPresentation.js'
-import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionConfig } from '../config/conventionConfig.js'
 import { conventionDayLabel, programCalendar } from '../utils/conventionCalendar.js'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { publicProgramPreview } from '../mocks/publicProgram.js'
 
 function trackSlug(track) {
   return (track || 'unknown').toLowerCase().replaceAll(' ', '-')
 }
 
-export default function ScheduleByDay({ sessions = publicProgramPreview.schedule, tracks = publicProgramPreview.trackNames, live = false, date, selectedTrack, onDateChange, onTrackChange, publicOnly = false }) {
-  const days = conventionConfig.dates
-  const calendar = programCalendar(sessions)
+export default function ScheduleByDay({ sessions = [], tracks = [], live = false }) {
+  const calendar = programCalendar(sessions, live)
+  const liveDays = [...new Set(calendar.map(session => session.calendarDate).filter(Boolean))]
+  const days = live && liveDays.length ? liveDays : conventionConfig.dates
   const unplaced = calendar.filter(session => !days.includes(session.calendarDate)).length
   const [localDay, setLocalDay] = useState(days[0] ?? '')
   const [localTrack, setLocalTrack] = useState('All tracks')

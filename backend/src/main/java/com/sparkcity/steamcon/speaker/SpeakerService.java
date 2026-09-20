@@ -21,20 +21,23 @@ public class SpeakerService {
     private final ApprovalDecisionRepository approvalDecisionRepository;
     private final NotificationService notificationService;
     private final SpeakerFlairRepository speakerFlairRepository;
+    private final SpeakerProfileRepository speakerProfileRepository;
 
     public SpeakerService(
-            SessionProposalRepository sessionProposalRepository,
-            SpeakerApplicationRepository speakerApplicationRepository,
-            ApprovalDecisionRepository approvalDecisionRepository,
-            NotificationService notificationService,
-            SpeakerFlairRepository speakerFlairRepository) {
+        SessionProposalRepository sessionProposalRepository,
+        SpeakerApplicationRepository speakerApplicationRepository,
+        ApprovalDecisionRepository approvalDecisionRepository,
+        NotificationService notificationService,
+        SpeakerFlairRepository speakerFlairRepository,
+        SpeakerProfileRepository speakerProfileRepository) {
 
-        this.sessionProposalRepository = sessionProposalRepository;
-        this.speakerApplicationRepository = speakerApplicationRepository;
-        this.approvalDecisionRepository = approvalDecisionRepository;
-        this.notificationService = notificationService;
-        this.speakerFlairRepository = speakerFlairRepository;
-    }
+    this.sessionProposalRepository = sessionProposalRepository;
+    this.speakerApplicationRepository = speakerApplicationRepository;
+    this.approvalDecisionRepository = approvalDecisionRepository;
+    this.notificationService = notificationService;
+    this.speakerFlairRepository = speakerFlairRepository;
+    this.speakerProfileRepository = speakerProfileRepository;
+}
 
     // ---------------------------------------------------------
     // PROPOSAL CREATION
@@ -67,10 +70,9 @@ public class SpeakerService {
                 description,
                 trackId);
 
-        ProposalStatus status =
-                requestedStatus == null
-                        ? ProposalStatus.SUBMITTED
-                        : requestedStatus;
+        ProposalStatus status = requestedStatus == null
+                ? ProposalStatus.SUBMITTED
+                : requestedStatus;
 
         if (status != ProposalStatus.DRAFT
                 && status != ProposalStatus.SUBMITTED) {
@@ -79,8 +81,7 @@ public class SpeakerService {
                     "New proposals may only be DRAFT or SUBMITTED");
         }
 
-        SessionProposal proposal =
-                new SessionProposal();
+        SessionProposal proposal = new SessionProposal();
 
         proposal.setSpeakerId(speakerId);
         proposal.setTitle(title);
@@ -99,17 +100,15 @@ public class SpeakerService {
 
         return sessionProposalRepository
                 .findById(proposalId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Proposal not found"));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Proposal not found"));
     }
 
     public SessionProposal getProposalForSpeaker(
             UUID proposalId,
             UUID speakerId) {
 
-        SessionProposal proposal =
-                getProposal(proposalId);
+        SessionProposal proposal = getProposal(proposalId);
 
         requireProposalOwner(
                 proposal,
@@ -129,9 +128,7 @@ public class SpeakerService {
         return sessionProposalRepository
                 .findBySpeakerId(speakerId)
                 .stream()
-                .filter(proposal ->
-                        proposal.getStatus()
-                                != ProposalStatus.WITHDRAWN)
+                .filter(proposal -> proposal.getStatus() != ProposalStatus.WITHDRAWN)
                 .toList();
     }
 
@@ -146,15 +143,12 @@ public class SpeakerService {
             String description,
             UUID trackId) {
 
-        SessionProposal proposal =
-                getProposalForSpeaker(
-                        proposalId,
-                        speakerId);
+        SessionProposal proposal = getProposalForSpeaker(
+                proposalId,
+                speakerId);
 
-        if (proposal.getStatus()
-                != ProposalStatus.DRAFT
-                && proposal.getStatus()
-                != ProposalStatus.SUBMITTED) {
+        if (proposal.getStatus() != ProposalStatus.DRAFT
+                && proposal.getStatus() != ProposalStatus.SUBMITTED) {
 
             throw new IllegalArgumentException(
                     "Only draft or submitted proposals can be edited");
@@ -196,13 +190,11 @@ public class SpeakerService {
             UUID proposalId,
             UUID speakerId) {
 
-        SessionProposal proposal =
-                getProposalForSpeaker(
-                        proposalId,
-                        speakerId);
+        SessionProposal proposal = getProposalForSpeaker(
+                proposalId,
+                speakerId);
 
-        if (proposal.getStatus()
-                == ProposalStatus.WITHDRAWN) {
+        if (proposal.getStatus() == ProposalStatus.WITHDRAWN) {
 
             throw new IllegalArgumentException(
                     "Proposal is already withdrawn");
@@ -233,21 +225,18 @@ public class SpeakerService {
                     "Session ID is required");
         }
 
-        boolean duplicate =
-                speakerApplicationRepository
-                        .findBySpeakerId(authenticatedUserId)
-                        .stream()
-                        .anyMatch(application ->
-                                sessionId.equals(
-                                        application.getSessionId()));
+        boolean duplicate = speakerApplicationRepository
+                .findBySpeakerId(authenticatedUserId)
+                .stream()
+                .anyMatch(application -> sessionId.equals(
+                        application.getSessionId()));
 
         if (duplicate) {
             throw new IllegalArgumentException(
                     "Speaker has already applied to this session");
         }
 
-        SpeakerApplication application =
-                new SpeakerApplication();
+        SpeakerApplication application = new SpeakerApplication();
 
         application.setSpeakerId(authenticatedUserId);
         application.setSessionId(sessionId);
@@ -265,18 +254,15 @@ public class SpeakerService {
                     "Application status is required");
         }
 
-        SpeakerApplication application =
-                speakerApplicationRepository
-                        .findById(applicationId)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Speaker application not found"));
+        SpeakerApplication application = speakerApplicationRepository
+                .findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Speaker application not found"));
 
         application.setStatus(status);
 
-        SpeakerApplication saved =
-                speakerApplicationRepository
-                        .save(application);
+        SpeakerApplication saved = speakerApplicationRepository
+                .save(application);
 
         if (application.getSpeakerId() != null) {
 
@@ -284,8 +270,7 @@ public class SpeakerService {
                     application.getSpeakerId(),
                     "Your speaker application status changed to "
                             + status + ".",
-                    NotificationType
-                            .SPEAKER_APPLICATION_UPDATED);
+                    NotificationType.SPEAKER_APPLICATION_UPDATED);
         }
 
         return saved;
@@ -311,11 +296,9 @@ public class SpeakerService {
                     "Decision is required");
         }
 
-        SessionProposal proposal =
-                getProposal(proposalId);
+        SessionProposal proposal = getProposal(proposalId);
 
-        if (proposal.getStatus()
-                == ProposalStatus.WITHDRAWN) {
+        if (proposal.getStatus() == ProposalStatus.WITHDRAWN) {
 
             throw new IllegalArgumentException(
                     "Withdrawn proposals cannot be reviewed");
@@ -324,41 +307,33 @@ public class SpeakerService {
         NotificationType notificationType;
         String notificationMessage;
 
-        if (decisionType
-                == ApprovalDecisionType.APPROVE) {
+        if (decisionType == ApprovalDecisionType.APPROVE) {
 
             proposal.setStatus(
                     ProposalStatus.APPROVED);
 
-            notificationType =
-                    NotificationType
-                            .PROPOSAL_APPROVED;
+            notificationType = NotificationType.PROPOSAL_APPROVED;
 
-            notificationMessage =
-                    "Your proposal \""
-                            + proposal.getTitle()
-                            + "\" was approved.";
+            notificationMessage = "Your proposal \""
+                    + proposal.getTitle()
+                    + "\" was approved.";
 
         } else {
 
             proposal.setStatus(
                     ProposalStatus.REJECTED);
 
-            notificationType =
-                    NotificationType
-                            .PROPOSAL_REJECTED;
+            notificationType = NotificationType.PROPOSAL_REJECTED;
 
-            notificationMessage =
-                    "Your proposal \""
-                            + proposal.getTitle()
-                            + "\" was rejected.";
+            notificationMessage = "Your proposal \""
+                    + proposal.getTitle()
+                    + "\" was rejected.";
         }
 
         sessionProposalRepository
                 .save(proposal);
 
-        ApprovalDecision approvalDecision =
-                new ApprovalDecision();
+        ApprovalDecision approvalDecision = new ApprovalDecision();
 
         // Existing entity currently calls this applicationId.
         // For proposal decisions we store proposalId here.
@@ -374,9 +349,8 @@ public class SpeakerService {
         approvalDecision.setComment(
                 comment);
 
-        ApprovalDecision savedDecision =
-                approvalDecisionRepository
-                        .save(approvalDecision);
+        ApprovalDecision savedDecision = approvalDecisionRepository
+                .save(approvalDecision);
 
         if (proposal.getSpeakerId() != null) {
 
@@ -397,20 +371,16 @@ public class SpeakerService {
     public SpeakerDashboardResponse getDashboard(
             UUID speakerId) {
 
-        List<SessionProposal> proposals =
-                getProposalsForSpeaker(
+        List<SessionProposal> proposals = getProposalsForSpeaker(
+                speakerId);
+
+        List<SpeakerApplication> applications = speakerApplicationRepository
+                .findBySpeakerId(
                         speakerId);
 
-        List<SpeakerApplication> applications =
-                speakerApplicationRepository
-                        .findBySpeakerId(
-                                speakerId);
+        Set<UUID> proposalIds = new LinkedHashSet<>();
 
-        Set<UUID> proposalIds =
-                new LinkedHashSet<>();
-
-        for (SessionProposal proposal
-                : proposals) {
+        for (SessionProposal proposal : proposals) {
 
             if (proposal.getId() != null) {
                 proposalIds.add(
@@ -418,15 +388,13 @@ public class SpeakerService {
             }
         }
 
-        List<ApprovalDecision> feedback =
-                approvalDecisionRepository
-                        .findAll()
-                        .stream()
-                        .filter(decision ->
-                                proposalIds.contains(
-                                        decision
-                                                .getApplicationId()))
-                        .toList();
+        List<ApprovalDecision> feedback = approvalDecisionRepository
+                .findAll()
+                .stream()
+                .filter(decision -> proposalIds.contains(
+                        decision
+                                .getApplicationId()))
+                .toList();
 
         return new SpeakerDashboardResponse(
                 speakerId,
@@ -439,50 +407,65 @@ public class SpeakerService {
     // PUBLIC SPEAKER DIRECTORY
     // ---------------------------------------------------------
 
-    public List<SpeakerDirectoryEntry>
-            getPublicSpeakerDirectory() {
+    public List<SpeakerDirectoryEntry> getPublicSpeakerDirectory() {
 
-        List<SessionProposal> approved =
-                sessionProposalRepository
-                        .findByStatus(
-                                ProposalStatus.APPROVED);
+        List<SessionProposal> approved = sessionProposalRepository
+                .findByStatus(
+                        ProposalStatus.APPROVED);
 
-        Set<UUID> speakerIds =
-                new LinkedHashSet<>();
+        Set<UUID> speakerIds = new LinkedHashSet<>();
 
-        for (SessionProposal proposal
-                : approved) {
+        for (SessionProposal proposal : approved) {
 
-            if (proposal.getSpeakerId()
-                    != null) {
+            if (proposal.getSpeakerId() != null) {
 
                 speakerIds.add(
                         proposal.getSpeakerId());
             }
         }
 
-        List<SpeakerDirectoryEntry> result =
-                new ArrayList<>();
+        List<SpeakerDirectoryEntry> result = new ArrayList<>();
 
-        for (UUID speakerId
-                : speakerIds) {
+        for (UUID speakerId : speakerIds) {
 
-            List<SessionProposal>
-                    speakerProposals =
-                    approved.stream()
-                            .filter(proposal ->
-                                    speakerId.equals(
-                                            proposal
-                                                    .getSpeakerId()))
-                            .toList();
+            List<SessionProposal> speakerProposals = approved.stream()
+                    .filter(proposal -> speakerId.equals(
+                            proposal
+                                    .getSpeakerId()))
+                    .toList();
 
-            SpeakerFlair flair =
-                    getSpeakerFlair(
-                            speakerId);
+            SpeakerFlair flair = getSpeakerFlair(
+                    speakerId);
+
+            SpeakerProfile profile = speakerProfileRepository
+                    .findBySpeakerId(
+                            speakerId)
+                    .orElse(null);
+
+            List<UUID> trackIds = speakerProposals
+                    .stream()
+                    .map(
+                            SessionProposal::getTrackId)
+                    .filter(id -> id != null)
+                    .distinct()
+                    .toList();
 
             result.add(
                     new SpeakerDirectoryEntry(
                             speakerId,
+                            profile == null
+                                    ? null
+                                    : profile.getDisplayName(),
+                            profile == null
+                                    ? null
+                                    : profile.getBiography(),
+                            profile == null
+                                    ? null
+                                    : profile.getTitle(),
+                            profile == null
+                                    ? null
+                                    : profile.getOrganization(),
+                            trackIds,
                             flair == null
                                     ? null
                                     : flair.getLabel(),
@@ -493,36 +476,30 @@ public class SpeakerService {
                             speakerProposals
                                     .stream()
                                     .map(
-                                            SessionProposal
-                                                    ::getTitle)
+                                            SessionProposal::getTitle)
                                     .toList()));
         }
 
         return result;
     }
 
-    public SpeakerPublicProfileResponse
-            getPublicSpeakerProfile(
-                    UUID speakerId) {
+    public SpeakerPublicProfileResponse getPublicSpeakerProfile(
+            UUID speakerId) {
 
-        List<SessionProposal> approved =
-                sessionProposalRepository
-                        .findBySpeakerId(
-                                speakerId)
-                        .stream()
-                        .filter(proposal ->
-                                proposal.getStatus()
-                                        == ProposalStatus.APPROVED)
-                        .toList();
+        List<SessionProposal> approved = sessionProposalRepository
+                .findBySpeakerId(
+                        speakerId)
+                .stream()
+                .filter(proposal -> proposal.getStatus() == ProposalStatus.APPROVED)
+                .toList();
 
         if (approved.isEmpty()) {
             throw new IllegalArgumentException(
                     "Public speaker profile not found");
         }
 
-        SpeakerFlair flair =
-                getSpeakerFlair(
-                        speakerId);
+        SpeakerFlair flair = getSpeakerFlair(
+                speakerId);
 
         return new SpeakerPublicProfileResponse(
                 speakerId,
@@ -593,9 +570,8 @@ public class SpeakerService {
         return speakerFlairRepository
                 .findAll()
                 .stream()
-                .filter(flair ->
-                        speakerId.equals(
-                                flair.getUserId()))
+                .filter(flair -> speakerId.equals(
+                        flair.getUserId()))
                 .findFirst()
                 .orElse(null);
     }

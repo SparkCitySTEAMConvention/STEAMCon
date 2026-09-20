@@ -22,6 +22,7 @@ export default function SpeakerForums({ repository = forumRepository }) {
       if (!current) return
       if (!Array.isArray(data)) throw new Error('Invalid forum response.')
       setForums(data)
+      setSelectedId(previous => data.some(forum => forum.id === previous) ? previous : data[0]?.id ?? null)
       setStatus('ready')
     }).catch(() => { if (current) setStatus('error') })
     return () => { current = false }
@@ -39,8 +40,7 @@ export default function SpeakerForums({ repository = forumRepository }) {
     <div id="forums-main" className="container portal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to speaker dashboard</Link>
       <div className="portal-welcome"><p className="eyebrow">Keep the conversation going</p><h1>Speaker Forum &amp; Messaging</h1><p>Exchange ideas in track forums, connect with organizers, or ask the concierge for help.</p></div>
-      {source.demo && <p className="portal-demo">Demo forum examples. Messages stay in memory until you leave this page. No forum requests are sent to the backend.</p>}
-      {!source.available && <p role="alert">Forum access requires a backend-authenticated speaker with a valid user ID. The current backend login does not supply speaker roles.</p>}
+      {!source.available && <p role="alert">Forum access requires a backend-authenticated account with the SPEAKER role.</p>}
       <fieldset className="portal-filters forum-scopes"><legend>Forum scope</legend>
         {[['', 'All forums'], ...Object.entries(scopes)].map(([value, label]) => <button key={value} type="button" aria-pressed={scope === value} onClick={() => reload(value)}>{label}</button>)}
       </fieldset>
@@ -88,7 +88,7 @@ function ForumConversation({ forum, user, repository }) {
       if (!message?.id || message.forumId !== forum.id || typeof message.body !== 'string') throw new Error('Invalid message response.')
       setMessages(previous => [...previous.filter(item => item.id !== message.id), message])
       setBody('')
-      setNotice(repository.demo ? 'Demo message posted locally.' : 'Message posted.')
+      setNotice('Message posted.')
     } catch { setError('Your message was not posted. Check your forum access or try again. Your draft has been kept.') }
     finally { pending.current = false; setSending(false) }
   }
@@ -103,7 +103,7 @@ function ForumConversation({ forum, user, repository }) {
       })}</ol> : <div className="portal-empty"><h3>Start the conversation.</h3><p>There are no active messages in this forum yet.</p></div>}
       <form className="portal-editor" onSubmit={post} aria-busy={sending}>
         <label htmlFor="forum-message">Your message<textarea id="forum-message" rows={5} value={body} onChange={event => { setBody(event.target.value); setNotice('') }} required disabled={sending || !canPost} aria-describedby="forum-post-help" /></label>
-        <p id="forum-post-help" className="portal-muted">{repository.demo ? 'This message will be added to the local demo conversation.' : canPost ? 'Posting requires POST permission for this forum.' : 'Posting requires a verified backend speaker account with a valid author ID.'}</p>
+        <p id="forum-post-help" className="portal-muted">{canPost ? 'Messages are saved to the STEAM Con forum and require POST permission for this forum.' : 'Posting requires a verified backend speaker account.'}</p>
         <div><button className="button button-dark" type="submit" disabled={sending || !canPost || !body.trim()}>{sending ? 'Posting…' : 'Post message'}</button></div>
         <p role="status">{notice}</p>{error && <p role="alert">{error}</p>}
       </form>

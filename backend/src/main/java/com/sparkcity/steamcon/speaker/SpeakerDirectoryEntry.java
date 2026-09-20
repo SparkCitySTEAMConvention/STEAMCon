@@ -5,6 +5,11 @@ import java.util.UUID;
 
 public record SpeakerDirectoryEntry(
         UUID speakerId,
+        String name,
+        String bio,
+        String role,
+        String organization,
+        List<UUID> trackIds,
         String flairLabel,
         String displayStyle,
         int approvedProposalCount,

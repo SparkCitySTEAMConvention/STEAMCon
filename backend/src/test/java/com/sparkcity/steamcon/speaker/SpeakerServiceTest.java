@@ -38,6 +38,9 @@ class SpeakerServiceTest {
 
         private SpeakerService speakerService;
 
+        @Mock
+        private SpeakerProfileRepository speakerProfileRepository;
+
         @BeforeEach
         void setUp() {
 
@@ -48,7 +51,8 @@ class SpeakerServiceTest {
                                 speakerApplicationRepository,
                                 approvalDecisionRepository,
                                 notificationService,
-                                speakerFlairRepository);
+                                speakerFlairRepository,
+                                speakerProfileRepository);
         }
 
         @Test

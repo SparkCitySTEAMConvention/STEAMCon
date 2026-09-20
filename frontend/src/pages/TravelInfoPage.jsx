@@ -1,9 +1,8 @@
-import { conventionConfig } from '../mocks/conventionConfig.js'
-import { conventionDateRange } from '../utils/conventionCalendar.js'
-import { locationLabel } from '../utils/proposalPresentation.js'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Footer from '../components/Footer.jsx'
-import Header from '../components/layout/PublicPageHeader.jsx'
+import Header from '../components/Header.jsx'
+import { bookingRepository } from '../services/bookingRepository.js'
 import './TravelInfoPage.css'
 
 const airports = [
@@ -12,23 +11,20 @@ const airports = [
   { code: 'EWR', name: 'Newark Liberty International', note: 'Serves the region from New Jersey with rail connections toward Manhattan.' },
 ]
 
-const sampleDepartures = [
-  { time: '8:05 AM', service: 'NJ Transit Bus 126', destination: 'Hoboken', terminal: 'Port Authority', status: 'On time' },
-  { time: '8:20 AM', service: 'Coach USA', destination: 'Newark Airport', terminal: 'Port Authority', status: 'Boarding' },
-  { time: '8:35 AM', service: 'NJ Transit Rail', destination: 'Secaucus Junction', terminal: 'Penn Station', status: 'On time' },
-  { time: '8:48 AM', service: 'LIRR', destination: 'Jamaica / JFK connection', terminal: 'Penn Station', status: 'On time' },
-  { time: '9:00 AM', service: 'Metro-North', destination: 'Harlem–125th Street', terminal: 'Grand Central', status: 'On time' },
-  { time: '9:12 AM', service: 'Metro-North', destination: 'Yankee Stadium', terminal: 'Grand Central', status: 'Sample trip' },
-]
 
-const mapLocations = [
-  { id: 'venue', marker: 'C', name: conventionConfig.venueName, distance: 'Event venue', note: 'Street address to be announced.' },
-  { id: 'hotel-one', marker: '1', name: 'Hotel One', distance: 'About a 4-minute walk', note: 'Closest example hotel.' },
-  { id: 'hotel-two', marker: '2', name: 'Hotel Two', distance: 'About a 9-minute walk', note: 'Near subway connections.' },
-  { id: 'hotel-three', marker: '3', name: 'Hotel Three', distance: 'About a 14-minute walk', note: 'Example lower-cost option.' },
-]
 
 export default function TravelInfoPage() {
+  const [hotels, setHotels] = useState([])
+  useEffect(() => {
+    let active = true
+    bookingRepository.getHotels().then(data => { if (active) setHotels(data) }).catch(() => {})
+    return () => { active = false }
+  }, [])
+  const mapLocations = useMemo(() => [
+    { id: 'venue', marker: 'C', name: 'Jacob K. Javits Convention Center', distance: 'Event venue', note: '429 11th Ave, New York, NY 10001' },
+    ...hotels.slice(0, 3).map((hotel, index) => ({ id: `hotel-${index + 1}`, marker: String(index + 1), name: hotel.name, distance: 'New York City hotel', note: hotel.address })),
+  ], [hotels])
+
   return (
     <div className="travel-guide-page">
       <a className="skip-link" href="#travel-guide-main">Skip to travel information</a>
@@ -39,7 +35,7 @@ export default function TravelInfoPage() {
             <div>
               <p className="eyebrow">Plan your New York visit</p>
               <h1>Come curious.<br />Arrive prepared.</h1>
-              <p className="travel-guide-lede">STEAM Con takes place at {locationLabel()} on {conventionDateRange()}. Use this preview guide to compare arrival options. Street address, rooms, and exact opening times remain to be announced.</p>
+              <p className="travel-guide-lede">STEAM Con is at the Jacob K. Javits Convention Center in New York City. Compare arrival options and nearby hotels as you plan your visit.</p>
               <div className="button-group">
                 <Link className="button button-dark" to="/register?role=attendee">Register for STEAM Con <span aria-hidden="true">→</span></Link>
                 <a className="button button-paper" href="#stay-nearby">View venue map</a>
@@ -59,7 +55,7 @@ export default function TravelInfoPage() {
         <section className="container travel-guide-section travel-map-section" id="stay-nearby" aria-labelledby="stay-nearby-heading">
           <div className="travel-guide-heading">
             <div><p className="eyebrow">01 / Stay nearby</p><h2 id="stay-nearby-heading">See what is within walking distance.</h2></div>
-            <p>This illustrative planning map uses placeholder hotel locations and estimated walking times. Hotel names, street addresses, and distances remain unconfirmed.</p>
+            <p>Hotel names and addresses below are loaded from the STEAM Con database alongside the confirmed Javits Center venue.</p>
           </div>
           <div className="travel-map-layout">
             <div className="travel-map" role="img" tabIndex={0} aria-label={`Illustrative planning map for ${conventionConfig.venueName} and three example hotels; locations and walking times are placeholders. Hover over or focus the map to watch a person walk the route.`}>
@@ -87,7 +83,7 @@ export default function TravelInfoPage() {
               ))}
             </ol>
           </div>
-          <p className="map-disclaimer"><strong>Planning preview:</strong> These are demonstration locations—not bookable hotels or confirmed distances.</p>
+          <p className="map-disclaimer"><strong>Planning note:</strong> Hotel records come from the STEAM Con database; exact walking times are not calculated by the application.</p>
         </section>
 
         <section className="container travel-guide-section" id="getting-here" aria-labelledby="getting-here-heading">
@@ -161,7 +157,7 @@ export default function TravelInfoPage() {
             <p>Register first. Your attendee portal keeps travel, hotel, car-rental, sessions, and the combined itinerary in one place.</p>
           </div>
           <div className="travel-guide-callout">
-            <div><strong>Venue update</strong><span>{locationLabel()} · {conventionDateRange()}. Street address and recommended hotels remain to be announced.</span></div>
+            <div><strong>Venue update</strong><span>STEAM Con is planned for the Jacob K. Javits Convention Center, 429 11th Ave, New York, NY 10001.</span></div>
             <Link className="button button-dark" to="/register?role=attendee">Choose a pass <span aria-hidden="true">→</span></Link>
           </div>
         </section>
