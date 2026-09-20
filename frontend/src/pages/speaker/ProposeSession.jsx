@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
-import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import { eventRepository } from '../../services/eventRepository.js'
 import { getSpeakerProposalSource, validateProposal, proposalTextLimit, proposalTitleLimit } from '../../services/speakerProposalSource.js'
@@ -43,8 +42,7 @@ function ProposalForm({ source }) {
   }
   function change(event) { setValues(previous => ({ ...previous, [event.target.name]: event.target.value })) }
   return <div className="speaker-portal">
-    <header className="container portal-header"><Link className="portal-home" to="/speaker">Speaker Portal</Link><AccountNavigation /></header>
-    <main className="container portal-main portal-proposal-main" tabIndex={-1}>
+    <div className="container portal-main portal-proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <h1>Propose a Session</h1>
       {source.demo && <p className="portal-demo">Speaker preview. Submissions are saved locally for this application session and never sent to the backend. Bill Nye is a proposed participant example, not a confirmed participant.</p>}
@@ -65,6 +63,6 @@ function ProposalForm({ source }) {
           <div className="portal-actions"><button type="submit" className="button button-dark" disabled={sending || resource.status !== 'ready' || !resource.data?.length}>{sending ? 'Submitting…' : 'Submit proposal'}</button><Link className="button button-paper" to="/speaker">Cancel</Link></div>
         </form>}
       </>}
-    </main>
+    </div>
   </div>
 }

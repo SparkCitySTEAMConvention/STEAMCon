@@ -33,6 +33,7 @@ export default function Header() {
         <Link className="wordmark" to="/" aria-label="STEAM Con home">STEAM <span>Con</span><span className="brand-dot" aria-hidden="true" /></Link>
         <nav aria-label="Main navigation">
           <Link to="/events">Events</Link>
+          <Link to="/calendar">Calendar</Link>
           <Link to="/tracks">Tracks</Link>
           <Link to="/speakers">Speakers</Link>
           <Link to="/travel">Travel</Link>

@@ -1,4 +1,7 @@
 :root {
+  --space-section: clamp(1.5rem, 3vw, 2.75rem);
+  --space-card: clamp(1rem, 2vw, 1.5rem);
+  --space-gap: 1rem;
   --color-ink: #0f1418;
   --color-paper: #fffaf0;
   --color-white: #ffffff;

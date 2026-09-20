@@ -9,7 +9,7 @@ export const conventionConfig = {
   startsAt: null,
   endsAt: null,
   timezone: 'America/New_York',
-  venueName: null,
-  city: null,
-  state: null,
+  venueName: 'Jacob K. Javits Convention Center',
+  city: 'New York',
+  state: 'NY',
 }

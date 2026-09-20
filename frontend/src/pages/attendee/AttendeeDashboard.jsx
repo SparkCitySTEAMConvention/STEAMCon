@@ -63,7 +63,6 @@ export default function AttendeeDashboard() {
   return (
     <div className="attendee-portal">
       <a className="skip-link" href="#attendee-main">Skip to content</a>
-      <AttendeeHeader attendee={data.attendee} admission={data.admission} />
 
       <main className="container attendee-main" id="attendee-main" tabIndex={-1}>
         {status === 'loading' && <p role="status">Loading your attendee workspace…</p>}
@@ -71,7 +70,7 @@ export default function AttendeeDashboard() {
         <section className="attendee-welcome" aria-labelledby="attendee-welcome-heading">
           <div>
             <p className="eyebrow">Your curiosity has a schedule</p>
-            <h1 id="attendee-welcome-heading">Welcome back, {data.attendee.firstName}.</h1>
+            <h1 id="attendee-welcome-heading">Attendee dashboard</h1>
             <p>Build your STEAM Con experience, handle the trip, and see every plan in one place.</p>
           </div>
           <a className="button button-dark" href="#discover">Find a session <span aria-hidden="true">↓</span></a>
@@ -96,18 +95,20 @@ export default function AttendeeDashboard() {
           </ul>
         </section>
 
-        <section className="attendee-section attendee-itinerary" id="itinerary" aria-labelledby="itinerary-heading">
+        <section className="attendee-section attendee-itinerary" id="itinerary" tabIndex={-1} aria-labelledby="itinerary-heading">
           <div className="attendee-section-heading">
             <div><p className="eyebrow">02 / One clear plan</p><h2 id="itinerary-heading">Your itinerary.</h2></div>
             <p>Sessions and confirmed bookings appear together in chronological order.</p>
           </div>
+          <details><summary>View itinerary · {itinerary.length} entries</summary>
           <ol className="attendee-itinerary-list">
             {itinerary.map((item, index) => <ItineraryItem key={item.id} item={item} index={index} />)}
           </ol>
+          </details>
         </section>
 
         <div className="attendee-primary-grid">
-          <section id="schedule" aria-labelledby="schedule-heading">
+          <section id="schedule" tabIndex={-1} aria-labelledby="schedule-heading">
             <div className="attendee-section-heading">
               <div><p className="eyebrow">03 / My schedule</p><h2 id="schedule-heading">What you’re showing up for.</h2></div>
               <span>{selectedSessions.length} sessions</span>
@@ -124,7 +125,7 @@ export default function AttendeeDashboard() {
             <h2 id="admission-heading">{data.admission.type}</h2>
             <p className="attendee-admission-status"><span aria-hidden="true">✓</span> {data.admission.status}</p>
             <dl>
-              <div><dt>Pass holder</dt><dd>{data.attendee.name}</dd></div>
+              <div><dt>Pass holder</dt><dd>{passHolder}</dd></div>
               <div><dt>Confirmation</dt><dd>{data.admission.confirmationCode}</dd></div>
               <div><dt>Access</dt><dd>All five STEAM tracks</dd></div>
             </dl>
@@ -162,7 +163,7 @@ export default function AttendeeDashboard() {
           </ul>
         </section>
 
-      </main>
+      </div>
 
       <footer className="container attendee-footer">
         <p>STEAM Con · A place for curious minds.</p>

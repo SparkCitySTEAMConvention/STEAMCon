@@ -31,7 +31,7 @@ export default function ProposalDetails({ repository = speakerRepository }) {
       {resource.status === 'loading' && <><h1>Proposal details</h1><p role="status">Loading proposal…</p></>}
       {resource.status === 'error' && <><h1>Proposal unavailable</h1><p role="alert">Unable to load this proposal. Please try again.</p><button type="button" className="button button-paper" onClick={resource.retry}>Try again</button></>}
       {resource.status === 'ready' && (resource.data ? <ProposalContent key={`${proposalId}:${scenario}`} initialProposal={resource.data} repository={proposalSource} /> : <><h1>Proposal not found</h1><p>This proposal may no longer be available. Return to your dashboard to select another.</p></>)}
-    </main>
+    </div>
     <footer className="container portal-footer"><p>STEAM Con · Speaker Portal{proposalSource.demo ? ' / Preview' : ''}</p></footer>
   </div>
 }
@@ -73,7 +73,7 @@ function ProposalContent({ initialProposal, repository }) {
         <div><dt>Duration</dt><dd>{proposal.durationMinutes ? `${proposal.durationMinutes} minutes` : 'Duration to be announced'}</dd></div>
         <div><dt>Schedule</dt><dd>{scheduleLabel(proposal)}</dd></div>
         <div><dt>Room</dt><dd>{roomLabel(proposal)}</dd></div>
-        <div><dt>Convention location</dt><dd>{repository.demo ? locationLabel() : 'Location to be announced'}</dd></div>
+        <div><dt>Convention location</dt><dd>{locationLabel()}</dd></div>
       </dl>
       <section className="portal-detail-section" aria-labelledby="primary-heading"><h2 id="primary-heading">Primary speaker</h2><h3>{primary?.name || 'Speaker to be announced'}</h3><p>{primary?.bio}</p></section>
       <section className="portal-detail-section" aria-labelledby="others-heading"><h2 id="others-heading">{proposal.format === 'Panel' ? 'Co-panelists' : 'Co-speakers'}</h2>{others.length ? <ul className="portal-list" aria-label="Co-speakers" role="list">{others.map(person => <li key={person.id}><h3>{person.name}</h3><p>{person.bio}</p></li>)}</ul> : <p>{repository.demo ? 'No co-speakers listed.' : 'Speaker relationships unavailable.'}</p>}</section>

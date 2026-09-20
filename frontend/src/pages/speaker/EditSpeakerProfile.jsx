@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
-import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
 import { getSpeakerProfileSource, profileFields, profileLimits, profileUnavailable, validateProfile } from '../../services/speakerProfileSource.js'
 import './SpeakerDashboard.css'
@@ -15,12 +14,11 @@ function ProfilePage({ source }) {
   const loader = useCallback(async () => {
     if (!source.available) return null
     const [profile, tracks] = await Promise.all([source.getProfile(), source.getTracks()])
-    return { profile, tracks }
+    return profile ? { profile: profileFormValues(profile, source.demo), tracks } : null
   }, [source])
   const resource = useSpeakerResource(loader, source)
   return <div className="speaker-portal">
-    <header className="container portal-header"><Link className="portal-home" to="/speaker">Speaker Portal</Link><AccountNavigation /></header>
-    <main className="container portal-main portal-proposal-main" tabIndex={-1}>
+    <div className="container portal-main portal-proposal-main" tabIndex={-1}>
       <Link className="portal-home" to="/speaker">← Back to Speaker Portal</Link>
       <h1>Edit Profile</h1>
       <p className="portal-demo">Live profile · Changes are saved to the STEAM Con backend.</p>
@@ -29,9 +27,10 @@ function ProfilePage({ source }) {
         : <>
           {resource.status === 'loading' && <p role="status">Loading profile…</p>}
           {resource.status === 'error' && <div role="alert"><p>Unable to load your profile.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
+          {resource.status === 'ready' && !resource.data && <div role="status"><p>No speaker profile is available.</p><button type="button" onClick={resource.retry}>Retry profile</button></div>}
           {resource.status === 'ready' && resource.data && <ProfileForm source={source} {...resource.data} />}
         </>}
-    </main>
+    </div>
   </div>
 }
 function ProfileForm({ source, profile, tracks }) {
@@ -49,7 +48,7 @@ function ProfileForm({ source, profile, tracks }) {
   async function submit(event) {
     event.preventDefault()
     if (pending.current || saved) return
-    const invalid = validateProfile(values)
+    const invalid = validateProfile(values, source.demo)
     setErrors(invalid)
     setFailure('')
     if (Object.keys(invalid).length) {
@@ -59,8 +58,8 @@ function ProfileForm({ source, profile, tracks }) {
     pending.current = true
     setSaving(true)
     try {
-      const updated = await source.updateProfile(values)
-      setValues({ ...Object.fromEntries(profileFields.map(([field]) => [field, updated[field]])), trackId: updated.trackIds[0] })
+      const updated = profileFormValues(await source.updateProfile(values), source.demo)
+      setValues({ ...Object.fromEntries(profileFields.map(([field]) => [field, updated[field] || ''])), trackId: updated.trackIds?.[0] || '' })
       setSaved(true)
     } catch (error) { setFailure(`${error.message || 'Unable to save profile.'} Your entries are still here; please try again.`) }
     finally { pending.current = false; setSaving(false) }
@@ -75,12 +74,12 @@ function ProfileForm({ source, profile, tracks }) {
         {errors[field] && <p id={`profile-${field}-error`}>{errors[field]}</p>}
       </div>
     })}
-    <div><label htmlFor="profile-trackId">Primary track (required)</label>
+    {source.demo && <div><label htmlFor="profile-trackId">Primary track (required)</label>
       <select id="profile-trackId" name="trackId" value={values.trackId} onChange={change} disabled={saving} required aria-invalid={!!errors.trackId} aria-describedby={errors.trackId ? 'profile-trackId-error' : undefined}>
         <option value="">Choose a track</option>{tracks.map(track => <option key={track.id} value={track.id}>{track.name}</option>)}
       </select>
       {errors.trackId && <p id="profile-trackId-error">{errors.trackId}</p>}
-    </div>
+    </div>}
     {failure && <p role="alert">{failure}</p>}
     <p aria-live="polite">{saving ? 'Saving profile…' : saved ? 'Profile saved.' : ''}</p>
     <div className="button-group"><button className="button button-dark" type="submit" disabled={saving || saved}>Save Profile</button>

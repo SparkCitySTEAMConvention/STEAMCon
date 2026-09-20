@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import BookingPageHeader from '../../components/attendee/BookingPageHeader.jsx'
 import TravelBookingNav from '../../components/attendee/TravelBookingNav.jsx'
 import { formatBookingDate } from '../../utils/travelBookings.js'
 import { bookingRepository } from '../../services/bookingRepository.js'
@@ -83,9 +82,8 @@ export default function HotelBookingPage() {
   return (
     <div className="travel-booking-page hotel-booking-page">
       <a className="skip-link" href="#hotel-booking-main">Skip to hotels</a>
-      <BookingPageHeader label="Hotel Booking" />
 
-      <main className="container travel-booking-main" id="hotel-booking-main" tabIndex={-1}>
+      <div className="container travel-booking-main" id="hotel-booking-main" tabIndex={-1}>
         <TravelBookingNav active="hotel" />
         {loading && <p role="status">Loading hotels…</p>}
 
@@ -172,7 +170,7 @@ export default function HotelBookingPage() {
             </section>
           </form>
         )}
-      </main>
+      </div>
     </div>
   )
 }

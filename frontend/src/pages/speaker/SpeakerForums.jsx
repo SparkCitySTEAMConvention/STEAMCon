@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth.js'
-import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { forumRepository } from '../../services/forumRepository.js'
 import { createSpeakerForumSource } from '../../services/speakerForumSource.js'
-import logo from '../../assets/steamcon-logo.png'
 import './SpeakerDashboard.css'
 import './SpeakerForums.css'
 
@@ -39,14 +37,8 @@ export default function SpeakerForums({ repository = forumRepository }) {
   }
   return <div className="speaker-portal speaker-forums">
     <a className="skip-link" href="#forums-main">Skip to content</a>
-    <header className="portal-header">
-      <div className="container portal-header-inner">
-        <div className="portal-brand"><Link to="/" aria-label="STEAM Con home"><img src={logo} width="1828" height="860" alt="STEAM Con" /></Link><span>Speaker Portal</span></div>
-        <Link className="portal-home" to="/speaker">Back to speaker dashboard</Link>
-      </div>
-      <div className="container"><AccountNavigation /></div>
-    </header>
-    <main id="forums-main" className="container portal-main" tabIndex={-1}>
+    <div id="forums-main" className="container portal-main" tabIndex={-1}>
+      <Link className="portal-home" to="/speaker">← Back to speaker dashboard</Link>
       <div className="portal-welcome"><p className="eyebrow">Keep the conversation going</p><h1>Speaker Forum &amp; Messaging</h1><p>Exchange ideas in track forums, connect with organizers, or ask the concierge for help.</p></div>
       {!source.available && <p role="alert">Forum access requires a backend-authenticated account with the SPEAKER role.</p>}
       <fieldset className="portal-filters forum-scopes"><legend>Forum scope</legend>
@@ -60,7 +52,7 @@ export default function SpeakerForums({ repository = forumRepository }) {
         </nav>
         {selected ? <ForumConversation key={`${selected.id}-${authSource}-${user?.id}`} forum={selected} user={user} repository={source} /> : <section className="portal-empty"><h2>Your next conversation starts here.</h2><p>Select a forum to read and post messages. Access depends on the forum’s permissions.</p></section>}
       </div>}
-    </main>
+    </div>
     <footer className="container portal-footer"><p>STEAM Con · A place for curious minds.</p><p>Speaker Forum &amp; Messaging</p></footer>
   </div>
 }

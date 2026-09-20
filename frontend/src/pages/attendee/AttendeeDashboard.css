@@ -26,7 +26,7 @@
 .attendee-pass { justify-content: space-between; width: min(100%, 280px); gap: 1rem; padding: 0.75rem 1rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); background: var(--color-surface); box-shadow: var(--shadow-small); text-decoration: none; }
 .attendee-pass span:first-child { display: grid; }
 .attendee-pass small { color: var(--color-success); font-weight: 700; }
-.attendee-main { padding-block: clamp(2rem, 5vw, 4.5rem); }
+.attendee-main { padding-block: var(--space-section); }
 .attendee-welcome { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
 .attendee-welcome > div { max-width: 800px; }
 .attendee-welcome h1 { margin-block: 0.75rem 1rem; font-size: clamp(2.5rem, 5vw, 4.75rem); }
@@ -35,7 +35,7 @@
 .attendee-demo-note { margin-block: 2rem 0.5rem; padding: 0.8rem 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-small); background: var(--color-surface); font-size: 0.8rem; }
 .attendee-live-notice { min-height: 1.7rem; margin-block: 0.35rem 1.25rem; color: var(--color-success); font-size: 0.85rem; font-weight: 700; }
 .attendee-small-heading { margin-bottom: 1rem; font-size: 1rem; letter-spacing: 0; }
-.attendee-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 0 0 4rem; }
+.attendee-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 0 0 var(--space-gap); }
 .attendee-summary-card { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 1rem; padding: 1.25rem 1.5rem; border: 2px solid var(--color-ink); border-radius: var(--radius-medium); box-shadow: var(--shadow-small); }
 .attendee-summary-card dt { align-self: end; font-weight: 700; }
 .attendee-summary-card > dd:not(.attendee-summary-detail) { grid-row: span 2; align-self: center; margin: 0; font-size: clamp(1.8rem, 3vw, 2.65rem); line-height: 1; font-weight: 900; }
@@ -44,7 +44,7 @@
 .attendee-summary-technology { background: color-mix(in srgb, var(--color-technology) 55%, white); }
 .attendee-summary-mathematics { background: color-mix(in srgb, var(--color-mathematics) 45%, white); }
 .attendee-primary-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.7fr); gap: 2rem; align-items: start; }
-.attendee-section { padding-top: clamp(4rem, 8vw, 7rem); }
+.attendee-section { padding-top: var(--space-section); }
 .attendee-section-priority { padding-top: 0; }
 .attendee-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem 3rem; margin-bottom: 1.5rem; }
 .attendee-section-heading h2 { margin-top: 0.7rem; font-size: clamp(2rem, 3.8vw, 3.5rem); }
@@ -102,8 +102,8 @@
 .attendee-booking-card article > p:not(.eyebrow) { flex-grow: 1; margin-block: 0.75rem 1.5rem; color: var(--color-text-muted); font-size: 0.85rem; }
 .attendee-text-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; min-height: 44px; padding: 0; border: 0; border-top: 1px solid var(--color-border); background: transparent; color: var(--color-ink); font-size: 0.82rem; font-weight: 800; text-align: left; text-decoration: none; cursor: pointer; }
 .attendee-text-action:hover { color: var(--color-art); }
-.attendee-itinerary { margin-top: clamp(4rem, 8vw, 7rem); padding: clamp(2rem, 5vw, 4rem); border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ice); box-shadow: var(--shadow-large); }
-.attendee-itinerary + .attendee-primary-grid { margin-top: clamp(4rem, 8vw, 7rem); }
+.attendee-itinerary { margin-top: var(--space-section); padding: var(--space-section); border: 2px solid var(--color-ink); border-radius: var(--radius-large); background: var(--color-ice); box-shadow: var(--shadow-large); }
+.attendee-itinerary + .attendee-primary-grid { margin-top: var(--space-section); }
 .attendee-itinerary-list { border-top: 2px solid var(--color-ink); }
 .attendee-itinerary-item { display: grid; grid-template-columns: 3rem minmax(0, 1fr) minmax(150px, 0.4fr); align-items: center; gap: 1rem; padding-block: 1.25rem; border-bottom: 1px solid var(--color-ink); }
 .attendee-itinerary-number { font: 700 0.75rem/1.5 'Courier New', monospace; }
@@ -124,7 +124,7 @@
   .attendee-header-top, .attendee-profile, .attendee-welcome, .attendee-section-heading { align-items: flex-start; flex-direction: column; }
   .attendee-nav { justify-content: flex-start; }
   .attendee-summary, .attendee-booking-grid { grid-template-columns: 1fr; }
-  .attendee-summary { margin-bottom: 3rem; }
+  .attendee-summary { margin-bottom: var(--space-gap); }
   .attendee-session.is-compact article { grid-template-columns: 1fr; }
   .attendee-session.is-compact .attendee-session-action { grid-column: 1; grid-row: auto; width: 100%; margin-top: 1rem; }
   .attendee-itinerary { margin-inline: -0.5rem; padding: 1.5rem; }
@@ -144,4 +144,32 @@
 
 @media (prefers-reduced-motion: reduce) {
   .attendee-portal .button:hover { transform: none; }
+}
+
+.attendee-itinerary summary { min-height: 44px; padding-block: 0.65rem; cursor: pointer; font-weight: 700; }
+.attendee-profile { padding-block: 0.75rem; }
+.attendee-booking-card h3 { margin-top: 0.75rem; }
+
+/* Preserve the attendee layout at the width left available by the portal shell. */
+.steam-portal-shell .attendee-portal { min-height: 0; container: attendee-page / inline-size; }
+.steam-portal-shell .attendee-portal .container { width: 100%; max-width: none; }
+.steam-portal-shell .attendee-main { padding-top: 0; }
+.steam-portal-shell .attendee-portal [tabindex='-1']:focus { outline: none; box-shadow: none; }
+@container attendee-page (max-width: 1000px) {
+  .attendee-discover-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .attendee-primary-grid { grid-template-columns: 1fr; }
+  .attendee-admission { position: static; }
+}
+@container attendee-page (max-width: 760px) {
+  .attendee-welcome, .attendee-section-heading { align-items: flex-start; flex-direction: column; }
+  .attendee-summary, .attendee-booking-grid { grid-template-columns: 1fr; }
+  .attendee-session.is-compact article { grid-template-columns: 1fr; }
+  .attendee-session.is-compact .attendee-session-action { grid-column: 1; grid-row: auto; width: 100%; margin-top: 1rem; }
+  .attendee-itinerary { margin-inline: 0; padding: 1.5rem; }
+  .attendee-itinerary-item { grid-template-columns: 2rem minmax(0, 1fr); }
+  .attendee-itinerary-location { grid-column: 2; text-align: left; }
+}
+@container attendee-page (max-width: 560px) {
+  .attendee-discover-grid { grid-template-columns: 1fr; }
+  .attendee-welcome .button { width: 100%; }
 }

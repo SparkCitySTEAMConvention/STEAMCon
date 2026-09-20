@@ -1,28 +1,21 @@
-import AccountNavigation from '../../auth/AccountNavigation.jsx'
 import { Link } from 'react-router-dom'
 import TrackBadge from './TrackBadge.jsx'
-import logo from '../../assets/steamcon-logo.png'
 
-export default function SpeakerHeader({ speaker }) {
+// Compact page identity/actions. PortalShell owns navigation and logout.
+export default function SpeakerHeader({ speaker, live = false, editable = speaker.profileEditable !== false }) {
   return (
-    <header className="portal-header">
-      <div className="container portal-header-inner">
-        <div className="portal-brand">
-          <Link to="/" aria-label="STEAM Con home"><img src={logo} width="1828" height="860" alt="STEAM Con" /></Link>
-          <span>Speaker Portal</span>
-        </div>
-        <Link className="portal-home" to="/">Back to homepage <span aria-hidden="true">↗</span></Link>
+    <section className="container portal-profile" id="speaker-profile" tabIndex={-1} aria-label="Speaker profile and actions">
+      <div className="portal-person">
+        <p className="portal-profile-name">{live ? speaker.displayName : speaker.name}</p>
+        {(speaker.organization || (live ? speaker.title : speaker.role)) && <p className="portal-muted">{[speaker.organization, (live ? speaker.title : speaker.role)].filter(Boolean).join(' · ')}</p>}
+        {live && speaker.biography && <p>{speaker.biography}</p>}
+        {speaker.trackIds?.length > 0 && <div className="portal-profile-tracks">{speaker.trackIds.map(trackId => <TrackBadge key={trackId} trackId={trackId} />)}</div>}
+        {!editable && <p className="portal-muted">Profile editing is currently unavailable.</p>}
       </div>
-      <div className="container portal-profile">
-        <div><p className="eyebrow">Speaker workspace</p><p className="portal-profile-name">{speaker.name}</p><p className="portal-muted">{speaker.organization}{speaker.role && ` · ${speaker.role}`}</p><div className="portal-profile-tracks">{speaker.trackIds?.map(trackId => <TrackBadge key={trackId} trackId={trackId} />)}</div></div>
-        <div className="portal-propose">
-          <div className="portal-actions">
-          <Link className="button button-dark" to="/speaker/proposals/new">Propose a Session <span aria-hidden="true">＋</span></Link>
-          {speaker.profileEditable === false ? <p className="portal-muted">Profile editing is unavailable until a profile-update endpoint exists.</p> : <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>}
-          </div>
-        </div>
+      <div className="portal-header-actions">
+        {editable && <Link className="button button-paper" to="/speaker/profile/edit">Edit Profile</Link>}
+        <Link className="button button-dark" to="/speaker/proposals/new">Propose a Session <span aria-hidden="true">＋</span></Link>
       </div>
-      <div className="container"><nav aria-label="Speaker navigation"><Link className="portal-home" to="/speaker/forums">Forum &amp; Messaging</Link></nav><AccountNavigation /></div>
-    </header>
+    </section>
   )
 }

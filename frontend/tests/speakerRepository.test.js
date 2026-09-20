@@ -25,7 +25,7 @@ test('program IDs and relationships remain valid across all five tracks', () => 
     assert.ok(proposal.speakerIds.includes(proposal.primarySpeakerId))
     assert.ok(tracks.some(track => track.id === proposal.trackId))
   }
-  for (const field of ['startsAt', 'endsAt', 'venueName', 'city', 'state']) assert.equal(convention[field], null)
+  for (const field of ['startsAt', 'endsAt']) assert.equal(convention[field], null)
 })
 
 test('schedule actions require approval and a complete actual schedule', () => {
@@ -75,7 +75,8 @@ test('dashboard identity stays Bill Nye for every public speaker ID', async () =
 test('shared schedule formatting respects the event timezone and nullable fields', () => {
   assert.equal(scheduleLabel({ scheduledAt: null }), 'Date and time to be announced')
   assert.equal(roomLabel({ room: null }), 'Room to be announced')
-  assert.equal(locationLabel(), 'Location to be announced')
+  assert.equal(locationLabel(), 'Jacob K. Javits Convention Center, New York, NY')
+  assert.equal(locationLabel({}), 'Location to be announced')
   assert.equal(locationLabel({ venueName: 'Test Hall', city: 'Test City', state: 'NY' }), 'Test Hall, Test City, NY')
   const record = { scheduledAt: '2000-01-01T02:00:00Z' }
   assert.equal(scheduleLabel(record, { timezone: 'America/New_York' }), 'December 31, 1999 at 9:00 PM EST')

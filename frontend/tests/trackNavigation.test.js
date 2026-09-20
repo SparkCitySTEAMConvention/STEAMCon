@@ -14,6 +14,7 @@ test('all five destinations and direct query selections match preview and backen
   }
   for (const query of [null, '', 'invalid', 'SCIENCE']) assert.equal(selectedTrack(publicProgramPreview.tracks, query), publicProgramPreview.tracks[0])
   assert.equal(selectedTrack([], 'science'), undefined)
+  assert.equal(selectedTrack(publicProgramPreview.tracks, 'all'), undefined)
 })
 test('whole cards are semantic Router links without nested controls and query selection is wired', () => {
   const card = read('components/TrackCard.jsx')
@@ -24,7 +25,7 @@ test('whole cards are semantic Router links without nested controls and query se
   const page = read('pages/TracksPage.jsx')
   assert.match(page, /useSearchParams\(\)/)
   assert.match(page, /selectedTrack\(tracks, searchParams.get\('track'\)\)/)
-  assert.match(page, /next.set\('track', trackQuery\(item\)\)/)
+  assert.match(page, /changeTrack\(trackQuery\(item\)\)/)
   assert.match(page, /<Link to=\{passRegistrationDestination\(track, pass\)\}/)
   assert.equal((page.match(/<h1>/g) || []).length, 1)
 })
