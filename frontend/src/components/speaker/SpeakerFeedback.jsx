@@ -1,5 +1,5 @@
 import { timestampLabel } from '../../utils/proposalPresentation.js'
-import { conventionConfig } from '../../mocks/conventionConfig.js'
+import { conventionConfig } from '../../config/conventionConfig.js'
 import EmptyState from './EmptyState.jsx'
 
 export default function SpeakerFeedback({ feedback }) {

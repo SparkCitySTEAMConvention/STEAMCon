@@ -1,60 +1,58 @@
-import { speakers } from '../mocks/speakers.js'
-import { tracks } from '../mocks/tracks.js'
+import { authenticatedFetch } from './authService.js'
+import { eventRepository } from './eventRepository.js'
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export const profileLimits = { name: 255, role: 255, organization: 255, bio: 2000 }
-export const profileFields = [
-  ['name', 'Display name'], ['role', 'Current title'],
-  ['organization', 'Organization'], ['bio', 'Professional biography'],
-]
-export const profileUnavailable = 'Profile editing awaits backend support. No profile read or update endpoint is available.'
-export function validateProfile(input = {}) {
+export const profileFields = [['name', 'Display name'], ['role', 'Current title'], ['organization', 'Organization'], ['bio', 'Professional biography']]
+export const profileUnavailable = 'Profile service is unavailable.'
+
+export function validateProfile(input = {}, tracks = []) {
   const errors = {}
   for (const [field, label] of profileFields) {
     const value = input[field]
     if (typeof value !== 'string' || !value.trim()) errors[field] = `${label} is required.`
     else if (value.trim().length > profileLimits[field]) errors[field] = `${label} must be ${profileLimits[field]} characters or fewer.`
   }
-  if (!tracks.some(track => track.id === input.trackId)) errors.trackId = 'Choose an available primary track.'
+  if (input.trackId && tracks.length && !tracks.some(track => track.id === input.trackId)) errors.trackId = 'Choose an available primary track.'
   return errors
 }
 
+function adaptProfile(record) {
+  return {
+    id: record.id, speakerId: record.speakerId,
+    name: record.displayName || '', role: record.title || '', organization: record.organization || '', bio: record.biography || '',
+    trackIds: [],
+  }
+}
+
 export function createSpeakerProfileSource(user, authSource, hasBackendSession = false) {
-  const demo = authSource === 'demo' && user?.role === 'SPEAKER'
-  const identityAvailable = demo || (authSource === 'backend' && user?.role === 'SPEAKER' && uuid.test(user?.id || '') && hasBackendSession === true)
-  let profile = structuredClone(speakers.find(speaker => speaker.id === 'speaker-bill-nye'))
+  const available = authSource === 'backend' && user?.role === 'SPEAKER' && hasBackendSession === true
   let revision = 0
   const listeners = new Set()
-  function requireEditing() {
-    if (!identityAvailable) throw new Error('Profile editing requires a verified backend speaker UUID, Speaker role and active session. Sign in again or use the speaker preview.')
-    if (!demo) throw new Error(profileUnavailable)
-  }
+  function requireEditing() { if (!available) throw new Error('Profile editing requires a verified backend speaker session.') }
   return {
-    demo, identityAvailable, available: demo,
+    demo: false, identityAvailable: available, available,
     getRevision: () => revision,
-    subscribe(listener) {
-      listeners.add(listener)
-      return () => listeners.delete(listener)
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener) },
+    async getProfile() {
+      requireEditing()
+      const response = await authenticatedFetch('/api/speaker/profile/me')
+      if (!response.ok) throw new Error(`Profile request failed (${response.status}).`)
+      return adaptProfile(await response.json())
     },
-    async getProfile() { requireEditing(); return structuredClone(profile) },
-    async getTracks() { requireEditing(); return tracks.map(track => ({ ...track })) },
+    async getTracks() { requireEditing(); return eventRepository.getTracks() },
     async updateProfile(input) {
       requireEditing()
-      const errors = validateProfile(input)
+      const tracks = await eventRepository.getTracks()
+      const errors = validateProfile(input, tracks)
       if (Object.keys(errors).length) throw new Error(Object.values(errors)[0])
-      const changes = Object.fromEntries(profileFields.map(([field]) => [field, input[field].trim()]))
-      profile = { ...profile, ...changes, firstName: changes.name.split(/\s+/)[0], trackIds: [input.trackId, ...profile.trackIds.filter(id => id !== profile.trackIds[0] && id !== input.trackId)] }
-      revision += 1
-      listeners.forEach(listener => listener())
-      return structuredClone(profile)
+      const response = await authenticatedFetch('/api/speaker/profile/me', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ displayName: input.name.trim(), title: input.role.trim(), organization: input.organization.trim(), biography: input.bio.trim() }),
+      })
+      if (!response.ok) throw new Error(`Profile update failed (${response.status}).`)
+      revision += 1; listeners.forEach(listener => listener())
+      return adaptProfile(await response.json())
     },
   }
 }
-// AuthContext keeps this user object across routes; a new login or app reset
-// receives a new object and therefore a fresh in-memory preview source.
-const previewSources = new WeakMap()
-export function getSpeakerProfileSource(user, authSource, hasBackendSession) {
-  if (authSource !== 'demo' || !user) return createSpeakerProfileSource(user, authSource, hasBackendSession)
-  if (!previewSources.has(user)) previewSources.set(user, createSpeakerProfileSource(user, authSource, hasBackendSession))
-  return previewSources.get(user)
-}
+export function getSpeakerProfileSource(user, authSource, hasBackendSession) { return createSpeakerProfileSource(user, authSource, hasBackendSession) }

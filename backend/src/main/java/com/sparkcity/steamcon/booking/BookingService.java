@@ -72,6 +72,19 @@ public class BookingService {
         return carRentalRepository.save(carRental);
     }
 
+
+    public List<TravelLeg> getTravelLegsForUser(UUID userId) {
+        return travelLegRepository.findByUserId(userId);
+    }
+
+    public List<CarRental> getCarRentalsForUser(UUID userId) {
+        return carRentalRepository.findByUserId(userId);
+    }
+
+    public List<HotelReservation> getHotelReservationsForUser(UUID userId) {
+        return hotelReservationRepository.findByUserId(userId);
+    }
+
     public List<Hotel> getHotels() {
 
         return hotelRepository.findAll();

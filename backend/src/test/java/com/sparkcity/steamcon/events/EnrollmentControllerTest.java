@@ -11,10 +11,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.core.Authentication;
 
 import java.util.UUID;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -27,125 +29,124 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 class EnrollmentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @MockBean
-    private AttendeeSessionEnrollmentService enrollmentService;
+        @MockBean
+        private AttendeeSessionEnrollmentService enrollmentService;
 
-    @MockBean
-    private AdmissionService admissionService;
+        @MockBean
+        private AdmissionService admissionService;
 
-    @Test
-    void shouldEnrollAttendee() throws Exception {
+        @Test
+        void shouldEnrollAttendee() throws Exception {
 
-        UUID attendeeId = UUID.randomUUID();
-        UUID sessionId = UUID.randomUUID();
-        UUID sessionOccurrenceId = UUID.randomUUID();
+                UUID attendeeId = UUID.randomUUID();
+                UUID sessionId = UUID.randomUUID();
+                UUID sessionOccurrenceId = UUID.randomUUID();
 
-        AttendeeSessionEnrollment enrollment =
-                new AttendeeSessionEnrollment(
-                        attendeeId,
-                        sessionId,
-                        sessionOccurrenceId);
+                AttendeeSessionEnrollment enrollment = new AttendeeSessionEnrollment(
+                                attendeeId,
+                                sessionId,
+                                sessionOccurrenceId);
 
-        when(enrollmentService.enroll(
-                attendeeId,
-                sessionOccurrenceId))
-                .thenReturn(enrollment);
+                when(enrollmentService.enroll(
+                                attendeeId,
+                                sessionOccurrenceId))
+                                .thenReturn(enrollment);
 
-        CreateEnrollmentRequest request =
-                new CreateEnrollmentRequest(
-                        sessionOccurrenceId);
+                CreateEnrollmentRequest request = new CreateEnrollmentRequest(
+                                sessionOccurrenceId);
 
-        mockMvc.perform(post("/api/enrollments")
-                        .principal(
-                                new UsernamePasswordAuthenticationToken(
-                                        attendeeId,
-                                        null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                                objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.attendeeId")
-                        .value(attendeeId.toString()))
-                .andExpect(jsonPath("$.sessionId")
-                        .value(sessionId.toString()))
-                .andExpect(jsonPath("$.sessionOccurrenceId")
-                        .value(sessionOccurrenceId.toString()));
-    }
+                mockMvc.perform(post("/api/enrollments")
+                                .principal(
+                                                new UsernamePasswordAuthenticationToken(
+                                                                attendeeId,
+                                                                null))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                                objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.attendeeId")
+                                                .value(attendeeId.toString()))
+                                .andExpect(jsonPath("$.sessionId")
+                                                .value(sessionId.toString()))
+                                .andExpect(jsonPath("$.sessionOccurrenceId")
+                                                .value(sessionOccurrenceId.toString()));
+        }
 
-    @Test
-    void shouldCancelEnrollment() throws Exception {
+        @Test
+        void shouldCancelEnrollment() throws Exception {
 
-        UUID attendeeId = UUID.randomUUID();
-        UUID sessionId = UUID.randomUUID();
+                UUID attendeeId = UUID.randomUUID();
+                UUID sessionOccurrenceId = UUID.randomUUID();
 
-        doNothing().when(enrollmentService)
-                .cancelEnrollment(
-                        attendeeId,
-                        sessionId);
+                Authentication authentication = mock(Authentication.class);
 
-        mockMvc.perform(delete("/api/enrollments")
-                        .param(
-                                "attendeeId",
-                                attendeeId.toString())
-                        .param(
-                                "sessionId",
-                                sessionId.toString()))
-                .andExpect(status().isNoContent());
-    }
+                when(authentication.getPrincipal())
+                                .thenReturn(attendeeId);
 
-    @Test
-    void shouldRejectEnrollmentWithMissingSessionOccurrenceId()
-            throws Exception {
+                doNothing().when(enrollmentService)
+                                .cancelEnrollment(
+                                                attendeeId,
+                                                sessionOccurrenceId);
 
-        CreateEnrollmentRequest request =
-                new CreateEnrollmentRequest(null);
+                mockMvc.perform(delete("/api/enrollments")
+                                .param(
+                                                "sessionOccurrenceId",
+                                                sessionOccurrenceId.toString())
+                                .principal(authentication))
+                                .andExpect(status().isNoContent());
+        }
 
-        mockMvc.perform(post("/api/enrollments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                                objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
+        @Test
+        void shouldRejectEnrollmentWithMissingSessionOccurrenceId()
+                        throws Exception {
 
-    @Test
-    void shouldReturnBadRequestWhenEnrollmentFails()
-            throws Exception {
+                CreateEnrollmentRequest request = new CreateEnrollmentRequest(null);
 
-        UUID attendeeId = UUID.randomUUID();
-        UUID sessionOccurrenceId = UUID.randomUUID();
+                mockMvc.perform(post("/api/enrollments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                                objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest());
+        }
 
-        when(enrollmentService.enroll(
-                attendeeId,
-                sessionOccurrenceId))
-                .thenThrow(
-                        new IllegalArgumentException(
-                                "Attendee does not have admission for this track"));
+        @Test
+        void shouldReturnBadRequestWhenEnrollmentFails()
+                        throws Exception {
 
-        CreateEnrollmentRequest request =
-                new CreateEnrollmentRequest(
-                        sessionOccurrenceId);
+                UUID attendeeId = UUID.randomUUID();
+                UUID sessionOccurrenceId = UUID.randomUUID();
 
-        mockMvc.perform(post("/api/enrollments")
-                        .principal(
-                                new UsernamePasswordAuthenticationToken(
-                                        attendeeId,
-                                        null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(
-                                objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status")
-                        .value(400))
-                .andExpect(jsonPath("$.error")
-                        .value("Bad Request"))
-                .andExpect(jsonPath("$.message")
-                        .value(
-                                "Attendee does not have admission for this track"));
-    }
+                when(enrollmentService.enroll(
+                                attendeeId,
+                                sessionOccurrenceId))
+                                .thenThrow(
+                                                new IllegalArgumentException(
+                                                                "Attendee does not have admission for this track"));
+
+                CreateEnrollmentRequest request = new CreateEnrollmentRequest(
+                                sessionOccurrenceId);
+
+                mockMvc.perform(post("/api/enrollments")
+                                .principal(
+                                                new UsernamePasswordAuthenticationToken(
+                                                                attendeeId,
+                                                                null))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                                objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isBadRequest())
+                                .andExpect(jsonPath("$.status")
+                                                .value(400))
+                                .andExpect(jsonPath("$.error")
+                                                .value("Bad Request"))
+                                .andExpect(jsonPath("$.message")
+                                                .value(
+                                                                "Attendee does not have admission for this track"));
+        }
 }

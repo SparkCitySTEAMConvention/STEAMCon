@@ -1,5 +1,3 @@
-import { useSearchParams } from 'react-router-dom'
-import { previewRepository } from '../../mocks/previewScenarios.js'
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
 import { speakerRepository } from '../../services/speakerRepository.js'
 import useSpeakerResource from '../../hooks/useSpeakerResource.js'
@@ -10,7 +8,6 @@ import ProposalCard from '../../components/speaker/ProposalCard.jsx'
 import UpcomingSessionCard from '../../components/speaker/UpcomingSessionCard.jsx'
 import SpeakerFeedback from '../../components/speaker/SpeakerFeedback.jsx'
 import EmptyState from '../../components/speaker/EmptyState.jsx'
-import { speakerData, developmentDisclaimer } from '../../mocks/speakerData.js'
 import { conventionScheduleLabel, locationLabel } from '../../utils/proposalPresentation.js'
 import { useAuth } from '../../auth/useAuth.js'
 import { notificationRepository } from '../../services/notificationRepository.js'
@@ -27,23 +24,22 @@ export default function SpeakerDashboard({ repository = speakerRepository }) {
   const { user, authSource, hasBackendSession } = useAuth()
   const notifications = useMemo(() => getSpeakerNotificationSource(notificationRepository, user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
   const proposalSource = useMemo(() => getSpeakerProposalSource(repository, eventRepository, user, authSource, hasBackendSession), [repository, user, authSource, hasBackendSession])
-  const [params] = useSearchParams()
-  const scenario = authSource === 'demo' && import.meta.env.DEV ? params.get('preview') : null
-  const source = useMemo(() => previewRepository(proposalSource, scenario), [proposalSource, scenario])
+  const source = proposalSource
   const profileSource = useMemo(() => getSpeakerProfileSource(user, authSource, hasBackendSession), [user, authSource, hasBackendSession])
   const profileRevision = useSyncExternalStore(profileSource.subscribe, profileSource.getRevision, profileSource.getRevision)
   const loader = useCallback(async () => {
     const data = await source.getDashboard()
-    return profileSource.demo ? { ...data, speaker: await profileSource.getProfile() } : data
+    const profile = profileSource.available ? await profileSource.getProfile() : liveSpeaker(user)
+    return { ...data, speaker: profile }
   }, [source, profileSource])
   const resourceKey = useMemo(() => ({ loader, profileRevision }), [loader, profileRevision])
   const resource = useSpeakerResource(loader, resourceKey)
-  return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { speaker: proposalSource.demo ? speakerData.speaker : liveSpeaker(user), convention: {}, proposals: [], applications: [], sessions: [], feedback: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
+  return <SpeakerDashboardView proposalSource={proposalSource} data={resource.data || { speaker: liveSpeaker(user), convention: {}, proposals: [], applications: [], sessions: [], feedback: [], tracks: [] }} resource={resource} notifications={notifications} notificationKey={`${authSource}-${user?.id}-${hasBackendSession}`} />
 }
 
 function SpeakerDashboardView({ proposalSource, data, resource, notifications, notificationKey }) {
   const [trackId, setTrackId] = useState('all')
-  const { speaker, convention, proposals, sessions, feedback } = data
+  const { speaker, convention, proposals, sessions, feedback, tracks = [] } = data
   const filtered = proposals.filter(proposal => trackId === 'all' || proposal.trackId === trackId || proposal.additionalTrackIds?.includes(trackId))
 
   return (
@@ -56,7 +52,7 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
           <h1>Welcome back, {speaker.name}.</h1>
           <p>Keep an eye on your proposals, upcoming sessions, and organizer feedback. Your next great conversation starts here.</p>
         </div>
-        <p className="portal-demo">{proposalSource.demo ? developmentDisclaimer : 'Live speaker workspace'}</p>
+        <p className="portal-demo">Live speaker workspace · Data is loaded from the STEAM Con backend.</p>
         {resource.status === 'loading' && <p role="status">Loading proposals…</p>}
         {resource.status === 'error' && <div role="alert"><p>Unable to load proposals.</p><button type="button" onClick={resource.retry}>Try again</button></div>}
         <SpeakerNotifications key={notificationKey} source={notifications} />
@@ -75,14 +71,14 @@ function SpeakerDashboardView({ proposalSource, data, resource, notifications, n
         <div className="portal-columns">
           <section aria-labelledby="proposals-heading">
             <div className="portal-section-heading"><h2 id="proposals-heading">Your Proposals</h2><span>{proposals.length} total</span></div>
-            <TrackFilters value={trackId} onChange={setTrackId} options={proposalSource.demo ? undefined : [...new Set(proposals.map(item => item.trackId).filter(Boolean))].map((id, index) => ({ id, name: `Track ${index + 1} (name unavailable)` }))} />
+            <TrackFilters value={trackId} onChange={setTrackId} options={proposalSource.demo ? undefined : tracks} />
             <p className="portal-result-count" role="status">{filtered.length} proposals shown</p>
             {filtered.length ? <ul className="portal-list portal-proposals">{filtered.map(proposal => <ProposalCard key={proposal.id} proposal={proposal} />)}</ul> : <EmptyState title={proposals.length ? "No proposals in this track." : "Make room for your first idea."}>{proposals.length ? 'Choose another track or return to All to explore your proposals.' : 'Use Propose a Session to submit your idea.'}</EmptyState>}
           </section>
           <div className="portal-sidebar">
             <section aria-labelledby="sessions-heading">
               <h2 id="sessions-heading">Upcoming speaking engagements</h2>
-              <p className="portal-muted">{proposalSource.demo ? 'Preview schedule' : 'Scheduling unavailable'} · The backend does not expose a speaker proposal-to-session relationship.</p>
+              <p className="portal-muted">Live speaking assignments from the convention schedule.</p>
               {sessions.length ? <ul className="portal-list">{sessions.map(session => <UpcomingSessionCard key={session.id} session={session} />)}</ul> : <EmptyState title="Your stage is still taking shape.">Upcoming sessions will appear here when they are assigned.</EmptyState>}
             </section>
             <SpeakerFeedback feedback={feedback} />

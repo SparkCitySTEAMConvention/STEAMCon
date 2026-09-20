@@ -3,6 +3,7 @@ package com.sparkcity.steamcon.events;
 import com.sparkcity.steamcon.admission.AdmissionService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -76,6 +77,10 @@ public class AttendeeSessionEnrollmentService {
                         sessionOccurrenceId);
 
         return enrollmentRepository.save(enrollment);
+    }
+
+    public List<AttendeeSessionEnrollment> getEnrollmentsForAttendee(UUID attendeeId) {
+        return enrollmentRepository.findByAttendeeIdAndStatus(attendeeId, EnrollmentStatus.ENROLLED);
     }
 
     public void cancelEnrollment(

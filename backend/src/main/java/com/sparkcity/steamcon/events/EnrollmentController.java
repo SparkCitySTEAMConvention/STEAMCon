@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,15 +38,21 @@ public class EnrollmentController {
                 .body(EnrollmentResponse.from(enrollment));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<EnrollmentResponse>> getMyEnrollments(
+            Authentication authentication) {
+        UUID authenticatedUserId = getAuthenticatedUserId(authentication);
+        return ResponseEntity.ok(
+                enrollmentService.getEnrollmentsForAttendee(authenticatedUserId)
+                        .stream().map(EnrollmentResponse::from).toList());
+    }
+
     @DeleteMapping
     public ResponseEntity<Void> cancelEnrollment(
-            @RequestParam UUID attendeeId,
-            @RequestParam UUID sessionId) {
-
-        enrollmentService.cancelEnrollment(
-                attendeeId,
-                sessionId);
-
+            @RequestParam UUID sessionOccurrenceId,
+            Authentication authentication) {
+        UUID authenticatedUserId = getAuthenticatedUserId(authentication);
+        enrollmentService.cancelEnrollment(authenticatedUserId, sessionOccurrenceId);
         return ResponseEntity.noContent().build();
     }
 

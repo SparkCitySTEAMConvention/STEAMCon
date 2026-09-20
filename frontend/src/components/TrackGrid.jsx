@@ -1,8 +1,6 @@
 import TrackCard from './TrackCard.jsx'
 
-import { publicTracks } from '../mocks/publicProgram.js'
-
-export default function TrackGrid({ tracks = publicTracks }) {
+export default function TrackGrid({ tracks = [] }) {
   return (
     <section className="section tracks-section" id="tracks" aria-labelledby="tracks-heading">
       <div className="container">

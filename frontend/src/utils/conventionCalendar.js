@@ -1,4 +1,4 @@
-import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionConfig } from '../config/conventionConfig.js'
 
 export function conventionDayLabel(date) {
   return new Intl.DateTimeFormat('en-US', {

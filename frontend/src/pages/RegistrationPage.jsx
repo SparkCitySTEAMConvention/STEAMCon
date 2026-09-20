@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import './RegistrationPage.css'
 import { passes } from '../config/passes.js'
-import { submitRegistration } from '../services/registrationRepository'
+import { createAdmission, submitRegistration } from '../services/registrationRepository'
+import { authenticatedFetch } from '../services/authService.js'
+import { eventRepository } from '../services/eventRepository.js'
+import { speakerRepository } from '../services/speakerRepository.js'
+import { useAuth } from '../auth/useAuth.js'
 import { validateRegistration } from '../utils/registrationValidation'
 
 import { registrationTracks as tracks, registrationPrefill } from '../utils/registrationQuery.js'
@@ -15,7 +19,7 @@ const roles = {
     description: 'Create your account, choose a pass, and get ready to make a personal schedule across all five tracks.',
     submit: 'Continue to payment',
     portal: '/attendee',
-    portalLabel: 'Open attendee preview',
+    portalLabel: 'Open attendee portal',
   },
   speaker: {
     label: 'Speaker',
@@ -24,7 +28,7 @@ const roles = {
     description: 'Tell us who you are and what you want to share. The program team can review session details after signup.',
     submit: 'Start speaker registration',
     portal: '/speaker',
-    portalLabel: 'Open speaker preview',
+    portalLabel: 'Open speaker portal',
   },
 }
 
@@ -50,6 +54,7 @@ const demoValues = {
 }
 
 export default function RegistrationPage() {
+  const { login } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const prefill = registrationPrefill(searchParams)
   const [role, setRole] = useState(prefill.role)
@@ -92,7 +97,41 @@ export default function RegistrationPage() {
     setStatus('submitting')
     setRequestError('')
     try {
-      await submitRegistration({ ...values, role, paymentMode: role === 'attendee' ? 'demo' : undefined })
+      await submitRegistration({ ...values, role })
+      await login({ email: values.email, password: values.password })
+
+      if (role === 'attendee') {
+        await createAdmission(values.passType)
+      } else {
+        const displayName = `${values.firstName} ${values.lastName}`.trim()
+        const profileResponse = await authenticatedFetch('/api/speaker/profile/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            displayName,
+            organization: values.organization.trim(),
+          }),
+        })
+
+        if (!profileResponse.ok) {
+          throw new Error(`Speaker profile could not be saved (${profileResponse.status}).`)
+        }
+
+        const liveTracks = await eventRepository.getTracks()
+        const selectedTrack = liveTracks.find(track =>
+          track.name?.toLocaleLowerCase() === values.track.trim().toLocaleLowerCase())
+
+        if (!selectedTrack) {
+          throw new Error('The selected speaker track is not available in the live program.')
+        }
+
+        await speakerRepository.createProposal({
+          title: values.sessionTitle,
+          description: values.sessionSummary,
+          trackId: selectedTrack.id,
+        })
+      }
+
       setSubmitted(true)
       setCheckout(false)
       setStatus('success')
@@ -166,7 +205,7 @@ export default function RegistrationPage() {
                 </li>
               ))}
             </ol>
-            <p className="registration-preview-note"><strong>Prototype note:</strong> this screen validates the form in your browser. Account creation will connect to the team’s API next.</p>
+            <p className="registration-preview-note"><strong>Prototype note:</strong> account creation and attendee admission are saved through the STEAM Con backend.</p>
           </aside>
 
           <section className="registration-form-shell" aria-labelledby="registration-form-heading">
@@ -188,9 +227,9 @@ export default function RegistrationPage() {
             {submitted ? (
               <div className="registration-success" aria-live="polite">
                 <span className="registration-success-mark" aria-hidden="true">✓</span>
-                <p className="eyebrow">{role === 'attendee' ? 'Admission confirmed' : 'Form preview complete'}</p>
+                <p className="eyebrow">{role === 'attendee' ? 'Admission confirmed' : 'Speaker registration complete'}</p>
                 <h2 id="registration-form-heading">{role === 'attendee' ? 'Your pass and attendee account are ready.' : 'Your speaker details look good.'}</h2>
-                <p>{role === 'attendee' ? `Demo purchase complete for the ${values.passType}. No real payment was processed.` : 'Nothing was sent yet. This front-end flow is ready to connect to the registration API when the backend endpoint is available.'}</p>
+                <p>{role === 'attendee' ? `Your ${values.passType} is saved to your STEAM Con account. No external payment processor is connected.` : 'Your speaker account, profile details, and initial session proposal are saved to the STEAM Con backend.'}</p>
                 <div className="registration-success-actions">
                   <Link className="button button-dark" to={roleCopy.portal}>{roleCopy.portalLabel} <span aria-hidden="true">↗</span></Link>
                   <button className="registration-text-button" type="button" onClick={() => setSubmitted(false)}>Edit my details</button>

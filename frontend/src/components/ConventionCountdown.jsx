@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionConfig } from '../config/conventionConfig.js'
 import { conventionDayLabel, countdownRemaining, occurrenceDate } from '../utils/conventionCalendar.js'
 import './ConventionCountdown.css'
 

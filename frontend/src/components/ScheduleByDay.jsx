@@ -1,16 +1,16 @@
-import { conventionConfig } from '../mocks/conventionConfig.js'
+import { conventionConfig } from '../config/conventionConfig.js'
 import { conventionDayLabel, programCalendar } from '../utils/conventionCalendar.js'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { attendeeData } from '../mocks/attendeeData.js'
 
 function trackSlug(track) {
   return (track || 'unknown').toLowerCase().replaceAll(' ', '-')
 }
 
-export default function ScheduleByDay({ sessions = attendeeData.sessions, tracks = attendeeData.tracks, live = false }) {
-  const days = conventionConfig.dates
+export default function ScheduleByDay({ sessions = [], tracks = [], live = false }) {
   const calendar = programCalendar(sessions, live)
+  const liveDays = [...new Set(calendar.map(session => session.calendarDate).filter(Boolean))]
+  const days = live && liveDays.length ? liveDays : conventionConfig.dates
   const unplaced = calendar.filter(session => !days.includes(session.calendarDate)).length
   const [activeDay, setActiveDay] = useState(days[0] ?? '')
   const [activeTrack, setActiveTrack] = useState('All tracks')

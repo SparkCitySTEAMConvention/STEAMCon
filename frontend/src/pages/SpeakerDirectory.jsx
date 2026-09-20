@@ -1,20 +1,56 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import TrackBadge from '../components/speaker/TrackBadge.jsx'
-import { speakers } from '../mocks/speakers.js'
-import { tracks } from '../mocks/tracks.js'
-import { proposals } from '../mocks/proposals.js'
-import { panels } from '../mocks/panels.js'
 import './speaker/SpeakerDashboard.css'
 import './SpeakerDirectory.css'
 
 export default function SpeakerDirectory() {
   const [trackId, setTrackId] = useState('all')
   const [query, setQuery] = useState('')
+  const [speakers, setSpeakers] = useState([])
+  const [tracks, setTracks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function loadDirectory() {
+      try {
+        setLoading(true)
+        setError('')
+
+        const [speakerResponse, trackResponse] = await Promise.all([
+          fetch('/api/speakers'),
+          fetch('/api/tracks')
+        ])
+
+        if (!speakerResponse.ok) {
+          throw new Error('Unable to load speakers')
+        }
+
+        if (!trackResponse.ok) {
+          throw new Error('Unable to load tracks')
+        }
+
+        const speakerData = await speakerResponse.json()
+        const trackData = await trackResponse.json()
+
+        setSpeakers(speakerData)
+        setTracks(trackData)
+      } catch (error) {
+        console.error(error)
+        setError('Unable to load the speaker directory.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDirectory()
+  }, [])
+
   const visibleSpeakers = speakers.filter(speaker =>
-    (trackId === 'all' || speaker.trackIds.includes(trackId)) &&
-    speaker.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
+    (trackId === 'all' || speaker.trackIds?.includes(trackId)) &&
+    (speaker.name ?? '').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
 
   function clearFilters() {
     setTrackId('all')
@@ -38,11 +74,13 @@ export default function SpeakerDirectory() {
         <label className="directory-search">Search speakers by name
           <input type="search" value={query} onChange={event => setQuery(event.target.value)} />
         </label>
+        {loading && <p className="portal-muted">Loading speakers...</p>}
+        {error && <p className="portal-empty">{error}</p>}
         <p className="portal-result-count" role="status">{visibleSpeakers.length} proposed {visibleSpeakers.length === 1 ? 'speaker' : 'speakers'}</p>
         {visibleSpeakers.length ? <ul className="directory-grid">
-          {visibleSpeakers.map(speaker => <li key={speaker.id}>
-            <article className="directory-card" aria-labelledby={speaker.id}>
-              <h3 id={speaker.id}>{speaker.name}</h3>
+          {visibleSpeakers.map(speaker => <li key={speaker.speakerId}>
+            <article className="directory-card" aria-labelledby={speaker.speakerId}>
+              <h3 id={speaker.speakerId}>{speaker.name}</h3>
               <p>{speaker.bio}</p>
               {speaker.organization && speaker.role && <p className="portal-muted">{speaker.role}, {speaker.organization}</p>}
               <dl className="directory-tracks">
@@ -50,8 +88,10 @@ export default function SpeakerDirectory() {
                 {speaker.trackIds.length > 1 && <div><dt>Additional tracks</dt><dd>{speaker.trackIds.slice(1).map(id => <TrackBadge key={id} trackId={id} />)}</dd></div>}
               </dl>
               <h4>Proposed sessions and panels</h4>
-              <ul>{proposals.filter(proposal => proposal.speakerIds.includes(speaker.id)).map(proposal =>
-                <li key={proposal.id}>{proposal.title} <span className="portal-muted">({proposal.format})</span></li>)}</ul>
+              <ul>
+                {speaker.approvedProposalTitles?.map(title =>
+                  <li key={title}>{title}</li>)}
+              </ul>
             </article>
           </li>)}
         </ul> : <div className="portal-empty">
@@ -60,7 +100,7 @@ export default function SpeakerDirectory() {
           <button className="button button-paper" type="button" onClick={clearFilters}>Show all speakers</button>
         </div>}
       </section>
-      <section className="directory-panels" aria-labelledby="panels-heading">
+      {/* <section className="directory-panels" aria-labelledby="panels-heading">
         <h2 id="panels-heading">Proposed crossover panels</h2>
         <p>All five placeholder panel concepts, independent of the speaker filters.</p>
         <ul className="directory-grid">
@@ -73,7 +113,7 @@ export default function SpeakerDirectory() {
             </article>
           </li>)}
         </ul>
-      </section>
+      </section> */}
     </main>
     <Footer />
   </>

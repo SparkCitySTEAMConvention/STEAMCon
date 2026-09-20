@@ -14,6 +14,7 @@ import RegistrationQrSamples from './pages/RegistrationQrSamples.jsx'
 import TravelInfoPage from './pages/TravelInfoPage.jsx'
 import SpeakerDirectory from './pages/SpeakerDirectory.jsx'
 import AttendeeDashboard from './pages/attendee/AttendeeDashboard.jsx'
+import AttendeeForums from './pages/attendee/AttendeeForums.jsx'
 import HotelBookingPage from './pages/attendee/HotelBookingPage.jsx'
 import TravelBookingPage from './pages/attendee/TravelBookingPage.jsx'
 import EditSpeakerProfile from './pages/speaker/EditSpeakerProfile.jsx'
@@ -37,6 +38,7 @@ export default function App() {
       '/registration-qr': 'Registration QR Samples | STEAM Con',
       '/travel': 'Plan Your New York Visit | STEAM Con',
       '/attendee': 'Attendee Portal | STEAM Con',
+      '/attendee/forums': 'Forums & Messaging | STEAM Con',
       '/attendee/travel': 'Book Travel | STEAM Con',
       '/attendee/hotel': 'Book a Hotel | STEAM Con',
       '/attendee/car': 'Reserve a Car | STEAM Con',
@@ -79,6 +81,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<RoleRoute role="ATTENDEE" />}>
           <Route path="/attendee" element={<AttendeeDashboard />} />
+          <Route path="/attendee/forums" element={<AttendeeForums />} />
           <Route
             path="/attendee/travel"
             element={<TravelBookingPage kind="travel" />}
