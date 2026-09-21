@@ -22,6 +22,10 @@ public class AttendeeSessionEnrollment {
     @Column(nullable = false)
     private UUID sessionId;
 
+    @NotNull
+    @Column(nullable = false)
+    private UUID sessionOccurrenceId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EnrollmentStatus status = EnrollmentStatus.ENROLLED;
@@ -32,9 +36,14 @@ public class AttendeeSessionEnrollment {
     public AttendeeSessionEnrollment() {
     }
 
-    public AttendeeSessionEnrollment(UUID attendeeId, UUID sessionId) {
+    public AttendeeSessionEnrollment(
+            UUID attendeeId,
+            UUID sessionId,
+            UUID sessionOccurrenceId) {
+
         this.attendeeId = attendeeId;
         this.sessionId = sessionId;
+        this.sessionOccurrenceId = sessionOccurrenceId;
     }
 
     public UUID getId() {
@@ -55,6 +64,14 @@ public class AttendeeSessionEnrollment {
 
     public void setSessionId(UUID sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public UUID getSessionOccurrenceId() {
+        return sessionOccurrenceId;
+    }
+
+    public void setSessionOccurrenceId(UUID sessionOccurrenceId) {
+        this.sessionOccurrenceId = sessionOccurrenceId;
     }
 
     public EnrollmentStatus getStatus() {

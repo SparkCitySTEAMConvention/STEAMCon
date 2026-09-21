@@ -1,0 +1,40 @@
+.track-feature {
+  --track-feature-color: var(--color-steel);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  border: 2px solid var(--color-ink);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-large);
+  overflow: hidden;
+  background: var(--color-surface);
+  margin-top: 2rem;
+}
+.track-feature-science { --track-feature-color: var(--color-science); }
+.track-feature-technology { --track-feature-color: var(--color-technology); }
+.track-feature-engineering { --track-feature-color: var(--color-engineering); }
+.track-feature-art { --track-feature-color: var(--color-art); }
+.track-feature-mathematics { --track-feature-color: var(--color-mathematics); }
+.track-feature-copy { min-width: 0; padding: var(--space-card); overflow-wrap: anywhere; }
+.track-feature-copy h2 { font-size: clamp(2.3rem, 4.5vw, 4.5rem); margin-block: 1rem; }
+.track-feature-description { color: var(--color-text-muted); }
+.track-feature-session { border-top: 2px solid var(--color-ink); margin-top: 2rem; padding-top: 1.5rem; }
+.track-feature-session h3 { font-size: clamp(1.5rem, 2.5vw, 2.4rem); margin-block: 0.75rem; }
+.track-feature-session > p:not(.eyebrow) { margin-top: 1rem; }
+.track-feature-mandatory { font-weight: 700; }
+.track-feature-schedule { font-size: 0.85rem; }
+.track-page-heading { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: end; gap: 2rem; margin-bottom: 1.5rem; }
+.track-page-heading h1 { font-size: clamp(2.5rem, 5.3vw, 4.75rem); margin-top: 1rem; overflow-wrap: anywhere; }
+.track-page-introduction > p { color: var(--color-text-muted); max-width: 440px; }
+.track-program-summary { margin-top: 1.25rem; padding-top: 1rem; border-top: 2px solid var(--color-ink); }
+.track-program-summary > p { font: 700 0.75rem/1.5 'Courier New', monospace; }
+.track-program-summary dl { display: flex; gap: 2rem; margin: 0.75rem 0 0; }
+.track-program-summary dl > div { display: flex; align-items: baseline; gap: 0.5rem; }
+.track-program-summary dt { font-size: 0.85rem; }
+.track-program-summary dd { margin: 0; font-size: 1.5rem; font-weight: 700; }
+.track-page-filters { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.track-page-filters button { padding: 0.65rem 1rem; border: 2px solid var(--color-ink); border-radius: var(--radius-small); color: var(--color-ink); cursor: pointer; }
+.track-page-filters button[aria-pressed='true'] { box-shadow: 3px 4px 0 var(--color-ink); }
+@media (max-width: 767px) {
+  .track-page-heading { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .track-feature { grid-template-columns: minmax(0, 1fr); }
+}
