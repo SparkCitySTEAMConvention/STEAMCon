@@ -1,0 +1,6 @@
+.convention-countdown { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.4rem 1.25rem; padding-block: 0.65rem; text-align: center; font-size: 0.9rem; overflow-wrap: anywhere; }
+.convention-countdown-label { font-weight: 700; }
+.convention-countdown [role="timer"] { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.35rem 0.85rem; }
+.convention-countdown [role="timer"] span { white-space: nowrap; }
+.convention-countdown [role="timer"] strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.convention-countdown-dates { color: var(--color-text-muted); }

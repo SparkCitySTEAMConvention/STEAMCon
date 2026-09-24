@@ -1,7 +1,15 @@
 package com.sparkcity.steamcon.identity;
 
-import jakarta.persistence.*;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -22,10 +30,14 @@ public class User {
 
     private String organization;
 
+    @Column(columnDefinition = "TEXT")
+    private String profileImageUrl;
+
     @OneToMany(mappedBy = "user")
     private List<UserRole> roles;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String email, String displayName, String passwordHash) {
         this.email = email;
@@ -51,6 +63,14 @@ public class User {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public String getPasswordHash() {
