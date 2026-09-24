@@ -72,7 +72,6 @@ public class BookingService {
         return carRentalRepository.save(carRental);
     }
 
-
     public List<TravelLeg> getTravelLegsForUser(UUID userId) {
         return travelLegRepository.findByUserId(userId);
     }
@@ -102,10 +101,11 @@ public class BookingService {
         }
 
         hotelRepository.findById(hotelId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Hotel not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Hotel not found"));
 
-        HotelReservation reservation = new HotelReservation();
+        HotelReservation reservation = hotelReservationRepository
+                .findFirstByUserIdOrderByCheckinDesc(userId)
+                .orElseGet(HotelReservation::new);
 
         reservation.setUserId(userId);
         reservation.setHotelId(hotelId);

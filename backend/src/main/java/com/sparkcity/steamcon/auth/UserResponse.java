@@ -1,17 +1,18 @@
 package com.sparkcity.steamcon.auth;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.sparkcity.steamcon.identity.Role;
 import com.sparkcity.steamcon.identity.User;
 import com.sparkcity.steamcon.identity.UserRole;
-
-import java.util.List;
-import java.util.UUID;
 
 public record UserResponse(
         UUID id,
         String email,
         String displayName,
         String organization,
+        String profileImageUrl,
         List<Role> roles
 ) {
 
@@ -29,6 +30,7 @@ public record UserResponse(
                 user.getEmail(),
                 user.getDisplayName(),
                 user.getOrganization(),
+                user.getProfileImageUrl(),
                 roles
         );
     }

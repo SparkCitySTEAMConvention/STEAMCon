@@ -163,8 +163,14 @@ public class ProjectDemoSeeder implements CommandLineRunner {
     public void run(String... args) {
 
         // ---------------------------------------------------------
-        // USERS + AUTH ROLES
+        // STEAMCON 2027 DEMO DATA
+        // Jacob K. Javits Convention Center, New York City
+        // November 3-5, 2027
         // All demo passwords are: demo
+        // ---------------------------------------------------------
+
+        // ---------------------------------------------------------
+        // USERS + AUTH ROLES
         // ---------------------------------------------------------
 
         User attendee = ensureUser(
@@ -179,16 +185,22 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 "Zip Code Wilmington",
                 "demo");
 
+        User attendeeThree = ensureUser(
+                "maker@steamcon.demo",
+                "Taylor Morgan",
+                "Delaware STEM Alliance",
+                "demo");
+
+        User attendeeFour = ensureUser(
+                "teacher@steamcon.demo",
+                "Casey Nguyen",
+                "Hudson Valley Public Schools",
+                "demo");
+
         User bill = ensureUser(
                 "bill.nye@steamcon.demo",
                 "Bill Nye",
                 "The Planetary Society",
-                "demo");
-
-        User ada = ensureUser(
-                "ada.lovelace@steamcon.demo",
-                "Ada Lovelace",
-                "STEAMCon",
                 "demo");
 
         User mae = ensureUser(
@@ -197,22 +209,89 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 "100 Year Starship",
                 "demo");
 
+        User ada = ensureUser(
+                "ada.lovelace@steamcon.demo",
+                "Ada Lovelace",
+                "STEAMCon",
+                "demo");
+
+        User lena = ensureUser(
+                "lena.ortiz@steamcon.demo",
+                "Dr. Lena Ortiz",
+                "Horizon Space Institute",
+                "demo");
+
+        User marcus = ensureUser(
+                "marcus.chen@steamcon.demo",
+                "Marcus Chen",
+                "Civic AI Lab",
+                "demo");
+
+        User priya = ensureUser(
+                "priya.shah@steamcon.demo",
+                "Priya Shah",
+                "Atlas Robotics",
+                "demo");
+
+        User noah = ensureUser(
+                "noah.bennett@steamcon.demo",
+                "Noah Bennett",
+                "Sentinel Security Labs",
+                "demo");
+
+        User sofia = ensureUser(
+                "sofia.martinez@steamcon.demo",
+                "Sofia Martinez",
+                "Lightwave Studio",
+                "demo");
+
+        User jamal = ensureUser(
+                "jamal.brooks@steamcon.demo",
+                "Jamal Brooks",
+                "Open Metrics Collective",
+                "demo");
+
+        User elena = ensureUser(
+                "elena.rossi@steamcon.demo",
+                "Dr. Elena Rossi",
+                "Earth Systems Collective",
+                "demo");
+
+        User avery = ensureUser(
+                "avery.thompson@steamcon.demo",
+                "Avery Thompson",
+                "MakerBridge Education",
+                "demo");
+
         User admin = ensureUser(
                 "admin@steamcon.demo",
                 "STEAMCon Organizer",
                 "STEAMCon",
                 "demo");
 
-        ensureRole(attendee, Role.ATTENDEE);
-        ensureRole(attendeeTwo, Role.ATTENDEE);
+        for (User demoAttendee : List.of(
+                attendee,
+                attendeeTwo,
+                attendeeThree,
+                attendeeFour)) {
+            ensureRole(demoAttendee, Role.ATTENDEE);
+        }
 
-        // Speakers can still use attendee-facing features.
-        ensureRole(bill, Role.SPEAKER);
-        ensureRole(bill, Role.ATTENDEE);
-        ensureRole(ada, Role.SPEAKER);
-        ensureRole(ada, Role.ATTENDEE);
-        ensureRole(mae, Role.SPEAKER);
-        ensureRole(mae, Role.ATTENDEE);
+        for (User speaker : List.of(
+                bill,
+                mae,
+                ada,
+                lena,
+                marcus,
+                priya,
+                noah,
+                sofia,
+                jamal,
+                elena,
+                avery)) {
+            ensureRole(speaker, Role.SPEAKER);
+            ensureRole(speaker, Role.ATTENDEE);
+        }
 
         ensureRole(admin, Role.ADMIN);
         ensureRole(admin, Role.ATTENDEE);
@@ -223,231 +302,549 @@ public class ProjectDemoSeeder implements CommandLineRunner {
 
         Track science = ensureTrack(
                 "Science",
-                "Discovery, experimentation, research, and the natural world.");
+                "Discovery, experimentation, research, climate, space, health, and the natural world.");
 
         Track technology = ensureTrack(
                 "Technology",
-                "Software, artificial intelligence, cybersecurity, and emerging technology.");
+                "Software, artificial intelligence, cybersecurity, data systems, and emerging technology.");
 
         Track engineering = ensureTrack(
                 "Engineering",
-                "Robotics, aerospace, design, systems thinking, and hands-on problem solving.");
+                "Robotics, aerospace, infrastructure, design, systems thinking, and hands-on problem solving.");
 
         Track arts = ensureTrack(
                 "Arts",
-                "Creative technology, music, design, digital media, and storytelling.");
+                "Creative technology, music, design, digital media, storytelling, and interactive experiences.");
 
         Track mathematics = ensureTrack(
                 "Mathematics",
-                "Data, statistics, modeling, patterns, and quantitative thinking.");
+                "Data, statistics, modeling, optimization, patterns, and quantitative thinking.");
+
+        List<UUID> allTracks = List.of(
+                science.getId(),
+                technology.getId(),
+                engineering.getId(),
+                arts.getId(),
+                mathematics.getId());
 
         // ---------------------------------------------------------
         // PUBLISHED PROGRAM
-        // April 6–8, 2027
+        // November 3-5, 2027
+        // Times are stored as UTC. New York is UTC-4 during these dates.
         // ---------------------------------------------------------
 
-        Session keynote = ensureSession(
+        Session openingKeynote = ensureSession(
                 "Science Changes Everything",
-                "Opening keynote on curiosity, evidence, discovery, and the future of science.",
+                "Opening keynote on curiosity, evidence, discovery, and the role of science in everyday life.",
                 science.getId(),
                 true);
 
+        Session futureSpace = ensureSession(
+                "Engineering Beyond Earth",
+                "Designing reliable aerospace systems for exploration, extreme environments, and future missions.",
+                engineering.getId(),
+                false);
+
         Session responsibleAi = ensureSession(
                 "Building Responsible AI",
-                "A practical conversation about AI systems, ethics, safety, and real-world use.",
+                "A practical discussion of AI systems, transparency, safety, ethics, and real-world deployment.",
                 technology.getId(),
+                false);
+
+        Session climateSignals = ensureSession(
+                "Reading the Planet: Climate Signals in Data",
+                "How scientists combine observations, models, and uncertainty to understand a changing planet.",
+                science.getId(),
                 false);
 
         Session robotics = ensureSession(
                 "Robotics from Concept to Competition",
-                "Design, build, test, and iterate on autonomous robotic systems.",
-                engineering.getId(),
-                false);
-
-        Session creativeTech = ensureSession(
-                "Where Art Meets Technology",
-                "Explore how software, digital media, music, and design create new forms of expression.",
-                arts.getId(),
-                false);
-
-        Session mathData = ensureSession(
-                "The Mathematics Behind Data",
-                "Probability, statistics, modeling, and the mathematics behind modern analytics.",
-                mathematics.getId(),
-                false);
-
-        Session aerospace = ensureSession(
-                "Engineering Beyond Earth",
-                "Aerospace engineering, human spaceflight, and designing systems for extreme environments.",
+                "Design, build, test, and iterate on autonomous robotic systems using an engineering workflow.",
                 engineering.getId(),
                 false);
 
         Session cyber = ensureSession(
                 "Cybersecurity for Everyone",
-                "A practical introduction to digital security, privacy, and safer connected systems.",
+                "A practical introduction to digital security, privacy, identity, and safer connected systems.",
                 technology.getId(),
                 false);
 
+        Session creativeTech = ensureSession(
+                "Where Art Meets Technology",
+                "Explore how software, digital media, projection, sound, and design create new forms of expression.",
+                arts.getId(),
+                false);
+
+        Session mathData = ensureSession(
+                "The Mathematics Behind Data",
+                "Probability, statistics, modeling, and the mathematics that power modern analytics.",
+                mathematics.getId(),
+                false);
+
+        Session quantum = ensureSession(
+                "Quantum Ideas Without the Hype",
+                "A clear introduction to quantum concepts, what quantum computers can do, and what remains difficult.",
+                science.getId(),
+                false);
+
+        Session aiWorkshop = ensureSession(
+                "Hands-On AI: From Prompt to Prototype",
+                "A workshop on turning a problem statement into a small, testable AI-assisted prototype.",
+                technology.getId(),
+                false);
+
+        Session buildChallenge = ensureSession(
+                "Rapid Engineering Design Challenge",
+                "Teams move from constraints to prototype while balancing cost, reliability, and usability.",
+                engineering.getId(),
+                false);
+
+        Session musicCode = ensureSession(
+                "Coding Music: Algorithms, Rhythm, and Sound",
+                "A creative session connecting programming structures with rhythm, composition, and digital audio.",
+                arts.getId(),
+                false);
+
+        Session visualization = ensureSession(
+                "Tell the Truth with Data Visualization",
+                "How to communicate quantitative information clearly without hiding uncertainty or distorting scale.",
+                mathematics.getId(),
+                false);
+
+        Session educationPanel = ensureSession(
+                "The Future of STEAM Education",
+                "Educators and practitioners discuss project-based learning, access, curiosity, and career readiness.",
+                science.getId(),
+                false);
+
+        Session smartCities = ensureSession(
+                "Engineering Smarter Cities",
+                "Systems thinking for transportation, energy, sensors, infrastructure, and resilient urban design.",
+                engineering.getId(),
+                false);
+
+        Session secureAi = ensureSession(
+                "Securing AI Systems",
+                "Threat modeling, data protection, model misuse, and practical safeguards for AI-enabled software.",
+                technology.getId(),
+                false);
+
+        Session mathGames = ensureSession(
+                "The Mathematics of Games and Strategy",
+                "Explore probability, optimization, decision-making, and game theory through interactive examples.",
+                mathematics.getId(),
+                false);
+
+        Session immersiveStory = ensureSession(
+                "Immersive Storytelling and Spatial Media",
+                "How creators blend interaction, visual design, sound, and physical space to tell stories.",
+                arts.getId(),
+                false);
+
+        Session spacePanel = ensureSession(
+                "Humans Beyond Earth: What Comes Next?",
+                "A multidisciplinary panel on exploration, engineering, medicine, science, and long-duration missions.",
+                engineering.getId(),
+                false);
+
+        Session careerPanel = ensureSession(
+                "Breaking Into STEAM Careers",
+                "A practical conversation about portfolios, internships, technical interviews, mentorship, and career pivots.",
+                technology.getId(),
+                false);
+
+        Session closingKeynote = ensureSession(
+                "Build the Future Together",
+                "Closing keynote connecting science, technology, engineering, arts, mathematics, and public impact.",
+                science.getId(),
+                true);
+
         Session concert = ensureSession(
-                "STEAMCon Evening Concert",
-                "An evening music celebration featuring special guests and collaborative performances.",
+                "STEAMCon Night Lab: Music, Light, and Code",
+                "An evening showcase of live music, interactive visuals, creative coding, and digital art.",
                 arts.getId(),
                 true);
 
-        SessionOccurrence keynoteOcc = ensureOccurrence(
-                keynote.getId(),
-                "2027-04-06T13:00:00Z",
-                "2027-04-06T14:00:00Z");
+        // Day 1 - Wednesday, November 3, 2027
+        SessionOccurrence openingOcc = ensureOccurrence(
+                openingKeynote.getId(),
+                "2027-11-03T13:00:00Z",
+                "2027-11-03T14:00:00Z");
 
-        SessionOccurrence aiOcc = ensureOccurrence(
+        SessionOccurrence responsibleAiOcc = ensureOccurrence(
                 responsibleAi.getId(),
-                "2027-04-06T15:00:00Z",
-                "2027-04-06T16:00:00Z");
-
-        SessionOccurrence cyberOcc = ensureOccurrence(
-                cyber.getId(),
-                "2027-04-06T17:00:00Z",
-                "2027-04-06T18:00:00Z");
+                "2027-11-03T14:30:00Z",
+                "2027-11-03T15:30:00Z");
 
         SessionOccurrence roboticsOcc = ensureOccurrence(
                 robotics.getId(),
-                "2027-04-07T14:00:00Z",
-                "2027-04-07T15:30:00Z");
+                "2027-11-03T14:30:00Z",
+                "2027-11-03T16:00:00Z");
+
+        SessionOccurrence climateOcc = ensureOccurrence(
+                climateSignals.getId(),
+                "2027-11-03T16:00:00Z",
+                "2027-11-03T17:00:00Z");
+
+        SessionOccurrence cyberOcc = ensureOccurrence(
+                cyber.getId(),
+                "2027-11-03T16:00:00Z",
+                "2027-11-03T17:00:00Z");
 
         SessionOccurrence creativeOcc = ensureOccurrence(
                 creativeTech.getId(),
-                "2027-04-07T17:00:00Z",
-                "2027-04-07T18:00:00Z");
-
-        SessionOccurrence concertOcc = ensureOccurrence(
-                concert.getId(),
-                "2027-04-08T00:00:00Z",
-                "2027-04-08T02:00:00Z");
+                "2027-11-03T17:30:00Z",
+                "2027-11-03T18:30:00Z");
 
         SessionOccurrence mathOcc = ensureOccurrence(
                 mathData.getId(),
-                "2027-04-08T14:00:00Z",
-                "2027-04-08T15:00:00Z");
+                "2027-11-03T17:30:00Z",
+                "2027-11-03T18:30:00Z");
 
-        SessionOccurrence aerospaceOcc = ensureOccurrence(
-                aerospace.getId(),
-                "2027-04-08T16:00:00Z",
-                "2027-04-08T17:00:00Z");
+        // Day 2 - Thursday, November 4, 2027
+        SessionOccurrence futureSpaceOcc = ensureOccurrence(
+                futureSpace.getId(),
+                "2027-11-04T13:00:00Z",
+                "2027-11-04T14:00:00Z");
+
+        SessionOccurrence quantumOcc = ensureOccurrence(
+                quantum.getId(),
+                "2027-11-04T14:30:00Z",
+                "2027-11-04T15:30:00Z");
+
+        SessionOccurrence aiWorkshopOcc = ensureOccurrence(
+                aiWorkshop.getId(),
+                "2027-11-04T14:30:00Z",
+                "2027-11-04T16:00:00Z");
+
+        SessionOccurrence buildChallengeOcc = ensureOccurrence(
+                buildChallenge.getId(),
+                "2027-11-04T16:00:00Z",
+                "2027-11-04T17:30:00Z");
+
+        SessionOccurrence musicCodeOcc = ensureOccurrence(
+                musicCode.getId(),
+                "2027-11-04T16:00:00Z",
+                "2027-11-04T17:00:00Z");
+
+        SessionOccurrence visualizationOcc = ensureOccurrence(
+                visualization.getId(),
+                "2027-11-04T17:30:00Z",
+                "2027-11-04T18:30:00Z");
+
+        SessionOccurrence educationPanelOcc = ensureOccurrence(
+                educationPanel.getId(),
+                "2027-11-04T19:00:00Z",
+                "2027-11-04T20:00:00Z");
+
+        SessionOccurrence concertOcc = ensureOccurrence(
+                concert.getId(),
+                "2027-11-05T00:00:00Z",
+                "2027-11-05T02:00:00Z");
+
+        // Day 3 - Friday, November 5, 2027
+        SessionOccurrence smartCitiesOcc = ensureOccurrence(
+                smartCities.getId(),
+                "2027-11-05T13:00:00Z",
+                "2027-11-05T14:00:00Z");
+
+        SessionOccurrence secureAiOcc = ensureOccurrence(
+                secureAi.getId(),
+                "2027-11-05T14:30:00Z",
+                "2027-11-05T15:30:00Z");
+
+        SessionOccurrence mathGamesOcc = ensureOccurrence(
+                mathGames.getId(),
+                "2027-11-05T14:30:00Z",
+                "2027-11-05T15:30:00Z");
+
+        SessionOccurrence immersiveStoryOcc = ensureOccurrence(
+                immersiveStory.getId(),
+                "2027-11-05T16:00:00Z",
+                "2027-11-05T17:00:00Z");
+
+        SessionOccurrence spacePanelOcc = ensureOccurrence(
+                spacePanel.getId(),
+                "2027-11-05T16:00:00Z",
+                "2027-11-05T17:00:00Z");
+
+        SessionOccurrence careerPanelOcc = ensureOccurrence(
+                careerPanel.getId(),
+                "2027-11-05T17:30:00Z",
+                "2027-11-05T18:30:00Z");
+
+        SessionOccurrence closingOcc = ensureOccurrence(
+                closingKeynote.getId(),
+                "2027-11-05T19:00:00Z",
+                "2027-11-05T20:00:00Z");
 
         // ---------------------------------------------------------
         // ADMISSIONS
         // ---------------------------------------------------------
 
-        ensureFullPass(attendee, List.of(
-                science.getId(),
-                technology.getId(),
-                engineering.getId(),
-                arts.getId(),
-                mathematics.getId()));
+        for (User fullPassUser : List.of(
+                attendee,
+                attendeeThree,
+                attendeeFour,
+                bill,
+                mae,
+                ada,
+                lena,
+                marcus,
+                priya,
+                noah,
+                sofia,
+                jamal,
+                elena,
+                avery)) {
+            ensureFullPass(fullPassUser, allTracks);
+        }
 
-        ensureFullPass(bill, List.of(
-                science.getId(),
-                technology.getId(),
-                engineering.getId(),
-                arts.getId(),
-                mathematics.getId()));
-
-        ensureFullPass(ada, List.of(
-                science.getId(),
-                technology.getId(),
-                engineering.getId(),
-                arts.getId(),
-                mathematics.getId()));
-
-        ensureFullPass(mae, List.of(
-                science.getId(),
-                technology.getId(),
-                engineering.getId(),
-                arts.getId(),
-                mathematics.getId()));
-
-        // A second attendee demonstrates a single-track ticket.
-        ensureTicket(
-                attendeeTwo,
-                technology.getId());
+        ensureTicket(attendeeTwo, technology.getId());
+        ensureTicket(attendeeTwo, mathematics.getId());
 
         // ---------------------------------------------------------
         // ATTENDEE ENROLLMENTS
         // ---------------------------------------------------------
 
-        ensureEnrollment(attendee, keynote, keynoteOcc);
-        ensureEnrollment(attendee, responsibleAi, aiOcc);
-        ensureEnrollment(attendee, robotics, roboticsOcc);
+        ensureEnrollment(attendee, openingKeynote, openingOcc);
+        ensureEnrollment(attendee, responsibleAi, responsibleAiOcc);
+        ensureEnrollment(attendee, climateSignals, climateOcc);
+        ensureEnrollment(attendee, futureSpace, futureSpaceOcc);
+        ensureEnrollment(attendee, educationPanel, educationPanelOcc);
         ensureEnrollment(attendee, concert, concertOcc);
+        ensureEnrollment(attendee, careerPanel, careerPanelOcc);
+        ensureEnrollment(attendee, closingKeynote, closingOcc);
 
-        ensureEnrollment(attendeeTwo, responsibleAi, aiOcc);
+        ensureEnrollment(attendeeTwo, responsibleAi, responsibleAiOcc);
         ensureEnrollment(attendeeTwo, cyber, cyberOcc);
+        ensureEnrollment(attendeeTwo, aiWorkshop, aiWorkshopOcc);
+        ensureEnrollment(attendeeTwo, visualization, visualizationOcc);
+        ensureEnrollment(attendeeTwo, secureAi, secureAiOcc);
+
+        ensureEnrollment(attendeeThree, robotics, roboticsOcc);
+        ensureEnrollment(attendeeThree, buildChallenge, buildChallengeOcc);
+        ensureEnrollment(attendeeThree, smartCities, smartCitiesOcc);
+        ensureEnrollment(attendeeThree, spacePanel, spacePanelOcc);
+
+        ensureEnrollment(attendeeFour, creativeTech, creativeOcc);
+        ensureEnrollment(attendeeFour, musicCode, musicCodeOcc);
+        ensureEnrollment(attendeeFour, educationPanel, educationPanelOcc);
+        ensureEnrollment(attendeeFour, immersiveStory, immersiveStoryOcc);
+        ensureEnrollment(attendeeFour, closingKeynote, closingOcc);
 
         // ---------------------------------------------------------
-        // HOTELS + TRAVEL + CAR RENTAL
-        // Calendar /api/calendar/me derives from these records.
+        // HOTELS + TRAVEL + CAR RENTALS
+        // Convention venue: Jacob K. Javits Convention Center, NYC.
         // ---------------------------------------------------------
 
-        Hotel downtownHotel = ensureHotel(
-                "STEAMCon Downtown Hotel",
-                "100 Convention Way, Wilmington, DE");
+        Hotel hudsonYardsHotel = ensureHotel(
+                "STEAMCon Hudson Yards Hotel",
+                "Hudson Yards, New York, NY");
 
-        Hotel riverfrontHotel = ensureHotel(
-                "Riverfront Conference Hotel",
-                "500 Riverfront Drive, Wilmington, DE");
+        Hotel midtownHotel = ensureHotel(
+                "STEAMCon Midtown Hotel",
+                "Midtown Manhattan, New York, NY");
+
+        Hotel chelseaHotel = ensureHotel(
+                "STEAMCon Chelsea Hotel",
+                "Chelsea, New York, NY");
+
+        Hotel timesSquareHotel = ensureHotel(
+                "STEAMCon Times Square Hotel",
+                "Times Square, New York, NY");
+
+        Hotel downtownManhattanHotel = ensureHotel(
+                "STEAMCon Downtown Manhattan Hotel",
+                "Lower Manhattan, New York, NY");
 
         ensureHotelReservation(
                 attendee,
-                downtownHotel,
-                "2027-04-05T20:00:00Z",
-                "2027-04-09T15:00:00Z",
-                "SC-ALEX-2027");
+                hudsonYardsHotel,
+                "2027-11-02T20:00:00Z",
+                "2027-11-06T16:00:00Z",
+                "SC-ALEX-NYC-2027");
+
+        ensureHotelReservation(
+                attendeeTwo,
+                midtownHotel,
+                "2027-11-02T21:00:00Z",
+                "2027-11-06T16:00:00Z",
+                "SC-JORDAN-NYC-2027");
+
+        ensureHotelReservation(
+                attendeeThree,
+                chelseaHotel,
+                "2027-11-02T21:30:00Z",
+                "2027-11-06T16:00:00Z",
+                "SC-TAYLOR-NYC-2027");
 
         ensureHotelReservation(
                 bill,
-                riverfrontHotel,
-                "2027-04-05T19:00:00Z",
-                "2027-04-08T16:00:00Z",
-                "SC-BILL-2027");
+                hudsonYardsHotel,
+                "2027-11-02T19:00:00Z",
+                "2027-11-06T15:00:00Z",
+                "SC-BILL-NYC-2027");
 
+        ensureHotelReservation(
+                mae,
+                hudsonYardsHotel,
+                "2027-11-03T00:00:00Z",
+                "2027-11-06T15:00:00Z",
+                "SC-MAE-NYC-2027");
+
+        ensureHotelReservation(
+                marcus,
+                midtownHotel,
+                "2027-11-02T22:00:00Z",
+                "2027-11-06T15:00:00Z",
+                "SC-MARCUS-NYC-2027");
+
+        ensureHotelReservation(
+                priya,
+                chelseaHotel,
+                "2027-11-02T23:00:00Z",
+                "2027-11-06T15:00:00Z",
+                "SC-PRIYA-NYC-2027");
+
+        ensureHotelReservation(
+                sofia,
+                timesSquareHotel,
+                "2027-11-03T00:30:00Z",
+                "2027-11-06T15:00:00Z",
+                "SC-SOFIA-NYC-2027");
+
+        // Attendee travel
         ensureTravelLeg(
                 attendee,
                 "Dover, DE",
-                "Wilmington, DE",
-                "2027-04-05T17:00:00Z",
-                "2027-04-05T18:30:00Z");
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-02T15:00:00Z",
+                "2027-11-02T19:00:00Z");
 
         ensureTravelLeg(
                 attendee,
-                "Wilmington, DE",
+                "Moynihan Train Hall, New York, NY",
                 "Dover, DE",
-                "2027-04-09T16:00:00Z",
-                "2027-04-09T17:30:00Z");
+                "2027-11-06T17:00:00Z",
+                "2027-11-06T21:00:00Z");
+
+        ensureTravelLeg(
+                attendeeTwo,
+                "Wilmington, DE",
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-02T18:00:00Z",
+                "2027-11-02T20:15:00Z");
+
+        ensureTravelLeg(
+                attendeeTwo,
+                "Moynihan Train Hall, New York, NY",
+                "Wilmington, DE",
+                "2027-11-06T18:30:00Z",
+                "2027-11-06T20:45:00Z");
+
+        ensureTravelLeg(
+                attendeeThree,
+                "Philadelphia, PA",
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-02T19:00:00Z",
+                "2027-11-02T20:45:00Z");
+
+        ensureTravelLeg(
+                attendeeThree,
+                "Moynihan Train Hall, New York, NY",
+                "Philadelphia, PA",
+                "2027-11-06T18:00:00Z",
+                "2027-11-06T19:45:00Z");
+
+        ensureTravelLeg(
+                attendeeFour,
+                "Albany, NY",
+                "Grand Central Terminal, New York, NY",
+                "2027-11-03T10:00:00Z",
+                "2027-11-03T12:30:00Z");
+
+        // Speaker travel examples from several regions
+        ensureTravelLeg(
+                bill,
+                "Washington, DC",
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-02T16:00:00Z",
+                "2027-11-02T19:15:00Z");
+
+        ensureTravelLeg(
+                bill,
+                "Moynihan Train Hall, New York, NY",
+                "Washington, DC",
+                "2027-11-06T16:30:00Z",
+                "2027-11-06T19:45:00Z");
+
+        ensureTravelLeg(
+                mae,
+                "Chicago O'Hare International Airport",
+                "LaGuardia Airport, New York, NY",
+                "2027-11-02T20:00:00Z",
+                "2027-11-02T22:30:00Z");
+
+        ensureTravelLeg(
+                marcus,
+                "Boston South Station",
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-02T17:30:00Z",
+                "2027-11-02T21:30:00Z");
+
+        ensureTravelLeg(
+                priya,
+                "Newark Liberty International Airport",
+                "Hudson Yards, New York, NY",
+                "2027-11-02T21:00:00Z",
+                "2027-11-02T22:00:00Z");
+
+        ensureTravelLeg(
+                sofia,
+                "John F. Kennedy International Airport",
+                "Times Square, New York, NY",
+                "2027-11-02T22:00:00Z",
+                "2027-11-03T00:00:00Z");
+
+        ensureTravelLeg(
+                jamal,
+                "Baltimore Penn Station",
+                "Moynihan Train Hall, New York, NY",
+                "2027-11-03T10:00:00Z",
+                "2027-11-03T12:45:00Z");
+
+        ensureTravelLeg(
+                elena,
+                "New Haven Union Station",
+                "Grand Central Terminal, New York, NY",
+                "2027-11-03T10:30:00Z",
+                "2027-11-03T12:30:00Z");
 
         ensureCarRental(
                 attendee,
-                "Wilmington Train Station",
-                "Wilmington Train Station",
-                "2027-04-05T18:45:00Z",
-                "2027-04-09T15:30:00Z");
+                "Newark Liberty International Airport",
+                "Newark Liberty International Airport",
+                "2027-11-02T19:30:00Z",
+                "2027-11-06T16:30:00Z");
+
+        ensureCarRental(
+                priya,
+                "Newark Liberty International Airport",
+                "Newark Liberty International Airport",
+                "2027-11-02T21:15:00Z",
+                "2027-11-06T14:30:00Z");
 
         // ---------------------------------------------------------
-        // SPEAKER PROFILES + PROPOSALS
+        // SPEAKER PROFILES
         // ---------------------------------------------------------
 
         ensureSpeakerProfile(
                 bill,
                 "Bill Nye",
-                "Chief Ambassador",
+                "Science Communicator",
                 "The Planetary Society",
-                "Science educator and advocate focused on science literacy, exploration, and the future.");
-
-        ensureSpeakerProfile(
-                ada,
-                "Ada Lovelace",
-                "Featured Technology Speaker",
-                "STEAMCon",
-                "Technology speaker focused on computing, algorithms, creativity, and responsible innovation.");
+                "Science educator and communicator focused on scientific literacy, exploration, and curiosity.");
 
         ensureSpeakerProfile(
                 mae,
@@ -456,22 +853,90 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 "100 Year Starship",
                 "Physician, engineer, astronaut, and advocate for science, technology, and human exploration.");
 
+        ensureSpeakerProfile(
+                ada,
+                "Ada Lovelace",
+                "Featured Computing Speaker",
+                "STEAMCon",
+                "Featured demo speaker focused on algorithms, computation, creativity, and the history of computing ideas.");
+
+        ensureSpeakerProfile(
+                lena,
+                "Dr. Lena Ortiz",
+                "Astrophysicist",
+                "Horizon Space Institute",
+                "Astrophysicist working on planetary science, observation, and making complex space science accessible.");
+
+        ensureSpeakerProfile(
+                marcus,
+                "Marcus Chen",
+                "AI Systems Engineer",
+                "Civic AI Lab",
+                "Engineer focused on responsible AI systems, evaluation, transparency, and practical public-interest applications.");
+
+        ensureSpeakerProfile(
+                priya,
+                "Priya Shah",
+                "Robotics Engineer",
+                "Atlas Robotics",
+                "Robotics engineer working across sensing, controls, rapid prototyping, and autonomous systems.");
+
+        ensureSpeakerProfile(
+                noah,
+                "Noah Bennett",
+                "Security Architect",
+                "Sentinel Security Labs",
+                "Cybersecurity practitioner focused on threat modeling, secure design, identity, and resilient software systems.");
+
+        ensureSpeakerProfile(
+                sofia,
+                "Sofia Martinez",
+                "Creative Technologist",
+                "Lightwave Studio",
+                "Creative technologist blending code, visual design, sound, projection, and interactive installations.");
+
+        ensureSpeakerProfile(
+                jamal,
+                "Jamal Brooks",
+                "Data Scientist",
+                "Open Metrics Collective",
+                "Data scientist focused on statistics, visualization, reproducible analysis, and communicating uncertainty.");
+
+        ensureSpeakerProfile(
+                elena,
+                "Dr. Elena Rossi",
+                "Climate Scientist",
+                "Earth Systems Collective",
+                "Climate scientist working with observational data, models, and public communication around Earth systems.");
+
+        ensureSpeakerProfile(
+                avery,
+                "Avery Thompson",
+                "STEAM Educator",
+                "MakerBridge Education",
+                "Educator focused on project-based learning, maker education, student creativity, and career-connected learning.");
+
         ensureSpeakerFlair(bill, "Featured Speaker", "featured");
-        ensureSpeakerFlair(ada, "Speaker", "speaker");
-        ensureSpeakerFlair(mae, "Speaker", "speaker");
+        ensureSpeakerFlair(mae, "Featured Speaker", "featured");
+        ensureSpeakerFlair(ada, "Featured Speaker", "featured");
+        ensureSpeakerFlair(lena, "Speaker", "speaker");
+        ensureSpeakerFlair(marcus, "Speaker", "speaker");
+        ensureSpeakerFlair(priya, "Speaker", "speaker");
+        ensureSpeakerFlair(noah, "Speaker", "speaker");
+        ensureSpeakerFlair(sofia, "Speaker", "speaker");
+        ensureSpeakerFlair(jamal, "Speaker", "speaker");
+        ensureSpeakerFlair(elena, "Speaker", "speaker");
+        ensureSpeakerFlair(avery, "Speaker", "speaker");
+
+        // ---------------------------------------------------------
+        // PROPOSALS + APPROVALS
+        // ---------------------------------------------------------
 
         SessionProposal billApproved = ensureProposal(
                 bill,
                 "Science Changes Everything",
                 "Opening keynote on curiosity, evidence, discovery, and science literacy.",
                 science.getId(),
-                ProposalStatus.APPROVED);
-
-        SessionProposal adaApproved = ensureProposal(
-                ada,
-                "Building Responsible AI",
-                "Responsible AI development, ethics, safety, and the future of computing.",
-                technology.getId(),
                 ProposalStatus.APPROVED);
 
         SessionProposal maeApproved = ensureProposal(
@@ -481,7 +946,69 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 engineering.getId(),
                 ProposalStatus.APPROVED);
 
-        // Extra proposal states make the dashboard more useful.
+        SessionProposal adaApproved = ensureProposal(
+                ada,
+                "The Mathematics Behind Data",
+                "A featured session connecting computation, algorithms, mathematics, and modern data systems.",
+                mathematics.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal lenaApproved = ensureProposal(
+                lena,
+                "Quantum Ideas Without the Hype",
+                "A grounded introduction to quantum ideas and what current technology can realistically do.",
+                science.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal marcusApproved = ensureProposal(
+                marcus,
+                "Building Responsible AI",
+                "Responsible AI development, evaluation, transparency, and deployment practices.",
+                technology.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal priyaApproved = ensureProposal(
+                priya,
+                "Robotics from Concept to Competition",
+                "A practical engineering workflow for autonomous robotics.",
+                engineering.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal noahApproved = ensureProposal(
+                noah,
+                "Cybersecurity for Everyone",
+                "Practical security concepts for developers, students, educators, and connected organizations.",
+                technology.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal sofiaApproved = ensureProposal(
+                sofia,
+                "Where Art Meets Technology",
+                "Creative coding, sound, projection, and interactive design as artistic tools.",
+                arts.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal jamalApproved = ensureProposal(
+                jamal,
+                "Tell the Truth with Data Visualization",
+                "Clear visual communication, uncertainty, scale, and responsible quantitative storytelling.",
+                mathematics.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal elenaApproved = ensureProposal(
+                elena,
+                "Reading the Planet: Climate Signals in Data",
+                "Using observations and models to understand climate signals and uncertainty.",
+                science.getId(),
+                ProposalStatus.APPROVED);
+
+        SessionProposal averyApproved = ensureProposal(
+                avery,
+                "The Future of STEAM Education",
+                "Project-based learning, maker education, access, and career-connected instruction.",
+                science.getId(),
+                ProposalStatus.APPROVED);
+
         SessionProposal billDraft = ensureProposal(
                 bill,
                 "Communicating Science in a Noisy World",
@@ -489,11 +1016,18 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 science.getId(),
                 ProposalStatus.DRAFT);
 
-        SessionProposal adaSubmitted = ensureProposal(
-                ada,
-                "Algorithms and Imagination",
-                "How mathematical thinking and creative problem solving shape computing.",
-                mathematics.getId(),
+        SessionProposal marcusSubmitted = ensureProposal(
+                marcus,
+                "AI Agents in Real Workflows",
+                "A submitted session exploring agentic software patterns, evaluation, and operational safeguards.",
+                technology.getId(),
+                ProposalStatus.SUBMITTED);
+
+        SessionProposal sofiaSubmitted = ensureProposal(
+                sofia,
+                "Designing Interactive Public Spaces",
+                "A submitted session on creative technology in museums, festivals, and civic spaces.",
+                arts.getId(),
                 ProposalStatus.SUBMITTED);
 
         SessionProposal maeRejected = ensureProposal(
@@ -503,89 +1037,102 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 engineering.getId(),
                 ProposalStatus.REJECTED);
 
-        ensureApprovalDecision(
+        for (SessionProposal approved : List.of(
                 billApproved,
-                admin,
-                ApprovalDecisionType.APPROVE,
-                "Approved for the opening keynote.");
-
-        ensureApprovalDecision(
-                adaApproved,
-                admin,
-                ApprovalDecisionType.APPROVE,
-                "Approved for the Technology track.");
-
-        ensureApprovalDecision(
                 maeApproved,
-                admin,
-                ApprovalDecisionType.APPROVE,
-                "Approved for the Engineering track.");
+                adaApproved,
+                lenaApproved,
+                marcusApproved,
+                priyaApproved,
+                noahApproved,
+                sofiaApproved,
+                jamalApproved,
+                elenaApproved,
+                averyApproved)) {
+            ensureApprovalDecision(
+                    approved,
+                    admin,
+                    ApprovalDecisionType.APPROVE,
+                    "Approved for the STEAMCon 2027 program.");
+        }
 
         ensureApprovalDecision(
                 maeRejected,
                 admin,
                 ApprovalDecisionType.REJECT,
-                "Strong topic, but the published program is already full.");
+                "Strong topic, but the published program is already full in this time block.");
 
         // ---------------------------------------------------------
         // SPEAKER APPLICATIONS
         // ---------------------------------------------------------
 
-        ensureSpeakerApplication(
-                bill,
-                keynote,
-                ApplicationStatus.APPROVED);
-
-        ensureSpeakerApplication(
-                ada,
-                responsibleAi,
-                ApplicationStatus.APPROVED);
-
-        ensureSpeakerApplication(
-                mae,
-                aerospace,
-                ApplicationStatus.APPROVED);
-
-        ensureSpeakerApplication(
-                ada,
-                mathData,
-                ApplicationStatus.SUBMITTED);
+        ensureSpeakerApplication(bill, openingKeynote, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(mae, futureSpace, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(ada, mathData, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(lena, quantum, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(marcus, responsibleAi, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(priya, robotics, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(noah, cyber, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(sofia, creativeTech, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(jamal, visualization, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(elena, climateSignals, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(avery, educationPanel, ApplicationStatus.APPROVED);
+        ensureSpeakerApplication(marcus, secureAi, ApplicationStatus.SUBMITTED);
+        ensureSpeakerApplication(sofia, immersiveStory, ApplicationStatus.SUBMITTED);
 
         // ---------------------------------------------------------
-        // APPROVED PROPOSAL -> LIVE SESSION ASSIGNMENTS
+        // LIVE SESSION ASSIGNMENTS
         // ---------------------------------------------------------
 
         SpeakerSessionAssignment billAssignment = ensureAssignment(
                 billApproved,
-                keynote,
-                SpeakerRole.PRIMARY_SPEAKER);
-
-        ensureAssignment(
-                adaApproved,
-                responsibleAi,
+                openingKeynote,
                 SpeakerRole.PRIMARY_SPEAKER);
 
         SpeakerSessionAssignment maeAssignment = ensureAssignment(
                 maeApproved,
-                aerospace,
+                futureSpace,
                 SpeakerRole.PRIMARY_SPEAKER);
 
-        // Demonstrates a panelist/co-speaker membership.
-        ensureDirectAssignment(
-                ada,
-                keynote,
-                SpeakerRole.PANELIST);
+        ensureAssignment(adaApproved, mathData, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(lenaApproved, quantum, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(marcusApproved, responsibleAi, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(priyaApproved, robotics, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(noahApproved, cyber, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(sofiaApproved, creativeTech, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(jamalApproved, visualization, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(elenaApproved, climateSignals, SpeakerRole.PRIMARY_SPEAKER);
+        ensureAssignment(averyApproved, educationPanel, SpeakerRole.PRIMARY_SPEAKER);
 
-        ensureDirectAssignment(
-                mae,
-                keynote,
-                SpeakerRole.CO_SPEAKER);
+        // Additional panel and workshop memberships.
+        ensureDirectAssignment(marcus, aiWorkshop, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(noah, secureAi, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(priya, buildChallenge, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(sofia, musicCode, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(jamal, mathGames, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(sofia, immersiveStory, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(mae, spacePanel, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(lena, spacePanel, SpeakerRole.PANELIST);
+        ensureDirectAssignment(priya, spacePanel, SpeakerRole.PANELIST);
+        ensureDirectAssignment(avery, careerPanel, SpeakerRole.PRIMARY_SPEAKER);
+        ensureDirectAssignment(marcus, careerPanel, SpeakerRole.PANELIST);
+        ensureDirectAssignment(priya, careerPanel, SpeakerRole.PANELIST);
+        ensureDirectAssignment(jamal, careerPanel, SpeakerRole.PANELIST);
+        ensureDirectAssignment(bill, closingKeynote, SpeakerRole.CO_SPEAKER);
+        ensureDirectAssignment(mae, closingKeynote, SpeakerRole.CO_SPEAKER);
+        ensureDirectAssignment(ada, closingKeynote, SpeakerRole.CO_SPEAKER);
 
         ensureScheduleChangeRequest(
                 maeAssignment,
                 "Travel conflict",
-                "2027-04-08T17:00:00Z",
-                "If possible, please schedule this session no earlier than 5 PM.");
+                "2027-11-04T14:00:00Z",
+                "If possible, please keep this session in the morning block because of an evening travel commitment.");
+
+        ensureScheduleChangeRequest(
+                billAssignment,
+                "Media availability",
+                "2027-11-03T13:00:00Z",
+                "Please preserve the opening keynote time to avoid a conflict with scheduled media availability.");
 
         // ---------------------------------------------------------
         // FORUMS + ACCESS POLICIES
@@ -633,46 +1180,22 @@ public class ProjectDemoSeeder implements CommandLineRunner {
                 artsForum,
                 mathForum)) {
 
-            ensureForumPolicy(
-                    forum,
-                    Role.ATTENDEE,
-                    ForumPermission.READ);
-
-            ensureForumPolicy(
-                    forum,
-                    Role.ATTENDEE,
-                    ForumPermission.POST);
-
-            ensureForumPolicy(
-                    forum,
-                    Role.SPEAKER,
-                    ForumPermission.READ);
-
-            ensureForumPolicy(
-                    forum,
-                    Role.SPEAKER,
-                    ForumPermission.POST);
-
-            ensureForumPolicy(
-                    forum,
-                    Role.ADMIN,
-                    ForumPermission.MODERATE);
+            ensureForumPolicy(forum, Role.ATTENDEE, ForumPermission.READ);
+            ensureForumPolicy(forum, Role.ATTENDEE, ForumPermission.POST);
+            ensureForumPolicy(forum, Role.SPEAKER, ForumPermission.READ);
+            ensureForumPolicy(forum, Role.SPEAKER, ForumPermission.POST);
+            ensureForumPolicy(forum, Role.ADMIN, ForumPermission.MODERATE);
         }
 
-        ensureForumPolicy(
-                organizerForum,
-                Role.ADMIN,
-                ForumPermission.READ);
+        ensureForumPolicy(concierge, Role.ATTENDEE, ForumPermission.READ);
+        ensureForumPolicy(concierge, Role.ATTENDEE, ForumPermission.POST);
+        ensureForumPolicy(concierge, Role.SPEAKER, ForumPermission.READ);
+        ensureForumPolicy(concierge, Role.SPEAKER, ForumPermission.POST);
+        ensureForumPolicy(concierge, Role.ADMIN, ForumPermission.MODERATE);
 
-        ensureForumPolicy(
-                organizerForum,
-                Role.ADMIN,
-                ForumPermission.POST);
-
-        ensureForumPolicy(
-                organizerForum,
-                Role.ADMIN,
-                ForumPermission.MODERATE);
+        ensureForumPolicy(organizerForum, Role.ADMIN, ForumPermission.READ);
+        ensureForumPolicy(organizerForum, Role.ADMIN, ForumPermission.POST);
+        ensureForumPolicy(organizerForum, Role.ADMIN, ForumPermission.MODERATE);
 
         // ---------------------------------------------------------
         // FORUM MESSAGES
@@ -680,58 +1203,88 @@ public class ProjectDemoSeeder implements CommandLineRunner {
 
         ensureMessage(
                 concierge,
-                bill,
-                "Welcome to STEAMCon! The Concierge forum is a good place for general convention questions.");
+                admin,
+                "Welcome to STEAMCon 2027 at the Jacob K. Javits Convention Center. Use this forum for general convention questions.");
 
         ensureMessage(
                 concierge,
                 attendee,
-                "Where can I find the latest schedule for today?");
+                "What is the easiest way to get from Moynihan Train Hall to the Javits Center?");
 
         ensureMessage(
                 concierge,
-                ada,
-                "The Program page is backed by the live session schedule and will show the latest times.");
+                attendeeFour,
+                "Will there be a staffed help desk throughout all three convention days?");
 
         ensureMessage(
                 scienceForum,
                 bill,
-                "Looking forward to meeting everyone in the Science track.");
+                "Looking forward to opening STEAMCon and meeting everyone in the Science track.");
+
+        ensureMessage(
+                scienceForum,
+                elena,
+                "I will share a short reading list after the climate-data session.");
 
         ensureMessage(
                 scienceForum,
                 attendee,
-                "Will there be audience Q&A after the opening keynote?");
+                "Will the climate session include time for audience questions about interpreting uncertainty?");
 
         ensureMessage(
                 technologyForum,
-                ada,
-                "I'll post follow-up resources after the Responsible AI session.");
+                marcus,
+                "I will post the responsible-AI evaluation checklist after the session.");
+
+        ensureMessage(
+                technologyForum,
+                noah,
+                "The cybersecurity session is beginner-friendly, and we will build from first principles.");
 
         ensureMessage(
                 technologyForum,
                 attendeeTwo,
-                "Is the cybersecurity session designed for beginners?");
+                "Is the hands-on AI workshop okay for someone who is still learning backend development?");
+
+        ensureMessage(
+                engineeringForum,
+                priya,
+                "Bring questions about prototyping, controls, sensors, and robotics competitions.");
 
         ensureMessage(
                 engineeringForum,
                 mae,
-                "Excited to talk about aerospace engineering and designing for extreme environments.");
+                "Excited for the space engineering sessions and the multidisciplinary Friday panel.");
+
+        ensureMessage(
+                engineeringForum,
+                attendeeThree,
+                "Will the rapid design challenge be team-based or individual?");
 
         ensureMessage(
                 artsForum,
-                attendee,
-                "Really looking forward to the evening concert.");
+                sofia,
+                "The Night Lab will combine live visuals, music, creative coding, and interactive installations.");
+
+        ensureMessage(
+                artsForum,
+                attendeeFour,
+                "Really looking forward to the immersive storytelling session and Night Lab.");
+
+        ensureMessage(
+                mathForum,
+                jamal,
+                "The visualization session will include examples of misleading charts and better alternatives.");
 
         ensureMessage(
                 mathForum,
                 ada,
-                "The Mathematics Behind Data session pairs nicely with the Responsible AI discussion.");
+                "Mathematics and computation have always been deeply connected; I am excited to explore that theme with everyone.");
 
         ensureMessage(
                 organizerForum,
                 admin,
-                "Demo organizer forum is active and restricted to administrators.");
+                "STEAMCon 2027 local demo data is active. Verify schedules, bookings, forums, notifications, and portal flows before integration testing.");
 
         // ---------------------------------------------------------
         // NOTIFICATIONS
@@ -739,39 +1292,51 @@ public class ProjectDemoSeeder implements CommandLineRunner {
 
         ensureNotification(
                 attendee,
-                "Welcome to STEAMCon. Your attendee portal is ready.",
+                "Welcome to STEAMCon 2027. Your attendee portal is ready.",
                 NotificationType.GENERAL,
                 false);
 
         ensureNotification(
                 attendee,
-                "Your convention schedule now includes the opening keynote.",
+                "Your hotel stay near Hudson Yards is confirmed for November 2-6.",
+                NotificationType.GENERAL,
+                false);
+
+        ensureNotification(
+                attendee,
+                "Science Changes Everything has been added to your schedule.",
                 NotificationType.GENERAL,
                 true);
 
         ensureNotification(
+                attendeeTwo,
+                "Your Technology and Mathematics track access is active.",
+                NotificationType.GENERAL,
+                false);
+
+        ensureNotification(
+                attendeeThree,
+                "Your engineering sessions are ready in My itinerary.",
+                NotificationType.GENERAL,
+                false);
+
+        ensureNotification(
+                attendeeFour,
+                "Your STEAMCon 2027 attendee account is ready.",
+                NotificationType.GENERAL,
+                false);
+
+        ensureNotification(
                 bill,
-                "Your proposal \"Science Changes Everything\" was approved.",
+                "Your proposal \"Science Changes Everything\" was approved for STEAMCon 2027.",
                 NotificationType.PROPOSAL_APPROVED,
                 false);
 
         ensureNotification(
                 bill,
-                "Welcome to the STEAMCon Speaker Portal.",
+                "Your opening keynote assignment is confirmed for November 3.",
                 NotificationType.GENERAL,
                 true);
-
-        ensureNotification(
-                ada,
-                "Your proposal \"Building Responsible AI\" was approved.",
-                NotificationType.PROPOSAL_APPROVED,
-                false);
-
-        ensureNotification(
-                ada,
-                "Your speaker application status changed to APPROVED.",
-                NotificationType.SPEAKER_APPLICATION_UPDATED,
-                false);
 
         ensureNotification(
                 mae,
@@ -781,27 +1346,93 @@ public class ProjectDemoSeeder implements CommandLineRunner {
 
         ensureNotification(
                 mae,
-                "A schedule-change request is pending review.",
+                "A schedule-change request is pending organizer review.",
                 NotificationType.GENERAL,
                 false);
 
         ensureNotification(
+                ada,
+                "Your proposal \"The Mathematics Behind Data\" was approved.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                lena,
+                "Your proposal \"Quantum Ideas Without the Hype\" was approved.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                marcus,
+                "Your proposal \"Building Responsible AI\" was approved.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                marcus,
+                "Your application for Securing AI Systems is still under review.",
+                NotificationType.SPEAKER_APPLICATION_UPDATED,
+                false);
+
+        ensureNotification(
+                priya,
+                "Your robotics session assignment is confirmed.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                noah,
+                "Your Cybersecurity for Everyone session is confirmed for November 3.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                sofia,
+                "Your Art and Technology session was approved.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                jamal,
+                "Your data visualization session is confirmed for November 4.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                elena,
+                "Your climate-data session is confirmed for November 3.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
+                avery,
+                "Your STEAM education panel is confirmed for November 4.",
+                NotificationType.PROPOSAL_APPROVED,
+                false);
+
+        ensureNotification(
                 admin,
-                "STEAMCon demo data is ready for integration testing.",
+                "STEAMCon 2027 local demo data is ready for integration testing.",
                 NotificationType.GENERAL,
                 false);
 
         System.out.println();
-        System.out.println("==============================================");
-        System.out.println("STEAMCon project demo data ready.");
+        System.out.println("========================================================");
+        System.out.println("STEAMCon 2027 demo data ready.");
+        System.out.println("Venue: Jacob K. Javits Convention Center, New York City");
+        System.out.println("Dates: November 3-5, 2027");
         System.out.println("All demo passwords: demo");
-        System.out.println("attendee@steamcon.demo  -> ATTENDEE");
-        System.out.println("student@steamcon.demo   -> ATTENDEE");
-        System.out.println("bill.nye@steamcon.demo  -> SPEAKER + ATTENDEE");
+        System.out.println("attendee@steamcon.demo -> ATTENDEE");
+        System.out.println("student@steamcon.demo -> ATTENDEE");
+        System.out.println("maker@steamcon.demo -> ATTENDEE");
+        System.out.println("teacher@steamcon.demo -> ATTENDEE");
+        System.out.println("bill.nye@steamcon.demo -> SPEAKER + ATTENDEE");
+        System.out.println("mae.jemison@steamcon.demo -> SPEAKER + ATTENDEE");
         System.out.println("ada.lovelace@steamcon.demo -> SPEAKER + ATTENDEE");
-        System.out.println("mae.jemison@steamcon.demo  -> SPEAKER + ATTENDEE");
-        System.out.println("admin@steamcon.demo     -> ADMIN + ATTENDEE");
-        System.out.println("==============================================");
+        System.out.println("marcus.chen@steamcon.demo -> SPEAKER + ATTENDEE");
+        System.out.println("priya.shah@steamcon.demo -> SPEAKER + ATTENDEE");
+        System.out.println("admin@steamcon.demo -> ADMIN + ATTENDEE");
+        System.out.println("========================================================");
         System.out.println();
     }
 

@@ -24,6 +24,8 @@ import ProposeSession from './pages/speaker/ProposeSession.jsx'
 import ProposalDetails from './pages/speaker/ProposalDetails.jsx'
 import SpeakerDashboard from './pages/speaker/SpeakerDashboard.jsx'
 import SpeakerForums from './pages/speaker/SpeakerForums.jsx'
+import AttendeeNotifications from './pages/attendee/AttendeeNotifications.jsx'
+import AttendeeAccount from './pages/attendee/AttendeeAccount.jsx'
 
 export default function App() {
   const { pathname } = useLocation()
@@ -76,23 +78,61 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/access-denied" element={<AccessDenied />} />
 
-      <Route element={<ProtectedRoute />}>
-        <Route element={<RoleRoute role="ATTENDEE" />}>
-          <Route path="/attendee" element={<AttendeeDashboard />} />
-          <Route path="/attendee/forums" element={<AttendeeForums />} />
-          <Route
-            path="/attendee/travel"
-            element={<TravelBookingPage kind="travel" />}
-          />
-          <Route
-            path="/attendee/hotel"
-            element={<HotelBookingPage />}
-          />
-          <Route
-            path="/attendee/car"
-            element={<TravelBookingPage kind="car" />}
-          />
-        </Route>
+      <Route element={<ApplicationLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/tracks" element={<TracksPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/travel" element={<TravelInfoPage />} />
+        <Route path="/speakers" element={<SpeakerDirectory />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<RoleRoute role="ATTENDEE" />}>
+            <Route
+              path="/attendee"
+              element={<AttendeeDashboard />}
+            />
+
+            <Route
+              path="/attendee/forums"
+              element={<AttendeeForums />}
+            />
+
+            <Route
+              path="/attendee/account"
+              element={<AttendeeAccount />}
+            />
+
+            <Route
+              path="/attendee/notifications"
+              element={<AttendeeNotifications />}
+            />
+
+            <Route
+              path="/attendee/travel"
+              element={
+                <TravelBookingPage
+                  key="travel"
+                  kind="travel"
+                />
+              }
+            />
+
+            <Route
+              path="/attendee/hotel"
+              element={<HotelBookingPage />}
+            />
+
+            <Route
+              path="/attendee/car"
+              element={
+                <TravelBookingPage
+                  key="car"
+                  kind="car"
+                />
+              }
+            />
+          </Route>
 
           <Route element={<RoleRoute role="SPEAKER" />}>
             <Route
@@ -111,7 +151,10 @@ export default function App() {
               path="/speaker/proposals/:proposalId"
               element={<ProposalDetails />}
             />
-            <Route path="/speaker" element={<SpeakerDashboard />} />
+            <Route
+              path="/speaker"
+              element={<SpeakerDashboard />}
+            />
           </Route>
         </Route>
       </Route>
@@ -119,13 +162,19 @@ export default function App() {
       <Route
         path="*"
         element={
-          <main className="container section" tabIndex={-1}>
+          <main
+            className="container section"
+            tabIndex={-1}
+          >
             <p className="eyebrow">STEAM Con / 404</p>
             <h1>That page isn’t here.</h1>
             <p>Head home to explore STEAM Con.</p>
 
             <div className="button-group">
-              <Link className="button button-dark" to="/">
+              <Link
+                className="button button-dark"
+                to="/"
+              >
                 Back to homepage
               </Link>
             </div>

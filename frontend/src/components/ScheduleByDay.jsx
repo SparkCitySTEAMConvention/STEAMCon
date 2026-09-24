@@ -2,12 +2,22 @@ import { conventionConfig } from '../config/conventionConfig.js'
 import { conventionDayLabel, programCalendar } from '../utils/conventionCalendar.js'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { locationLabel } from '../utils/proposalPresentation.js'
 
 function trackSlug(track) {
   return (track || 'unknown').toLowerCase().replaceAll(' ', '-')
 }
 
-export default function ScheduleByDay({ sessions = [], tracks = [], live = false }) {
+export default function ScheduleByDay({
+  sessions = [],
+  tracks = [],
+  live = false,
+  date,
+  selectedTrack,
+  onDateChange,
+  onTrackChange,
+  publicOnly = false,
+}) {
   const calendar = programCalendar(sessions, live)
   const liveDays = [...new Set(calendar.map(session => session.calendarDate).filter(Boolean))]
   const days = live && liveDays.length ? liveDays : conventionConfig.dates

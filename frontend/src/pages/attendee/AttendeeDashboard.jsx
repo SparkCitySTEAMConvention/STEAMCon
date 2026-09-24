@@ -125,7 +125,7 @@ export default function AttendeeDashboard() {
             <h2 id="admission-heading">{data.admission.type}</h2>
             <p className="attendee-admission-status"><span aria-hidden="true">✓</span> {data.admission.status}</p>
             <dl>
-              <div><dt>Pass holder</dt><dd>{passHolder}</dd></div>
+              <div><dt>Pass holder</dt><dd>{data.admission.passHolder || data.user?.name || 'Attendee'}</dd></div>
               <div><dt>Confirmation</dt><dd>{data.admission.confirmationCode}</dd></div>
               <div><dt>Access</dt><dd>All five STEAM tracks</dd></div>
             </dl>
@@ -163,7 +163,7 @@ export default function AttendeeDashboard() {
           </ul>
         </section>
 
-      </div>
+      </main>
 
       <footer className="container attendee-footer">
         <p>STEAM Con · A place for curious minds.</p>

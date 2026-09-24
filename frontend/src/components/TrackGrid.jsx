@@ -1,6 +1,6 @@
 import TrackCard from './TrackCard.jsx'
 
-export default function TrackGrid({ tracks = [] }) {
+export default function TrackGrid({ tracks = [], compact = false }) {
   return (
     <section className="section tracks-section" id="tracks" aria-labelledby="tracks-heading">
       <div className="container">

@@ -15,9 +15,27 @@ export function getPortalNavigation(user) {
     { id: 'travel', label: 'Travel', to: attendee ? '/attendee/travel' : null, unavailable: 'No Speaker travel booking destination is available', group: 'Your trip' },
     { id: 'hotel', label: 'Hotel', to: attendee ? '/attendee/hotel' : null, unavailable: 'Booking currently requires an Attendee account', group: 'Your trip' },
     { id: 'car', label: 'Car rental', to: attendee ? '/attendee/car' : null, unavailable: 'Booking currently requires an Attendee account', group: 'Your trip' },
-    { id: 'forums', label: 'Forums', to: speaker ? '/speaker/forums' : null, unavailable: 'No Attendee forum destination is available', group: 'Community' },
-    { id: 'notifications', label: 'Notifications', to: speaker ? '/speaker#speaker-updates' : null, unavailable: 'No Attendee notifications destination is available', group: 'Community' },
-    { id: 'account', label: 'Account', to: speaker ? '/speaker#speaker-profile' : '/attendee', activePaths: speaker ? ['/speaker/profile/edit'] : [], group: 'Community' },
+    {
+      id: 'forums',
+      label: 'Forums',
+      to: speaker ? '/speaker/forums' : '/attendee/forums',
+      group: 'Community',
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      to: speaker
+        ? '/speaker#speaker-updates'
+        : '/attendee/notifications',
+      group: 'Community',
+    },
+    {
+      id: 'account',
+      label: 'Account',
+      to: speaker ? '/speaker#speaker-profile' : '/attendee/account',
+      activePaths: speaker ? ['/speaker/profile/edit'] : ['/attendee/account'],
+      group: 'Community',
+    },
     ...(speaker ? [
       { id: 'overview', label: 'Overview', to: '/speaker', group: 'Speaking' },
       { id: 'proposals', label: 'My proposals', to: '/speaker#speaker-proposals', activePaths: ['/speaker/proposals/'], group: 'Speaking' },

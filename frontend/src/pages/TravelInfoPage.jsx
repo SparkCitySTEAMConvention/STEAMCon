@@ -4,6 +4,31 @@ import Footer from '../components/Footer.jsx'
 import Header from '../components/Header.jsx'
 import { bookingRepository } from '../services/bookingRepository.js'
 import './TravelInfoPage.css'
+import { conventionConfig } from '../config/conventionConfig.js'
+
+const sampleDepartures = [
+  {
+    time: '8:10 AM',
+    service: 'NJ Transit',
+    destination: 'Newark Penn Station',
+    terminal: 'Penn Station',
+    status: 'On time',
+  },
+  {
+    time: '8:30 AM',
+    service: 'Amtrak',
+    destination: 'Washington, DC',
+    terminal: 'Moynihan Train Hall',
+    status: 'Boarding',
+  },
+  {
+    time: '8:45 AM',
+    service: 'Metro-North',
+    destination: 'New Haven',
+    terminal: 'Grand Central',
+    status: 'On time',
+  },
+]
 
 const airports = [
   { code: 'LGA', name: 'LaGuardia Airport', note: 'Often the shortest trip into Manhattan and convenient for domestic flights.' },
@@ -11,13 +36,11 @@ const airports = [
   { code: 'EWR', name: 'Newark Liberty International', note: 'Serves the region from New Jersey with rail connections toward Manhattan.' },
 ]
 
-
-
 export default function TravelInfoPage() {
   const [hotels, setHotels] = useState([])
   useEffect(() => {
     let active = true
-    bookingRepository.getHotels().then(data => { if (active) setHotels(data) }).catch(() => {})
+    bookingRepository.getHotels().then(data => { if (active) setHotels(data) }).catch(() => { })
     return () => { active = false }
   }, [])
   const mapLocations = useMemo(() => [

@@ -1,5 +1,14 @@
 package com.sparkcity.steamcon.auth;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.sparkcity.steamcon.identity.AuthSession;
 import com.sparkcity.steamcon.identity.AuthSessionRepository;
 import com.sparkcity.steamcon.identity.AuthSessionStatus;
@@ -8,15 +17,6 @@ import com.sparkcity.steamcon.identity.User;
 import com.sparkcity.steamcon.identity.UserRepository;
 import com.sparkcity.steamcon.identity.UserRole;
 import com.sparkcity.steamcon.identity.UserRoleRepository;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -161,4 +161,22 @@ public class AuthService {
 
         authSessionRepository.save(session);
     }
+    @Transactional
+public UserResponse updateProfileImage(
+        UUID userId,
+        String profileImageUrl) {
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(InvalidSessionException::new);
+
+    user.setProfileImageUrl(profileImageUrl);
+
+    User savedUser = userRepository.save(user);
+
+    List<UserRole> roles =
+            userRoleRepository
+                    .findByUserIdAndActiveTrue(userId);
+
+    return UserResponse.from(savedUser, roles);
+}
 }
